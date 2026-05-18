@@ -1,0 +1,38 @@
+﻿version: '3.8'
+
+services:
+  pdks-app:
+    build: .
+    image: pdks_app:latest
+    container_name: pdks_app
+    ports:
+      - '8104:8104'
+    environment:
+      - PORT=8104
+      - NODE_ENV=production
+      # Yeni Sistem Ayarlari
+      - PDKS_SYSTEM_KEY=${PDKS_SYSTEM_KEY}
+      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
+      # Veritabani Baglantisi (db servisine baglanacak)
+      - DATABASE_URL=postgresql://pdks_admin:pdks_secure_password_123@pdks-db:5432/pdks_saas
+    depends_on:
+      - pdks-db
+    restart: unless-stopped
+
+  pdks-db:
+    image: postgres:16-alpine
+    container_name: pdks_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pdks_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pdks_secure_password_123}
+      POSTGRES_DB: ${POSTGRES_DB:-pdks_saas}
+    ports:
+      - '5432:5432'
+    volumes:
+      - pdks_pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pdks_pgdata:
+
+
