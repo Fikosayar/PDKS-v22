@@ -1,4 +1,4 @@
-﻿import express from 'express';
+import express from 'express';
 import dotenv from 'dotenv';
 dotenv.config();
 import path from 'path';
@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 import webpush from 'web-push';
 import { db, pool } from './src/db/index.js';
 import { users, attendanceLogs, leaveRequests, overtimeRequests, notifications, companies, companySettings } from './src/db/schema.js';
-import { eq, and, desc, gte, lte } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 
 const __dirname = process.cwd();
 const JWT_SECRET = process.env.PDKS_SYSTEM_KEY || 'default_jwt_secret_change_in_production';
@@ -47,17 +47,15 @@ const authenticateToken = (req: any, res: any, next: any) => {
   });
 };
 
-async function startServer() {
-  
 // --- INITIALIZE DATABASE ---
 const initDb = async () => {
   try {
     const client = await pool.connect();
-    
-    // Create enum types
-    await client.query("DO ' BEGIN CREATE TYPE role AS ENUM (''superadmin'', ''admin'', ''mudur'', ''takim_lideri'', ''personel''); EXCEPTION WHEN duplicate_object THEN null; END '");
-    await client.query("DO ' BEGIN CREATE TYPE log_type AS ENUM (''in'', ''out''); EXCEPTION WHEN duplicate_object THEN null; END '");
-    await client.query("DO ' BEGIN CREATE TYPE status AS ENUM (''pending'', ''approved'', ''rejected''); EXCEPTION WHEN duplicate_object THEN null; END '");
+
+    // Create enum types (IF NOT EXISTS mantığı DO bloğunda)
+    await client.query("DO $$ BEGIN CREATE TYPE role AS ENUM ('superadmin', 'admin', 'mudur', 'takim_lideri', 'personel'); EXCEPTION WHEN duplicate_object THEN null; END $$");
+    await client.query("DO $$ BEGIN CREATE TYPE log_type AS ENUM ('in', 'out'); EXCEPTION WHEN duplicate_object THEN null; END $$");
+    await client.query("DO $$ BEGIN CREATE TYPE req_status AS ENUM ('pending', 'approved', 'rejected'); EXCEPTION WHEN duplicate_object THEN null; END $$");
 
     // Create tables
     await client.query(`CREATE TABLE IF NOT EXISTS companies (
@@ -125,7 +123,7 @@ const initDb = async () => {
       days REAL NOT NULL,
       reason TEXT,
       type TEXT NOT NULL,
-      status status DEFAULT 'pending' NOT NULL,
+      status req_status DEFAULT 'pending' NOT NULL,
       attachment_url TEXT,
       deleted BOOLEAN DEFAULT false,
       created_at TIMESTAMP DEFAULT now() NOT NULL
@@ -138,7 +136,7 @@ const initDb = async () => {
       date TIMESTAMP NOT NULL,
       hours REAL NOT NULL,
       description TEXT,
-      status status DEFAULT 'pending' NOT NULL,
+      status req_status DEFAULT 'pending' NOT NULL,
       deleted BOOLEAN DEFAULT false,
       created_at TIMESTAMP DEFAULT now() NOT NULL
     )`);
@@ -154,35 +152,47 @@ const initDb = async () => {
       created_at TIMESTAMP DEFAULT now() NOT NULL
     )`);
 
-    // Seed admin if no users exist
+    // Seed: Eğer hiç kullanıcı yoksa demo şirket + admin oluştur
     const existing = await client.query('SELECT COUNT(*) FROM users');
     if (parseInt(existing.rows[0].count) === 0) {
       const compResult = await client.query("INSERT INTO companies (name, is_active) VALUES ('PDKS Demo', true) RETURNING id");
       const companyId = compResult.rows[0].id;
-      
-      const bcryptLib = require('bcryptjs');
-      const hash = await bcryptLib.hash('admin', 10);
+
+      const hash = await bcrypt.hash('admin', 10);
       await client.query(
-        "INSERT INTO users (company_id, personnel_id, password_hash, name, role, leave_balance, can_remote_check_in, is_active) VALUES ($1, 'admin', $2, 'Sistem Yoneticisi', 'admin', 14, true, true)",
+        "INSERT INTO users (company_id, personnel_id, password_hash, name, role, leave_balance, can_remote_check_in, is_active) VALUES ($1, 'admin', $2, 'Sistem Yöneticisi', 'admin', 14, true, true)",
         [companyId, hash]
       );
-      
+
       await client.query("INSERT INTO company_settings (company_id, shift_start, shift_end) VALUES ($1, '08:00', '18:00')", [companyId]);
-      console.log('Default admin user created (admin/admin)');
+      console.log('[PDKS] Varsayılan admin oluşturuldu: ID=admin / Şifre=admin');
     }
-    
+
     client.release();
-    console.log('Database initialized successfully.');
+    console.log('[PDKS] Veritabanı başarıyla hazırlandı.');
   } catch (err) {
-    console.error('Database initialization failed:', err);
+    console.error('[PDKS] Veritabanı başlatma hatası:', err);
   }
 };
-initDb();
 
+async function startServer() {
+  await initDb();
 
-const app = express();
-  const PORT = parseInt(process.env.PORT || '3000', 10);
-  app.use(express.json({ limit: '2mb' }));
+  const app = express();
+  const PORT = parseInt(process.env.PORT || '8104', 10);
+  app.use(express.json({ limit: '10mb' }));
+
+  // Trust proxy (Cloudflare / Coolify reverse proxy için)
+  app.set('trust proxy', 1);
+
+  // CORS (Cloudflare tunnel üzerinden erişim için)
+  app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    if (req.method === 'OPTIONS') return res.status(200).end();
+    next();
+  });
 
   // --- Rate Limiting ---
   const loginAttempts = new Map<string, { count: number; lastAttempt: number }>();
@@ -200,114 +210,65 @@ const app = express();
     return true;
   }
 
-  app.get('/api/health', (req, res) => res.json({ status: 'Çok', time: new Date().toISOString() }));
+  app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 
-  // API Routes - Public
+  // --- Auth ---
   app.post('/api/login', async (req, res) => {
-    const { personnelId, password, deviceInfo, permanentDeviceId } = req.body;
-    if (!personnelId || !password) return res.status(400).json({ error: 'Gecersiz giris' });
+    const { personnelId, password } = req.body;
+    if (!personnelId || !password) return res.status(400).json({ error: 'Geçersiz giriş' });
     const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
-    if (!checkRateLimit(clientIp)) return res.status(429).json({ error: 'Cok fazla deneme.' });
+    if (!checkRateLimit(clientIp)) return res.status(429).json({ error: 'Çok fazla deneme. Lütfen bekleyin.' });
 
     try {
       const userList = await db.select().from(users).where(eq(users.personnelId, personnelId)).limit(1);
-      if (userList.length === 0) return res.status(401).json({ error: 'Hatali ID veya sifre' });
+      if (userList.length === 0) return res.status(401).json({ error: 'Hatalı ID veya şifre' });
       const user = userList[0];
 
       const passwordMatch = await bcrypt.compare(password, user.passwordHash);
-      if (!passwordMatch) return res.status(401).json({ error: 'Hatali ID veya sifre' });
-      if (!user.isActive) return res.status(403).json({ error: 'Hesap devre disi' });
+      if (!passwordMatch) return res.status(401).json({ error: 'Hatalı ID veya şifre' });
+      if (!user.isActive) return res.status(403).json({ error: 'Hesap devre dışı' });
 
-      // Token
       const token = jwt.sign({ uid: user.id, role: user.role, companyId: user.companyId }, JWT_SECRET, { expiresIn: '30d' });
       const { passwordHash, ...safeUser } = user;
       res.json({ success: true, uid: user.id, customToken: token, ...safeUser });
     } catch (error: any) {
-      res.status(500).json({ error: 'Sistem hatasi' });
+      console.error('[Login Error]', error);
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
 
-  // API Routes - Protected
+  // --- Me ---
   app.get('/api/me', authenticateToken, async (req: any, res) => {
     try {
       const userList = await db.select().from(users).where(eq(users.id, req.user.uid)).limit(1);
-      if (userList.length === 0) return res.status(404).json({ error: 'User not found' });
+      if (userList.length === 0) return res.status(404).json({ error: 'Kullanıcı bulunamadı' });
       const { passwordHash, ...safeUser } = userList[0];
       res.json(safeUser);
     } catch (error: any) {
-      res.status(500).json({ error: 'Sistem hatasi' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
 
-  
-  app.get('/api/users/me', authenticateToken, async (req, res) => {
-    try {
-      const u = await db.select().from(users).where(eq(users.id, req.user.id)).limit(1);
-      if (u.length > 0) res.json(u[0]);
-      else res.status(404).json({ error: 'Not found' });
-    } catch (e) { res.status(500).json({ error: 'Server error' }); }
-  });
-
+  // --- Users ---
   app.get('/api/users', authenticateToken, async (req: any, res) => {
     try {
-      if (!req.user.companyId && req.user.role !== 'superadmin') return res.status(400).json({ error: 'Sirket bulunamadi' });
-      
-      const query = req.user.role === 'superadmin' 
-        ? db.select().from(users) 
+      if (!req.user.companyId && req.user.role !== 'superadmin') return res.status(400).json({ error: 'Şirket bulunamadı' });
+      const query = req.user.role === 'superadmin'
+        ? db.select().from(users)
         : db.select().from(users).where(eq(users.companyId, req.user.companyId));
-        
       const allUsers = await query;
       const safeUsers = allUsers.map(u => { const { passwordHash, ...safe } = u; return safe; });
       res.json(safeUsers);
     } catch (error) {
-      res.status(500).json({ error: 'Sistem hatasi' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
 
-  app.get('/api/logs', authenticateToken, async (req: any, res) => {
-    try {
-      const companyId = req.user.companyId;
-      if (!companyId) return res.status(400).json({ error: 'Sirket bulunamadi' });
-      const logs = await db.select().from(attendanceLogs).where(eq(attendanceLogs.companyId, companyId)).orderBy(desc(attendanceLogs.timestamp));
-      res.json(logs);
-    } catch (error) {
-      res.status(500).json({ error: 'Sistem hatasi' });
-    }
-  });
-
-  app.post('/api/attendance', authenticateToken, async (req: any, res) => {
-    try {
-      const { type, isRemote, remoteNote, latitude, longitude } = req.body;
-      const companyId = req.user.companyId;
-      const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
-      
-      await db.insert(attendanceLogs).values({
-        companyId,
-        userId: req.user.uid,
-        type,
-        ipAddress: clientIp,
-        status: 'success',
-        isRemote: !!isRemote,
-        remoteNote,
-        latitude,
-        longitude
-      });
-      res.json({ success: true });
-    } catch (error) {
-      res.status(500).json({ error: 'Sistem hatasi' });
-    }
-  });
-
-  
-  // --- ADDITIONAL CRUD ROUTES ---
-
-  // User Management
   app.post('/api/users', authenticateToken, async (req: any, res: any) => {
     try {
       if (req.user.role !== 'admin' && req.user.role !== 'superadmin') return res.status(403).json({ error: 'Yetkisiz' });
       const { newUser } = req.body;
       const hashedPassword = await bcrypt.hash(newUser.password, 10);
-      
       const userList = await db.insert(users).values({
         companyId: req.user.companyId,
         personnelId: newUser.personnelId,
@@ -320,11 +281,10 @@ const app = express();
         canRemoteCheckIn: newUser.canRemoteCheckIn,
         allowedDevice: newUser.allowedDevice,
       }).returning();
-      
       res.json({ success: true, user: userList[0] });
     } catch (e: any) {
       console.error(e);
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
 
@@ -333,18 +293,15 @@ const app = express();
       const { targetUid, updates } = req.body;
       const isSelf = req.user.uid === targetUid;
       const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin';
-      
       if (!isSelf && !isAdmin) return res.status(403).json({ error: 'Yetkisiz' });
-
       if (updates.password) {
         updates.passwordHash = await bcrypt.hash(updates.password, 10);
         delete updates.password;
       }
-      
       await db.update(users).set(updates).where(eq(users.id, targetUid));
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
 
@@ -354,17 +311,70 @@ const app = express();
       await db.update(users).set({ isActive: false }).where(eq(users.id, req.params.id));
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
 
-  // Settings
+  // --- Attendance Logs ---
+  app.get('/api/logs', authenticateToken, async (req: any, res) => {
+    try {
+      const companyId = req.user.companyId;
+      if (!companyId) return res.status(400).json({ error: 'Şirket bulunamadı' });
+      const logs = await db.select().from(attendanceLogs).where(eq(attendanceLogs.companyId, companyId)).orderBy(desc(attendanceLogs.timestamp));
+      res.json(logs);
+    } catch (error) {
+      res.status(500).json({ error: 'Sistem hatası' });
+    }
+  });
+
+  app.post('/api/attendance', authenticateToken, async (req: any, res) => {
+    try {
+      const { type, isRemote, remoteNote, latitude, longitude } = req.body;
+      const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
+      await db.insert(attendanceLogs).values({
+        companyId: req.user.companyId,
+        userId: req.user.uid,
+        type,
+        ipAddress: clientIp,
+        status: 'success',
+        isRemote: !!isRemote,
+        remoteNote,
+        latitude,
+        longitude
+      });
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Sistem hatası' });
+    }
+  });
+
+  app.delete('/api/attendance/:id', authenticateToken, async (req: any, res: any) => {
+    try {
+      if (req.user.role !== 'admin' && req.user.role !== 'superadmin') return res.status(403).json({ error: 'Yetkisiz' });
+      await db.delete(attendanceLogs).where(eq(attendanceLogs.id, req.params.id));
+      res.json({ success: true });
+    } catch (e) {
+      res.status(500).json({ error: 'Sistem hatası' });
+    }
+  });
+
+  app.put('/api/attendance/:id', authenticateToken, async (req: any, res: any) => {
+    try {
+      if (req.user.role !== 'admin' && req.user.role !== 'superadmin') return res.status(403).json({ error: 'Yetkisiz' });
+      await db.update(attendanceLogs).set(req.body).where(eq(attendanceLogs.id, req.params.id));
+      res.json({ success: true });
+    } catch (e) {
+      res.status(500).json({ error: 'Sistem hatası' });
+    }
+  });
+
+  // --- Settings ---
   app.get('/api/settings', authenticateToken, async (req: any, res: any) => {
     try {
       const s = await db.select().from(companySettings).where(eq(companySettings.companyId, req.user.companyId)).limit(1);
       res.json(s[0] || {});
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
 
@@ -372,7 +382,6 @@ const app = express();
     try {
       if (req.user.role !== 'admin' && req.user.role !== 'superadmin') return res.status(403).json({ error: 'Yetkisiz' });
       const updates = req.body;
-      // upsert
       const existing = await db.select().from(companySettings).where(eq(companySettings.companyId, req.user.companyId));
       if (existing.length > 0) {
         await db.update(companySettings).set(updates).where(eq(companySettings.companyId, req.user.companyId));
@@ -381,110 +390,91 @@ const app = express();
       }
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
 
-  // Attendance Mutators
-  app.delete('/api/attendance/:id', authenticateToken, async (req: any, res: any) => {
-    try {
-      if (req.user.role !== 'admin' && req.user.role !== 'superadmin') return res.status(403).json({ error: 'Yetkisiz' });
-      await db.delete(attendanceLogs).where(eq(attendanceLogs.id, req.params.id));
-      res.json({ success: true });
-    } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
-    }
-  });
-  
-  app.put('/api/attendance/:id', authenticateToken, async (req: any, res: any) => {
-    try {
-      if (req.user.role !== 'admin' && req.user.role !== 'superadmin') return res.status(403).json({ error: 'Yetkisiz' });
-      await db.update(attendanceLogs).set(req.body).where(eq(attendanceLogs.id, req.params.id));
-      res.json({ success: true });
-    } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
-    }
-  });
-
-  // Leaves & Overtimes
+  // --- Leave Requests ---
   app.get('/api/leaves', authenticateToken, async (req: any, res: any) => {
     try {
       const leaves = await db.select().from(leaveRequests).where(eq(leaveRequests.companyId, req.user.companyId));
       res.json(leaves);
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
-  
+
   app.post('/api/leaves', authenticateToken, async (req: any, res: any) => {
     try {
       await db.insert(leaveRequests).values({ companyId: req.user.companyId, userId: req.user.uid, ...req.body });
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
-  
+
   app.put('/api/leaves/:id', authenticateToken, async (req: any, res: any) => {
     try {
       await db.update(leaveRequests).set(req.body).where(eq(leaveRequests.id, req.params.id));
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
-  
+
   app.delete('/api/leaves/:id', authenticateToken, async (req: any, res: any) => {
     try {
       await db.delete(leaveRequests).where(eq(leaveRequests.id, req.params.id));
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
 
+  // --- Overtime Requests ---
   app.get('/api/overtime', authenticateToken, async (req: any, res: any) => {
     try {
       const ot = await db.select().from(overtimeRequests).where(eq(overtimeRequests.companyId, req.user.companyId));
       res.json(ot);
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
-  
+
   app.post('/api/overtime', authenticateToken, async (req: any, res: any) => {
     try {
       await db.insert(overtimeRequests).values({ companyId: req.user.companyId, userId: req.user.uid, ...req.body });
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
-  
+
   app.put('/api/overtime/:id', authenticateToken, async (req: any, res: any) => {
     try {
       await db.update(overtimeRequests).set(req.body).where(eq(overtimeRequests.id, req.params.id));
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
-  
+
   app.delete('/api/overtime/:id', authenticateToken, async (req: any, res: any) => {
     try {
       await db.delete(overtimeRequests).where(eq(overtimeRequests.id, req.params.id));
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
 
+  // --- Notifications ---
   app.get('/api/notifications', authenticateToken, async (req: any, res: any) => {
     try {
       const notifs = await db.select().from(notifications).where(eq(notifications.userId, req.user.uid)).orderBy(desc(notifications.createdAt)).limit(100);
       res.json(notifs);
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
 
@@ -500,7 +490,7 @@ const app = express();
       });
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
 
@@ -509,26 +499,29 @@ const app = express();
       await db.update(notifications).set(req.body).where(eq(notifications.id, req.params.id));
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
 
-  // Push subscription
+  // --- Push ---
+  app.get('/api/push/vapid-public-key', (req, res) => {
+    res.json({ publicKey: VAPID_PUBLIC_KEY });
+  });
+
   app.post('/api/push/subscribe', authenticateToken, async (req: any, res: any) => {
     try {
       const { subscription } = req.body;
       await db.update(users).set({ pushSubscription: JSON.stringify(subscription) }).where(eq(users.id, req.user.uid));
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: 'Sistem hatasıı' });
+      res.status(500).json({ error: 'Sistem hatası' });
     }
   });
 
-  // Notify endpoints
+  // --- Notify Endpoints ---
   app.post('/api/notify/checkin', authenticateToken, async (req: any, res: any) => {
     try {
-      const { userId, userName, type, isRemote, remoteNote } = req.body;
-      // Find managers of this user
+      const { userId, userName, type, isRemote } = req.body;
       const userList = await db.select().from(users).where(eq(users.id, userId)).limit(1);
       if (userList.length > 0 && userList[0].managerId) {
         const title = type === 'in' ? 'Giriş Bildirimi' : 'Çıkış Bildirimi';
@@ -541,7 +534,7 @@ const app = express();
       }
       res.json({ success: true });
     } catch (e) {
-      res.json({ success: true }); // Don't fail on notification errors
+      res.json({ success: true });
     }
   });
 
@@ -568,34 +561,34 @@ const app = express();
       const typeLabel = requestType === 'leave' ? 'İzin' : 'Mesai';
       const title = 'Yeni ' + typeLabel + ' Talebi';
       const msg = userName + ' yeni bir ' + typeLabel.toLowerCase() + ' talebi gönderdi';
-      const targetId = managerId || 'admin_initial';
-      await db.insert(notifications).values({
-        userId: targetId, title, message: msg, type: 'info', read: false
-      });
-      await sendPushToUser(targetId, title, msg, '/approvals');
+      if (managerId) {
+        await db.insert(notifications).values({
+          userId: managerId, title, message: msg, type: 'info', read: false
+        });
+        await sendPushToUser(managerId, title, msg, '/approvals');
+      }
       res.json({ success: true });
     } catch (e) {
       res.json({ success: true });
     }
   });
 
-
+  // --- Static / SPA ---
   if (process.env.NODE_ENV !== 'production') {
     try {
       const { createServer: createViteServer } = await import('vite');
       const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'spa' });
       app.use(vite.middlewares);
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[Dev] Vite middleware başlatılamadı:', e);
+    }
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (req, res) => res.sendFile(path.join(distPath, 'index.html')));
   }
 
-  app.listen(PORT, '0.0.0.0', () => console.log('Server running on port ' + PORT));
+  app.listen(PORT, '0.0.0.0', () => console.log(`[PDKS] Sunucu port ${PORT} üzerinde çalışıyor`));
 }
 
 startServer();
-
-
-
