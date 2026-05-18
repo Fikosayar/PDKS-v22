@@ -1,4 +1,4 @@
-import express from 'express';
+﻿import express from 'express';
 import dotenv from 'dotenv';
 dotenv.config();
 import path from 'path';
@@ -275,7 +275,7 @@ async function startServer() {
         name: newUser.name,
         title: newUser.title,
         role: newUser.role,
-        managerId: newUser.managerId,
+        managerId: (newUser.managerId === 'superadmin' || newUser.managerId === 'admin_initial') ? null : (newUser.managerId || null),
         passwordHash: hashedPassword,
         leaveBalance: newUser.leaveBalance,
         canRemoteCheckIn: newUser.canRemoteCheckIn,
@@ -291,6 +291,7 @@ async function startServer() {
   app.post('/api/users/update', authenticateToken, async (req: any, res: any) => {
     try {
       const { targetUid, updates } = req.body;
+      if (updates.managerId === 'superadmin' || updates.managerId === 'admin_initial') updates.managerId = null;
       const isSelf = req.user.uid === targetUid;
       const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin';
       if (!isSelf && !isAdmin) return res.status(403).json({ error: 'Yetkisiz' });
