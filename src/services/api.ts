@@ -1,4 +1,4 @@
-/**
+﻿/**
  * API Service Layer — Tüm backend çağrıları burada merkezi yönetilir
  * Frontend'den doğrudan fetch() çağrısı yerine bu fonksiyonlar kullanılır
  */
@@ -25,7 +25,7 @@ export interface LoginResponse {
 export async function loginUser(payload: LoginPayload): Promise<LoginResponse> {
   const response = await fetch('/api/login', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
     body: JSON.stringify(payload),
   });
 
@@ -53,7 +53,7 @@ export interface CreateUserPayload {
 export async function createUser(payload: CreateUserPayload): Promise<{ success: boolean }> {
   const response = await fetch('/api/users', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
     body: JSON.stringify(payload),
   });
 
@@ -73,7 +73,7 @@ export interface UpdateUserPayload {
 export async function updateUser(payload: UpdateUserPayload): Promise<{ success: boolean }> {
   const response = await fetch('/api/users/update', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
     body: JSON.stringify(payload),
   });
 
@@ -88,7 +88,7 @@ export async function updateUser(payload: UpdateUserPayload): Promise<{ success:
 
 export async function deleteAttendanceLog(logId: string, adminUid: string): Promise<{ success: boolean }> {
   const response = await fetch(`/api/attendance/${logId}?adminUid=${adminUid}`, {
-    method: 'DELETE',
+    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
   });
 
   const data = await response.json();
@@ -103,7 +103,7 @@ export async function deleteAttendanceLog(logId: string, adminUid: string): Prom
 export async function subscribePush(uid: string, subscription: PushSubscription): Promise<void> {
   await fetch('/api/push/subscribe', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
     body: JSON.stringify({ uid, subscription }),
   });
 }
@@ -117,7 +117,7 @@ export async function sendPushNotification(payload: {
 }): Promise<void> {
   await fetch('/api/push/send', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
     body: JSON.stringify(payload),
   });
 }
@@ -133,7 +133,7 @@ export function notifyApproval(payload: {
   // Fire and forget
   fetch('/api/notify/approval', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
     body: JSON.stringify(payload),
   }).catch(() => {});
 }
@@ -147,7 +147,7 @@ export function notifyCheckin(payload: {
 }): void {
   fetch('/api/notify/checkin', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
     body: JSON.stringify(payload),
   }).catch(() => {});
 }
@@ -160,7 +160,7 @@ export function notifyNewRequest(payload: {
 }): void {
   fetch('/api/notify/newrequest', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
     body: JSON.stringify(payload),
   }).catch(() => {});
 }

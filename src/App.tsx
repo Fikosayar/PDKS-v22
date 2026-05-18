@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -491,7 +491,7 @@ export default function App() {
       // Verify session with API
       const verifySession = async () => {
         try {
-          const res = await fetch('/api/users/me', { headers: { 'Authorization': `Bearer ${sessionData.token}` } });
+          const res = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${sessionData.token}` } });
           if (res.ok) {
             const userData = await res.json();
             if (userData && userData.role !== 'deleted') {
@@ -573,7 +573,7 @@ export default function App() {
           // Abonelii sunucuya kaydet
           await fetch('/api/push/subscribe', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
             body: JSON.stringify({ uid: user.uid, subscription: sub })
           });
         }
@@ -643,7 +643,7 @@ export default function App() {
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
         body: JSON.stringify({
           personnelId,
           password,
@@ -751,7 +751,7 @@ export default function App() {
     try {
       const response = await fetch('/api/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
         body: JSON.stringify({
           adminUid: profile.uid,
           newUser: { name, title, personnelId, password, role, managerId, leaveBalance, startDate, birthDate, allowedDevice, deviceId, canRemoteCheckIn }
@@ -949,7 +949,7 @@ export default function App() {
         // Yöneticiye giriş bildirimi gönder
         fetch('/api/notify/checkin', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
           body: JSON.stringify({
             userId: user.uid,
             userName: profile.name,
@@ -1210,7 +1210,7 @@ export default function App() {
         if (!isAdminOrManager) {
           fetch('/api/notify/checkin', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
             body: JSON.stringify({ userId: user.uid, userName: profile.name, type: manualLogType, isRemote: true, remoteNote: 'Gemi Manuel Kayt Eklendi' })
           }).catch(() => { });
         }
@@ -1234,7 +1234,7 @@ export default function App() {
 
     try {
       const response = await fetch(`/api/attendance/${log.id}?adminUid=${profile.uid}`, {
-        method: 'DELETE'
+        method: 'DELETE', headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') }
       });
 
       if (response.ok) {
@@ -1292,7 +1292,7 @@ export default function App() {
     if (profile?.role !== 'admin' || uid === user?.uid) return;
 
     try {
-      await userMutation.mutateAsync({ method: 'DELETE', id: uid });
+      await userMutation.mutateAsync({ method: 'DELETE', headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') }, id: uid });
       setStatus({ type: 'success', message: 'Personel kayd pasif hale getirildi.' });
       setDeletingUser(null);
     } catch (error) {
@@ -1357,7 +1357,7 @@ export default function App() {
       // Yöneticiye push bildirimi gönder
       fetch('/api/notify/newrequest', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
         body: JSON.stringify({
           userId: user.uid,
           userName: profile.name,
@@ -1427,7 +1427,7 @@ export default function App() {
       // Yöneticiye push bildirimi gönder
       fetch('/api/notify/newrequest', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
         body: JSON.stringify({
           userId: user.uid,
           userName: profile.name,
@@ -1451,7 +1451,7 @@ export default function App() {
       // Push bildirimi gönder (arka planda, hata olsa bile devam)
       fetch('/api/notify/approval', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
         body: JSON.stringify({
           targetUid: requestData.userId,
           isApproved: action === 'approved',
@@ -1476,7 +1476,7 @@ export default function App() {
 
     try {
       // 1. Mark as deleted
-      await leaveMutation.mutateAsync({ method: 'DELETE', id });
+      await leaveMutation.mutateAsync({ method: 'DELETE', headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') }, id });
 
       // 2. Revert balance if annual
       if (deletingLeave.type === 'annual') {
@@ -1555,7 +1555,7 @@ export default function App() {
     try {
       const response = await fetch('/api/users/update', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
         body: JSON.stringify({
           adminUid: profile.uid,
           targetUid: editingUser.uid,
@@ -1583,7 +1583,7 @@ export default function App() {
     try {
       const response = await fetch('/api/users/update', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
         body: JSON.stringify({
           adminUid: user.uid,
           targetUid: user.uid,
@@ -3678,7 +3678,7 @@ export default function App() {
                             setEditingUser(newUpdates);
                             fetch('/api/users/update', {
                               method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
+                              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
                               body: JSON.stringify({
                                 adminUid: profile.uid,
                                 targetUid: editingUser.uid,
@@ -4262,7 +4262,7 @@ export default function App() {
                             <button onClick={() => setDeletingOvertime(null)} className="flex-1 rounded-xl bg-zinc-900 py-3 font-bold text-zinc-400">Vazgeç</button>
                             <button
                               onClick={async () => {
-                                await overtimeMutation.mutateAsync({ method: 'DELETE', id: deletingOvertime.id! });
+                                await overtimeMutation.mutateAsync({ method: 'DELETE', headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') }, id: deletingOvertime.id! });
                                 setDeletingOvertime(null);
                                 setStatus({ type: 'success', message: 'Mesai kayd silindi.' });
                               }}
@@ -4437,7 +4437,7 @@ export default function App() {
                   <button onClick={() => setDeletingOvertime(null)} className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-bold text-zinc-500">Vazgeç</button>
                   <button onClick={async () => {
                     try {
-                      await overtimeMutation.mutateAsync({ method: 'DELETE', id: deletingOvertime.id! });
+                      await overtimeMutation.mutateAsync({ method: 'DELETE', headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') }, id: deletingOvertime.id! });
                       setDeletingOvertime(null);
                       setStatus({ type: 'success', message: 'Mesai kayd silindi' });
                     } catch (e) {
@@ -4695,7 +4695,7 @@ export default function App() {
                             // Bildirim gönder
                             fetch('/api/notify/checkin', {
                               method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
+                              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
                               body: JSON.stringify({ userId: user.uid, userName: profile.name, type: pendingScanType, isRemote: true, remoteNote: remoteNote || '' })
                             }).catch(() => { });
 

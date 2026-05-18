@@ -1,4 +1,4 @@
-import React from 'react';
+ï»¿import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, User, Edit, CheckCircle, ChevronLeft, ChevronRight, Clock4, Key, Camera, Lock, Eye, EyeOff, Building2, MapPin, Truck, Plus, LogIn, LogOut, ShieldAlert, Clock3, Clock, Trash2, FileText, Download, XCircle, QrCode, Wifi } from 'lucide-react';
 import { format } from 'date-fns';
@@ -38,7 +38,7 @@ export default function AppModals({
               >
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold flex items-center gap-2">
-                    <Edit className="text-orange-500" /> Personel Düzenle
+                    <Edit className="text-orange-500" /> Personel Dï¿½zenle
                   </h2>
                   <button 
                     onClick={() => setEditingUser(null)}
@@ -48,7 +48,7 @@ export default function AppModals({
                   </button>
                 </div>
 
-                {/* Profil Fotoðrafý Yönetimi */}
+                {/* Profil Fotoï¿½rafï¿½ Yï¿½netimi */}
                 <div className="flex items-center gap-5 p-4 rounded-2xl border border-zinc-800 bg-zinc-900/30">
                   <div className="relative group shrink-0">
                     {editingUser.avatarUrl ? (
@@ -82,24 +82,24 @@ export default function AppModals({
                                 URL.revokeObjectURL(objectUrl);
                                 resolve(canvas.toDataURL('image/jpeg', 0.8));
                               };
-                              img.onerror = () => reject(new Error('Resim yüklenemedi.'));
+                              img.onerror = () => reject(new Error('Resim yï¿½klenemedi.'));
                               img.src = objectUrl;
                             });
                             await updateDoc(doc(db, 'users', editingUser.uid), { avatarUrl: avatarBase64 });
                             setEditingUser(prev => prev ? { ...prev, avatarUrl: avatarBase64 } : prev);
-                            // Personele bildirim gönder
+                            // Personele bildirim gï¿½nder
                             await addDoc(collection(db, 'notifications'), {
                               userId: editingUser.uid,
-                              title: 'Profil Fotoðrafýnýz Güncellendi',
-                              message: `${profile?.name || 'Yöneticiniz'} profil fotoðrafýnýzý güncelledi.`,
+                              title: 'Profil Fotoï¿½rafï¿½nï¿½z Gï¿½ncellendi',
+                              message: `${profile?.name || 'Yï¿½neticiniz'} profil fotoï¿½rafï¿½nï¿½zï¿½ gï¿½ncelledi.`,
                               type: 'info',
                               read: false,
                               link: '/profile',
                               createdAt: new Date().toISOString(),
                             });
-                            setStatus({ type: 'success', message: `${editingUser.name} için profil fotoðrafý güncellendi.` });
+                            setStatus({ type: 'success', message: `${editingUser.name} iï¿½in profil fotoï¿½rafï¿½ gï¿½ncellendi.` });
                           } catch (err: any) {
-                            setStatus({ type: 'error', message: 'Fotoðraf yüklenemedi: ' + err.message });
+                            setStatus({ type: 'error', message: 'Fotoï¿½raf yï¿½klenemedi: ' + err.message });
                           } finally {
                             setAvatarUploading(false);
                             e.target.value = '';
@@ -114,33 +114,33 @@ export default function AppModals({
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm mb-1">Profil Fotoðrafý</p>
-                    <p className="text-[11px] text-zinc-500 mb-3">Resmin üzerine týklayarak fotoðrafý deðiþtirebilirsiniz. Deðiþiklik personele bildirim olarak iletilir.</p>
+                    <p className="font-bold text-sm mb-1">Profil Fotoï¿½rafï¿½</p>
+                    <p className="text-[11px] text-zinc-500 mb-3">Resmin ï¿½zerine tï¿½klayarak fotoï¿½rafï¿½ deï¿½iï¿½tirebilirsiniz. Deï¿½iï¿½iklik personele bildirim olarak iletilir.</p>
                     {editingUser.avatarUrl && (
                       <button
                         type="button"
                         onClick={async () => {
-                          if (!window.confirm('Profil fotoðrafý silinsin mi?')) return;
+                          if (!window.confirm('Profil fotoï¿½rafï¿½ silinsin mi?')) return;
                           try {
                             await updateDoc(doc(db, 'users', editingUser.uid), { avatarUrl: null });
                             setEditingUser(prev => prev ? { ...prev, avatarUrl: undefined } : prev);
                             await addDoc(collection(db, 'notifications'), {
                               userId: editingUser.uid,
-                              title: 'Profil Fotoðrafýnýz Silindi',
-                              message: `${profile?.name || 'Yöneticiniz'} profil fotoðrafýnýzý kaldýrdý.`,
+                              title: 'Profil Fotoï¿½rafï¿½nï¿½z Silindi',
+                              message: `${profile?.name || 'Yï¿½neticiniz'} profil fotoï¿½rafï¿½nï¿½zï¿½ kaldï¿½rdï¿½.`,
                               type: 'info',
                               read: false,
                               link: '/profile',
                               createdAt: new Date().toISOString(),
                             });
-                            setStatus({ type: 'success', message: 'Fotoðraf silindi.' });
+                            setStatus({ type: 'success', message: 'Fotoï¿½raf silindi.' });
                           } catch (err: any) {
                             setStatus({ type: 'error', message: 'Silinemedi: ' + err.message });
                           }
                         }}
                         className="flex items-center gap-1.5 rounded-lg bg-red-500/10 px-3 py-1.5 text-[11px] font-bold text-red-500 hover:bg-red-500/20 transition-colors"
                       >
-                        <Trash2 size={11} /> Fotoðrafý Kaldýr
+                        <Trash2 size={11} /> Fotoï¿½rafï¿½ Kaldï¿½r
                       </button>
                     )}
                   </div>
@@ -157,11 +157,11 @@ export default function AppModals({
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">Ünvan / Pozisyon</label>
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">ï¿½nvan / Pozisyon</label>
                     <input 
                       name="title"
                       defaultValue={editingUser.title || ''}
-                      placeholder="Örn: Bölüm Müdürü, Tekniker"
+                      placeholder="ï¿½rn: Bï¿½lï¿½m Mï¿½dï¿½rï¿½, Tekniker"
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                     />
                   </div>
@@ -173,18 +173,18 @@ export default function AppModals({
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                     >
                       <option value="employee">Personel</option>
-                      <option value="admin">Yönetici</option>
+                      <option value="admin">Yï¿½netici</option>
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">Baðlý Olduðu Yönetici</label>
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Baï¿½lï¿½ Olduï¿½u Yï¿½netici</label>
                     <select 
                       name="managerId"
                       required
                       defaultValue={editingUser.managerId || 'admin_initial'}
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                     >
-                      <option value="admin_initial">Sistem Yöneticisi</option>
+                      <option value="admin_initial">Sistem Yï¿½neticisi</option>
                       {allUsers.filter(u => u.role === 'admin' && u.uid !== 'admin_initial').map(admin => (
                         <option key={admin.uid} value={admin.uid}>{admin.name}</option>
                       ))}
@@ -192,8 +192,8 @@ export default function AppModals({
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase flex items-center justify-between">
-                      Yýllýk Ýzin Bakiyesi (Gün)
-                      <span className="text-[10px] text-orange-500 lowercase font-normal italic">Mevcut: {getEffectiveLeaveBalance(editingUser)} Gün</span>
+                      Yï¿½llï¿½k ï¿½zin Bakiyesi (Gï¿½n)
+                      <span className="text-[10px] text-orange-500 lowercase font-normal italic">Mevcut: {getEffectiveLeaveBalance(editingUser)} Gï¿½n</span>
                     </label>
                     <input 
                       name="leaveBalance"
@@ -204,7 +204,7 @@ export default function AppModals({
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">Ýþe Giriþ Tarihi</label>
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">ï¿½ï¿½e Giriï¿½ Tarihi</label>
                     <input 
                       name="startDate"
                       type="date"
@@ -213,7 +213,7 @@ export default function AppModals({
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">Doðum Tarihi</label>
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Doï¿½um Tarihi</label>
                     <input 
                       name="birthDate"
                       type="date"
@@ -222,19 +222,19 @@ export default function AppModals({
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">Cihaz Kýsýtlamasý</label>
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Cihaz Kï¿½sï¿½tlamasï¿½</label>
                     <input 
                       name="allowedDevice"
                       type="text"
                       defaultValue={editingUser.allowedDevice || ''}
-                      placeholder="Örn: iPhone, Samsung"
+                      placeholder="ï¿½rn: iPhone, Samsung"
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                     />
-                    <p className="text-[10px] text-zinc-600">Boþ býrakýlýrsa her cihazdan giriþ yapabilir.</p>
+                    <p className="text-[10px] text-zinc-600">Boï¿½ bï¿½rakï¿½lï¿½rsa her cihazdan giriï¿½ yapabilir.</p>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-zinc-500 uppercase">Sabit Cihaz Kimliði (Fixed ID)</label>
+                      <label className="text-xs font-semibold text-zinc-500 uppercase">Sabit Cihaz Kimliï¿½i (Fixed ID)</label>
                       {editingUser.deviceId && (
                         <button 
                           type="button"
@@ -243,19 +243,19 @@ export default function AppModals({
                             setEditingUser(newUpdates);
                             fetch('/api/users/update', {
                               method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
+                              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
                               body: JSON.stringify({ 
                                 adminUid: profile.uid,
                                 targetUid: editingUser.uid,
                                 updates: { deviceId: '' }
                               })
                             }).then(() => {
-                              setStatus({ type: 'success', message: 'Cihaz kilidi kaldýrýldý.' });
+                              setStatus({ type: 'success', message: 'Cihaz kilidi kaldï¿½rï¿½ldï¿½.' });
                             });
                           }}
                           className="text-[10px] font-bold text-red-500 hover:underline"
                         >
-                          Cihaz Kilidini Kaldýr
+                          Cihaz Kilidini Kaldï¿½r
                         </button>
                       )}
                     </div>
@@ -263,11 +263,11 @@ export default function AppModals({
                       name="deviceId"
                       type="text"
                       defaultValue={editingUser.deviceId || ''}
-                      placeholder="Otomatik atanýr, manuel girmek için yapýþtýrýn"
+                      placeholder="Otomatik atanï¿½r, manuel girmek iï¿½in yapï¿½ï¿½tï¿½rï¿½n"
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                     />
                   </div>
-                  {/* Nakliye / Uzaktan giriþ yetkisi */}
+                  {/* Nakliye / Uzaktan giriï¿½ yetkisi */}
                   <div className="md:col-span-2">
                     <label className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 cursor-pointer hover:border-orange-500/50 transition-colors">
                       <input 
@@ -280,19 +280,19 @@ export default function AppModals({
                       <div>
                         <p className="text-sm font-semibold text-white flex items-center gap-2">
                           <Truck size={14} className="text-orange-500" />
-                          Nakliye / Uzaktan Giriþ Yetkisi
+                          Nakliye / Uzaktan Giriï¿½ Yetkisi
                         </p>
-                        <p className="text-[11px] text-zinc-500 mt-0.5">Bu personel ofis dýþýndan (nakliyede) da giriþ-çýkýþ yapabilir. Konumu kaydedilir, yöneticileri bildirim alýr.</p>
+                        <p className="text-[11px] text-zinc-500 mt-0.5">Bu personel ofis dï¿½ï¿½ï¿½ndan (nakliyede) da giriï¿½-ï¿½ï¿½kï¿½ï¿½ yapabilir. Konumu kaydedilir, yï¿½neticileri bildirim alï¿½r.</p>
                       </div>
                     </label>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">Þifre Sýfýrla (Yeni Þifre)</label>
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">ï¿½ifre Sï¿½fï¿½rla (Yeni ï¿½ifre)</label>
                     <input 
                       name="password"
                       type="password"
-                      placeholder="Deðiþtirmek istemiyorsanýz boþ býrakýn"
+                      placeholder="Deï¿½iï¿½tirmek istemiyorsanï¿½z boï¿½ bï¿½rakï¿½n"
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                     />
                   </div>
@@ -308,7 +308,7 @@ export default function AppModals({
                       Sil
                     </button>
                     <button className="flex-[2] rounded-xl bg-orange-500 py-3 font-bold text-white transition-colors hover:bg-orange-600">
-                      Deðiþiklikleri Kaydet
+                      Deï¿½iï¿½iklikleri Kaydet
                     </button>
                   </div>
                 </form>
@@ -338,9 +338,9 @@ export default function AppModals({
                 <div>
                   <h3 className="text-xl font-bold flex items-center gap-2">
                     <Clock4 size={24} className="text-orange-500" />
-                    {editingLog ? 'Kaydý Düzenle' : 'Manuel Kayýt Ekle'}
+                    {editingLog ? 'Kaydï¿½ Dï¿½zenle' : 'Manuel Kayï¿½t Ekle'}
                   </h3>
-                  {/* Hedef kiþi adýný göster */}
+                  {/* Hedef kiï¿½i adï¿½nï¿½ gï¿½ster */}
                   {(() => {
                     const tid = selectedDayDetails?.userId || selectedPersonnelId || editingLog?.userId;
                     const tName = tid ? (allUsers.find(u => u.uid === tid)?.name || (profile?.uid === tid ? profile?.name : null)) : null;
@@ -374,7 +374,7 @@ export default function AppModals({
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Ýþlem Tipi</label>
+                  <label className="text-xs font-semibold text-zinc-500 uppercase">ï¿½ï¿½lem Tipi</label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
@@ -384,7 +384,7 @@ export default function AppModals({
                         manualLogType === 'in' ? "bg-emerald-600 text-white" : "bg-zinc-900 text-zinc-500"
                       )}
                     >
-                      Giriþ
+                      Giriï¿½
                     </button>
                     <button
                       type="button"
@@ -394,7 +394,7 @@ export default function AppModals({
                         manualLogType === 'out' ? "bg-orange-600 text-white" : "bg-zinc-900 text-zinc-500"
                       )}
                     >
-                      Çýkýþ
+                      ï¿½ï¿½kï¿½ï¿½
                     </button>
                   </div>
                 </div>
@@ -413,7 +413,7 @@ export default function AppModals({
                     type="submit"
                     className="flex-[2] rounded-xl bg-orange-500 py-4 font-bold text-white transition-colors hover:bg-orange-600"
                   >
-                    {editingLog ? 'Güncelle' : 'Kaydet'}
+                    {editingLog ? 'Gï¿½ncelle' : 'Kaydet'}
                   </button>
                 </div>
               </form>
@@ -434,34 +434,34 @@ export default function AppModals({
               className="relative w-full max-w-lg rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl"
             >
               <div className="mb-6 flex items-center justify-between">
-                <h3 className="text-xl font-bold">Ýzin Talebini Düzenle</h3>
+                <h3 className="text-xl font-bold">ï¿½zin Talebini Dï¿½zenle</h3>
                 <button onClick={() => setEditingLeave(null)} className="rounded-full bg-zinc-900 p-2 text-zinc-500 hover:bg-zinc-800"><X size={20} /></button>
               </div>
               <form onSubmit={handleUpdateLeave} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">Baþlangýç</label>
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Baï¿½langï¿½ï¿½</label>
                     <input name="startDate" type="date" required defaultValue={editingLeave.startDate} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">Bitiþ</label>
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Bitiï¿½</label>
                     <input name="endDate" type="date" required defaultValue={editingLeave.endDate} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Gün Sayýsý</label>
+                  <label className="text-xs font-semibold text-zinc-500 uppercase">Gï¿½n Sayï¿½sï¿½</label>
                   <input name="days" type="number" required defaultValue={editingLeave.days} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-zinc-500 uppercase">Durum</label>
                   <select name="status" defaultValue={editingLeave.status} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none appearance-none">
                     <option value="pending">Bekliyor</option>
-                    <option value="approved">Onaylandý</option>
+                    <option value="approved">Onaylandï¿½</option>
                     <option value="rejected">Reddedildi</option>
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Açýklama</label>
+                  <label className="text-xs font-semibold text-zinc-500 uppercase">Aï¿½ï¿½klama</label>
                   <textarea name="reason" required defaultValue={editingLeave.reason} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none h-24 resize-none" />
                 </div>
                 <div className="flex gap-2">
@@ -476,7 +476,7 @@ export default function AppModals({
                   >
                     Sil
                   </button>
-                  <button type="submit" className="flex-[2] rounded-xl bg-orange-500 py-3 font-bold text-white transition-colors hover:bg-orange-600">Güncelle</button>
+                  <button type="submit" className="flex-[2] rounded-xl bg-orange-500 py-3 font-bold text-white transition-colors hover:bg-orange-600">Gï¿½ncelle</button>
                 </div>
               </form>
             </motion.div>
@@ -496,7 +496,7 @@ export default function AppModals({
               className="relative w-full max-w-lg rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl"
             >
               <div className="mb-6 flex items-center justify-between">
-                <h3 className="text-xl font-bold">Mesai Düzenle</h3>
+                <h3 className="text-xl font-bold">Mesai Dï¿½zenle</h3>
                 <button onClick={() => setEditingOvertime(null)} className="rounded-full bg-zinc-900 p-2 text-zinc-500 hover:bg-zinc-800"><X size={20} /></button>
               </div>
               <form onSubmit={async (e) => {
@@ -509,7 +509,7 @@ export default function AppModals({
                   status: formData.get('status')
                 });
                 setEditingOvertime(null);
-                setStatus({ type: 'success', message: 'Mesai kaydý güncellendi' });
+                setStatus({ type: 'success', message: 'Mesai kaydï¿½ gï¿½ncellendi' });
               }} className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-zinc-500 uppercase">Tarih</label>
@@ -523,12 +523,12 @@ export default function AppModals({
                   <label className="text-xs font-semibold text-zinc-500 uppercase">Durum</label>
                   <select name="status" defaultValue={editingOvertime.status} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none appearance-none">
                     <option value="pending">Bekliyor</option>
-                    <option value="approved">Onaylandý</option>
+                    <option value="approved">Onaylandï¿½</option>
                     <option value="rejected">Reddedildi</option>
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Açýklama</label>
+                  <label className="text-xs font-semibold text-zinc-500 uppercase">Aï¿½ï¿½klama</label>
                   <textarea name="description" required defaultValue={editingOvertime.description} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none h-24 resize-none" />
                 </div>
                 <div className="flex gap-2">
@@ -540,13 +540,13 @@ export default function AppModals({
                         deleted: true,
                       }, { merge: true });
                       setEditingOvertime(null);
-                      setStatus({ type: 'success', message: 'Mesai kaydý silindi.' });
+                      setStatus({ type: 'success', message: 'Mesai kaydï¿½ silindi.' });
                     }}
                     className="flex-1 rounded-xl bg-red-500/10 py-3 font-bold text-red-500 transition-colors hover:bg-red-500/20"
                   >
                     Sil
                   </button>
-                  <button type="submit" className="flex-[2] rounded-xl bg-orange-500 py-3 font-bold text-white transition-colors hover:bg-orange-600">Güncelle</button>
+                  <button type="submit" className="flex-[2] rounded-xl bg-orange-500 py-3 font-bold text-white transition-colors hover:bg-orange-600">Gï¿½ncelle</button>
                 </div>
               </form>
             </motion.div>
@@ -567,23 +567,23 @@ export default function AppModals({
             >
               <div className="mb-6 flex items-center justify-between">
                 <h3 className="text-xl font-bold flex items-center gap-2">
-                  <Key size={24} className="text-orange-500" /> Þifreyi Deðiþtir
+                  <Key size={24} className="text-orange-500" /> ï¿½ifreyi Deï¿½iï¿½tir
                 </h3>
                 <button onClick={() => setShowPasswordChangeModal(false)} className="rounded-full bg-zinc-900 p-2 text-zinc-500 hover:bg-zinc-800"><X size={20} /></button>
               </div>
               <form onSubmit={handleSelfPasswordChange} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Yeni Þifre</label>
+                  <label className="text-xs font-semibold text-zinc-500 uppercase">Yeni ï¿½ifre</label>
                   <input 
                     type="password" 
                     required 
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Þifrenizi girin" 
+                    placeholder="ï¿½ifrenizi girin" 
                     className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" 
                   />
                 </div>
-                <button type="submit" className="w-full rounded-xl bg-orange-500 py-4 font-bold text-white transition-colors hover:bg-orange-600">Güncelle</button>
+                <button type="submit" className="w-full rounded-xl bg-orange-500 py-4 font-bold text-white transition-colors hover:bg-orange-600">Gï¿½ncelle</button>
               </form>
             </motion.div>
           </div>
@@ -621,7 +621,7 @@ export default function AppModals({
                   </div>
                   <div>
                     <p className="font-black text-white">{dashboardStatModal.title}</p>
-                    <p className="text-xs text-zinc-400">{dashboardStatModal.people.length} kiþi · Bugün</p>
+                    <p className="text-xs text-zinc-400">{dashboardStatModal.people.length} kiï¿½i ï¿½ Bugï¿½n</p>
                   </div>
                 </div>
                 <button onClick={() => setDashboardStatModal(null)} className="rounded-full bg-zinc-800/60 p-2 text-zinc-400 hover:bg-zinc-700">
@@ -681,7 +681,7 @@ export default function AppModals({
               </div>
               
               <div className="space-y-6 pt-4">
-                {/* Manuel Hareket Ekle: admin veya bu günün sahibinin yöneticisi */}
+                {/* Manuel Hareket Ekle: admin veya bu gï¿½nï¿½n sahibinin yï¿½neticisi */}
                 {(() => {
                   const dayUserId = selectedDayDetails.userId;
                   const dayUser = allUsers.find(u => u.uid === dayUserId);
@@ -707,11 +707,11 @@ export default function AppModals({
                 {/* Logs Section */}
                 <div className="space-y-3">
                   <h4 className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-2">
-                    <LogIn size={14} className="text-emerald-500" /> Giriþ-Çýkýþ Kayýtlarý
+                    <LogIn size={14} className="text-emerald-500" /> Giriï¿½-ï¿½ï¿½kï¿½ï¿½ Kayï¿½tlarï¿½
                   </h4>
                   <div className="space-y-2">
                     {logs.filter(l => l.userId === selectedDayDetails.userId && !l.deleted && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM-dd') === selectedDayDetails.date).length === 0 ? (
-                      <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gün için giriþ/çýkýþ kaydý yok.</p>
+                      <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gï¿½n iï¿½in giriï¿½/ï¿½ï¿½kï¿½ï¿½ kaydï¿½ yok.</p>
                     ) : (
                       logs.filter(l => l.userId === selectedDayDetails.userId && !l.deleted && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM-dd') === selectedDayDetails.date)
                         .sort((a,b) => a.timestamp.toDate() - b.timestamp.toDate())
@@ -741,8 +741,8 @@ export default function AppModals({
                               </p>
                               <p className="text-[10px] text-zinc-500 uppercase truncate">
                                 {log.status === 'error' ? log.errorMessage : 
-                                 log.status === 'pending' ? 'Yönetici onayý bekleniyor' :
-                                 (log.type === 'in' ? 'Giriþ' : 'Çýkýþ')}
+                                 log.status === 'pending' ? 'Yï¿½netici onayï¿½ bekleniyor' :
+                                 (log.type === 'in' ? 'Giriï¿½' : 'ï¿½ï¿½kï¿½ï¿½')}
                               </p>
                               <p className="text-[9px] text-zinc-600 font-mono truncate">{log.ipAddress}</p>
                             </div>
@@ -768,11 +768,11 @@ export default function AppModals({
                 {/* Overtime Section */}
                 <div className="space-y-3">
                   <h4 className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-2">
-                    <Clock size={14} className="text-blue-500" /> Mesai Kayýtlarý
+                    <Clock size={14} className="text-blue-500" /> Mesai Kayï¿½tlarï¿½
                   </h4>
                   <div className="space-y-2">
                     {overtimeRequests.filter(r => r.userId === selectedDayDetails.userId && r.date === selectedDayDetails.date).length === 0 ? (
-                      <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gün için mesai kaydý yok.</p>
+                      <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gï¿½n iï¿½in mesai kaydï¿½ yok.</p>
                     ) : (
                       overtimeRequests.filter(r => r.userId === selectedDayDetails.userId && r.date === selectedDayDetails.date).map(req => (
                         <div key={req.id} className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/40 border border-zinc-800">
@@ -818,16 +818,16 @@ export default function AppModals({
                       >
                         <div className="mb-4 flex justify-center text-red-500"><Trash2 size={32} /></div>
                         <h3 className="text-xl font-bold mb-2">Mesai Silinsin mi?</h3>
-                        <p className="text-sm text-zinc-500 mb-6">{deletingOvertime.date} tarihli {deletingOvertime.hours} saatlik mesai kaydý silinecektir.</p>
+                        <p className="text-sm text-zinc-500 mb-6">{deletingOvertime.date} tarihli {deletingOvertime.hours} saatlik mesai kaydï¿½ silinecektir.</p>
                         <div className="flex gap-3">
-                          <button onClick={() => setDeletingOvertime(null)} className="flex-1 rounded-xl bg-zinc-900 py-3 font-bold text-zinc-400">Vazgeç</button>
+                          <button onClick={() => setDeletingOvertime(null)} className="flex-1 rounded-xl bg-zinc-900 py-3 font-bold text-zinc-400">Vazgeï¿½</button>
                           <button 
                             onClick={async () => {
                               await setDoc(doc(db, 'overtimeRequests', deletingOvertime.id!), {
                                 deleted: true,
                               }, { merge: true });
                               setDeletingOvertime(null);
-                              setStatus({ type: 'success', message: 'Mesai kaydý silindi.' });
+                              setStatus({ type: 'success', message: 'Mesai kaydï¿½ silindi.' });
                             }} 
                             className="flex-1 rounded-xl bg-red-500 py-3 font-bold text-white"
                           >
@@ -842,11 +842,11 @@ export default function AppModals({
                 {/* Leave Section */}
                 <div className="space-y-3">
                   <h4 className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-2">
-                    <FileText size={14} className="text-orange-500" /> Ýzin Kayýtlarý
+                    <FileText size={14} className="text-orange-500" /> ï¿½zin Kayï¿½tlarï¿½
                   </h4>
                   <div className="space-y-2">
                     {leaveRequests.filter(r => r.userId === selectedDayDetails.userId && selectedDayDetails.date >= r.startDate && selectedDayDetails.date <= r.endDate).length === 0 ? (
-                      <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gün için izin kaydý yok.</p>
+                      <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gï¿½n iï¿½in izin kaydï¿½ yok.</p>
                     ) : (
                       leaveRequests.filter(r => r.userId === selectedDayDetails.userId && selectedDayDetails.date >= r.startDate && selectedDayDetails.date <= r.endDate).map(req => (
                         <div key={req.id} className="flex flex-col p-3 rounded-xl bg-zinc-900/40 border border-zinc-800 space-y-2">
@@ -856,7 +856,7 @@ export default function AppModals({
                                 <FileText size={14} />
                               </div>
                               <div>
-                                <p className="text-sm font-bold capitalize">{req.type === 'report' ? 'Rapor' : (req.type === 'excuse' ? 'Mazeret' : 'Yýllýk Ýzin')}</p>
+                                <p className="text-sm font-bold capitalize">{req.type === 'report' ? 'Rapor' : (req.type === 'excuse' ? 'Mazeret' : 'Yï¿½llï¿½k ï¿½zin')}</p>
                                 <p className={cn("text-[9px] font-bold uppercase", 
                                   req.status === 'approved' ? "text-emerald-500" : 
                                   req.status === 'pending' ? "text-orange-500" : "text-red-500"
@@ -876,7 +876,7 @@ export default function AppModals({
                               onClick={() => handleViewAttachment(req.attachmentUrl!)}
                               className="flex items-center gap-2 rounded-lg bg-zinc-950 p-2 text-[10px] font-bold text-emerald-400 hover:bg-zinc-900 transition-colors mt-2"
                             >
-                              <Download size={14} /> Rapor Belgesini Görüntüle
+                              <Download size={14} /> Rapor Belgesini Gï¿½rï¿½ntï¿½le
                             </button>
                           )}
                           <p className="text-[10px] text-zinc-500 italic">"{req.reason}"</p>
@@ -904,14 +904,14 @@ export default function AppModals({
             >
               <div className="mb-4 flex justify-center text-red-500"><Trash2 size={40} /></div>
               <h3 className="mb-2 text-xl font-bold">Talebi Sil</h3>
-              <p className="mb-4 text-sm text-zinc-500">Bu izin talebini silmek istediðinize emin misiniz? Personele silme nedeni bildirilecektir.</p>
+              <p className="mb-4 text-sm text-zinc-500">Bu izin talebini silmek istediï¿½inize emin misiniz? Personele silme nedeni bildirilecektir.</p>
               
               <div className="mb-6 space-y-1 text-left">
                 <label className="text-[10px] font-bold text-zinc-500 uppercase">Silme Nedeni (Zorunlu)</label>
                 <textarea 
                   value={deletionReason}
                   onChange={(e) => setDeletionReason(e.target.value)}
-                  placeholder="Ýptal edilme sebebi..."
+                  placeholder="ï¿½ptal edilme sebebi..."
                   className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2 text-sm focus:border-red-500 focus:outline-none h-20 resize-none"
                 />
               </div>
@@ -920,7 +920,7 @@ export default function AppModals({
                 <button onClick={() => {
                   setDeletingLeave(null);
                   setDeletionReason('');
-                }} className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-bold text-zinc-500">Vazgeç</button>
+                }} className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-bold text-zinc-500">Vazgeï¿½</button>
                 <button 
                   onClick={() => handleDeleteLeave(deletingLeave.id!, deletionReason)}
                   disabled={!deletionReason.trim()}
@@ -959,16 +959,16 @@ export default function AppModals({
                   <Trash2 size={32} />
                 </div>
               </div>
-              <h3 className="mb-2 text-xl font-bold text-white">Kaydý Sil</h3>
+              <h3 className="mb-2 text-xl font-bold text-white">Kaydï¿½ Sil</h3>
               <p className="mb-6 text-sm text-zinc-400">
-                Bu kayýt silinecek, emin misiniz? Bu iþlem geri alýnamaz.
+                Bu kayï¿½t silinecek, emin misiniz? Bu iï¿½lem geri alï¿½namaz.
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeletingLog(null)}
                   className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-bold text-zinc-400 transition-colors hover:bg-zinc-800"
                 >
-                  Vazgeç
+                  Vazgeï¿½
                 </button>
                 <button
                   onClick={() => deleteLog(deletingLog)}
@@ -995,18 +995,18 @@ export default function AppModals({
             >
               <div className="mb-4 flex justify-center text-red-500"><Trash2 size={40} /></div>
               <h3 className="mb-2 text-xl font-bold">Mesaiyi Sil</h3>
-              <p className="mb-6 text-sm text-zinc-500">Bu mesai kaydýný silmek istediðinize emin misiniz?</p>
+              <p className="mb-6 text-sm text-zinc-500">Bu mesai kaydï¿½nï¿½ silmek istediï¿½inize emin misiniz?</p>
               <div className="flex gap-3">
-                <button onClick={() => setDeletingOvertime(null)} className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-bold text-zinc-500">Vazgeç</button>
+                <button onClick={() => setDeletingOvertime(null)} className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-bold text-zinc-500">Vazgeï¿½</button>
                 <button onClick={async () => {
                   try {
                     await setDoc(doc(db, 'overtimeRequests', deletingOvertime.id!), {
                       deleted: true,
                     }, { merge: true });
                     setDeletingOvertime(null);
-                    setStatus({ type: 'success', message: 'Mesai kaydý silindi' });
+                    setStatus({ type: 'success', message: 'Mesai kaydï¿½ silindi' });
                   } catch (e) {
-                    setStatus({ type: 'error', message: 'Hata oluþtu' });
+                    setStatus({ type: 'error', message: 'Hata oluï¿½tu' });
                   }
                 }} className="flex-1 rounded-xl bg-red-600 py-3 text-sm font-bold text-white">Sil</button>
               </div>
@@ -1039,14 +1039,14 @@ export default function AppModals({
               </div>
               <h3 className="mb-2 text-xl font-bold text-white">Personeli Sil</h3>
               <p className="mb-6 text-sm text-zinc-400">
-                <strong>{deletingUser.name}</strong> isimli personeli silmek istediðinize emin misiniz? Bu iþlem personelin sisteme giriþini engelleyecektir.
+                <strong>{deletingUser.name}</strong> isimli personeli silmek istediï¿½inize emin misiniz? Bu iï¿½lem personelin sisteme giriï¿½ini engelleyecektir.
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeletingUser(null)}
                   className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-bold text-zinc-400 transition-colors hover:bg-zinc-800"
                 >
-                  Vazgeç
+                  Vazgeï¿½
                 </button>
                 <button
                   onClick={() => deleteUser(deletingUser.uid)}
@@ -1072,7 +1072,7 @@ export default function AppModals({
               >
                 <div className="flex items-center justify-between text-white">
                   <h2 className="text-xl font-bold flex items-center gap-2">
-                    <QrCode /> {scanType === 'in' ? 'Giriþ' : 'Çýkýþ'} Taramasý
+                    <QrCode /> {scanType === 'in' ? 'Giriï¿½' : 'ï¿½ï¿½kï¿½ï¿½'} Taramasï¿½
                   </h2>
                   <button 
                     onClick={() => setShowScanner(false)}
@@ -1085,7 +1085,7 @@ export default function AppModals({
                   onScanSuccess={handleScanSuccess} 
                   onScanError={(err) => {
                     // Only show fatal errors like permission denied
-                    if (err.includes("izni reddedildi") || err.includes("baþlatýlamadý")) {
+                    if (err.includes("izni reddedildi") || err.includes("baï¿½latï¿½lamadï¿½")) {
                       setStatus({ type: 'error', message: err });
                       setShowScanner(false);
                     }
@@ -1093,14 +1093,14 @@ export default function AppModals({
                 />
                 <div className="flex items-center gap-2 rounded-xl bg-orange-500/10 p-4 text-xs text-orange-500">
                   <Wifi size={16} />
-                  <span>Sadece iþ yeri Wi-Fi aðýna baðlýyken tarama yapabilirsiniz.</span>
+                  <span>Sadece iï¿½ yeri Wi-Fi aï¿½ï¿½na baï¿½lï¿½yken tarama yapabilirsiniz.</span>
                 </div>
               </motion.div>
             </div>
           )}
         </AnimatePresence>
 
-      {/* Nakliye / Uzaktan Giriþ Seçim Modal */}
+      {/* Nakliye / Uzaktan Giriï¿½ Seï¿½im Modal */}
       <AnimatePresence>
         {showRemoteModal && (
           <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4">
@@ -1111,15 +1111,15 @@ export default function AppModals({
               transition={{ type: 'spring', damping: 20 }}
               className="w-full max-w-md rounded-3xl border border-zinc-800 bg-zinc-950 overflow-hidden"
             >
-              {/* Baþlýk */}
+              {/* Baï¿½lï¿½k */}
               <div className="flex items-center gap-3 p-5 border-b border-zinc-800">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-500 shrink-0">
                   <Truck size={22} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-white">Giriþ Yöntemi</h3>
+                  <h3 className="font-bold text-white">Giriï¿½ Yï¿½ntemi</h3>
                   <p className="text-xs text-zinc-500">
-                    {pendingScanType === 'in' ? '?? Giriþ' : '?? Çýkýþ'} iþlemi — Bir yöntem seçin
+                    {pendingScanType === 'in' ? '?? Giriï¿½' : '?? ï¿½ï¿½kï¿½ï¿½'} iï¿½lemi ï¿½ Bir yï¿½ntem seï¿½in
                   </p>
                 </div>
                 <button onClick={() => { setShowRemoteModal(false); setRemoteManualMode(false); setRemoteNote(''); setRemoteManualTime(''); }} className="text-zinc-500 hover:text-white p-1">
@@ -1128,9 +1128,9 @@ export default function AppModals({
               </div>
 
               {!remoteManualMode ? (
-                /* === EKRAN 1: Yöntem Seçimi === */
+                /* === EKRAN 1: Yï¿½ntem Seï¿½imi === */
                 <div className="p-5 space-y-3">
-                  {/* QR Seçeneði */}
+                  {/* QR Seï¿½eneï¿½i */}
                   <button
                     onClick={() => {
                       if (pendingScanType) {
@@ -1146,13 +1146,13 @@ export default function AppModals({
                       <QrCode size={22} />
                     </div>
                     <div>
-                      <p className="font-bold text-white text-sm">QR Kod ile Giriþ</p>
-                      <p className="text-xs text-zinc-500 mt-0.5">Ýþ yerindeki QR kodu kameraya okutun</p>
+                      <p className="font-bold text-white text-sm">QR Kod ile Giriï¿½</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">ï¿½ï¿½ yerindeki QR kodu kameraya okutun</p>
                     </div>
                     <ChevronRight size={18} className="ml-auto text-zinc-600" />
                   </button>
 
-                  {/* Manuel Seçeneði */}
+                  {/* Manuel Seï¿½eneï¿½i */}
                   <button
                     onClick={() => {
                       setRemoteManualMode(true);
@@ -1164,26 +1164,26 @@ export default function AppModals({
                       <Clock size={22} />
                     </div>
                     <div>
-                      <p className="font-bold text-white text-sm">Manuel Giriþ</p>
-                      <p className="text-xs text-zinc-500 mt-0.5">Saati kendiniz girin (nakliye, saha çalýþmasý)</p>
+                      <p className="font-bold text-white text-sm">Manuel Giriï¿½</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">Saati kendiniz girin (nakliye, saha ï¿½alï¿½ï¿½masï¿½)</p>
                     </div>
                     <ChevronRight size={18} className="ml-auto text-zinc-600" />
                   </button>
 
                   <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 flex items-start gap-2">
                     <MapPin size={14} className="text-amber-400 shrink-0 mt-0.5" />
-                    <p className="text-xs text-amber-400">Her iki yöntemde de konumunuz ve notunuz yöneticinize iletilir.</p>
+                    <p className="text-xs text-amber-400">Her iki yï¿½ntemde de konumunuz ve notunuz yï¿½neticinize iletilir.</p>
                   </div>
                 </div>
               ) : (
-                /* === EKRAN 2: Manuel Giriþ Formu === */
+                /* === EKRAN 2: Manuel Giriï¿½ Formu === */
                 <div className="p-5 space-y-4">
                   <button onClick={() => setRemoteManualMode(false)} className="flex items-center gap-1 text-xs text-zinc-500 hover:text-white transition">
-                    <ChevronLeft size={14} /> Geri dön
+                    <ChevronLeft size={14} /> Geri dï¿½n
                   </button>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-400 uppercase">{pendingScanType === 'in' ? 'Giriþ Saati' : 'Çýkýþ Saati'}</label>
+                    <label className="text-xs font-semibold text-zinc-400 uppercase">{pendingScanType === 'in' ? 'Giriï¿½ Saati' : 'ï¿½ï¿½kï¿½ï¿½ Saati'}</label>
                     <input
                       type="time"
                       value={remoteManualTime}
@@ -1193,11 +1193,11 @@ export default function AppModals({
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-400 uppercase">Açýklama / Konum Notu</label>
+                    <label className="text-xs font-semibold text-zinc-400 uppercase">Aï¿½ï¿½klama / Konum Notu</label>
                     <textarea
                       value={remoteNote}
                       onChange={(e) => setRemoteNote(e.target.value)}
-                      placeholder="Örn: Ankara mal teslimi, þantiye çalýþmasý..."
+                      placeholder="ï¿½rn: Ankara mal teslimi, ï¿½antiye ï¿½alï¿½ï¿½masï¿½..."
                       rows={3}
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none resize-none"
                     />
@@ -1208,7 +1208,7 @@ export default function AppModals({
                       onClick={() => { setShowRemoteModal(false); setRemoteManualMode(false); setRemoteNote(''); }}
                       className="rounded-xl border border-zinc-700 py-3 text-sm font-bold text-zinc-400 hover:bg-zinc-800 transition"
                     >
-                      Ýptal
+                      ï¿½ptal
                     </button>
                     <button
                       disabled={remoteSubmitting || !remoteManualTime}
@@ -1216,7 +1216,7 @@ export default function AppModals({
                         if (!user || !profile || !pendingScanType || !remoteManualTime) return;
                         setRemoteSubmitting(true);
                         try {
-                          // Saat bilgisini bugüne uygula
+                          // Saat bilgisini bugï¿½ne uygula
                           const [h, m] = remoteManualTime.split(':').map(Number);
                           const clientNow = new Date();
                           clientNow.setHours(h, m, 0, 0);
@@ -1244,7 +1244,7 @@ export default function AppModals({
 
                           const newDocRef = await addDoc(collection(db, 'attendance'), {
                             ...logPayload,
-                            timestamp: clientNow, // Kullanýcýnýn girdiði saat
+                            timestamp: clientNow, // Kullanï¿½cï¿½nï¿½n girdiï¿½i saat
                           });
 
                           // Optimistik UI
@@ -1255,20 +1255,20 @@ export default function AppModals({
                           };
                           setLogs(prev => [optimisticLog, ...prev.filter(l => l.id !== newDocRef.id)]);
 
-                          // Bildirim gönder
+                          // Bildirim gï¿½nder
                           fetch('/api/notify/checkin', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('pdks_token') || '') },
                             body: JSON.stringify({ userId: user.uid, userName: profile.name, type: pendingScanType, isRemote: true, remoteNote: remoteNote || '' })
                           }).catch(() => {});
 
-                          setStatus({ type: 'success', message: `?? Manuel ${pendingScanType === 'in' ? 'giriþ' : 'çýkýþ'} talebi alýndý. Yönetici onayýndan sonra kesinleþecek.` });
+                          setStatus({ type: 'success', message: `?? Manuel ${pendingScanType === 'in' ? 'giriï¿½' : 'ï¿½ï¿½kï¿½ï¿½'} talebi alï¿½ndï¿½. Yï¿½netici onayï¿½ndan sonra kesinleï¿½ecek.` });
                           setShowRemoteModal(false);
                           setRemoteManualMode(false);
                           setRemoteNote('');
                           setRemoteManualTime('');
                         } catch (err) {
-                          setStatus({ type: 'error', message: 'Manuel kayýt sýrasýnda hata oluþtu.' });
+                          setStatus({ type: 'error', message: 'Manuel kayï¿½t sï¿½rasï¿½nda hata oluï¿½tu.' });
                         } finally {
                           setRemoteSubmitting(false);
                         }
@@ -1286,14 +1286,14 @@ export default function AppModals({
         )}
       </AnimatePresence>
 
-      {/* Belge Görüntüleyici Modal */}
-      {/* Belge Görüntüleyici Modal */}
+      {/* Belge Gï¿½rï¿½ntï¿½leyici Modal */}
+      {/* Belge Gï¿½rï¿½ntï¿½leyici Modal */}
       {viewingAttachment && (
         <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-black/90 p-4 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-4xl bg-zinc-900 rounded-2xl overflow-hidden flex flex-col border border-zinc-800 h-[80vh] shadow-2xl">
             <div className="flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-950">
               <h3 className="font-bold text-white flex items-center gap-2">
-                <FileText size={18} className="text-emerald-500"/> Belge Görüntüleyici
+                <FileText size={18} className="text-emerald-500"/> Belge Gï¿½rï¿½ntï¿½leyici
               </h3>
               <button onClick={() => setViewingAttachment(null)} className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition-colors">
                 <X size={20} />
@@ -1309,13 +1309,13 @@ export default function AppModals({
                   </div>
                   <h4 className="text-xl font-bold text-white">PDF Belgesi</h4>
                   <p className="text-sm text-zinc-400">
-                    Mobil cihazlarda (özellikle iOS) yerleþik PDF görüntüleyiciler tam uyumlu çalýþmayabilir. Belgeyi eksiksiz görüntülemek için lütfen cihazýnýza indirin veya açýn.
+                    Mobil cihazlarda (ï¿½zellikle iOS) yerleï¿½ik PDF gï¿½rï¿½ntï¿½leyiciler tam uyumlu ï¿½alï¿½ï¿½mayabilir. Belgeyi eksiksiz gï¿½rï¿½ntï¿½lemek iï¿½in lï¿½tfen cihazï¿½nï¿½za indirin veya aï¿½ï¿½n.
                   </p>
                   <button 
                     onClick={handleDownloadAndOpen}
                     className="mt-4 flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(239,68,68,0.3)]"
                   >
-                    <Download size={18} /> Belgeyi Aç / Ýndir
+                    <Download size={18} /> Belgeyi Aï¿½ / ï¿½ndir
                   </button>
                 </div>
               )}
@@ -1323,7 +1323,7 @@ export default function AppModals({
             {viewingAttachment.startsWith('data:image') && (
               <div className="p-4 bg-zinc-950 border-t border-zinc-800 flex justify-end gap-3">
                 <button onClick={handleDownloadAndOpen} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-                  <Download size={16} /> Cihaza Ýndir
+                  <Download size={16} /> Cihaza ï¿½ndir
                 </button>
               </div>
             )}
