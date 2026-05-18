@@ -172,7 +172,7 @@ export default function AppModals({
                       defaultValue={editingUser.role}
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                     >
-                      <option value="employee">Personel</option>
+                      <option value="personel">Personel</option>
                       <option value="admin">Y�netici</option>
                     </select>
                   </div>
@@ -181,11 +181,11 @@ export default function AppModals({
                     <select 
                       name="managerId"
                       required
-                      defaultValue={editingUser.managerId || 'admin_initial'}
+                      defaultValue={editingUser.managerId || 'superadmin'}
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                     >
-                      <option value="admin_initial">Sistem Y�neticisi</option>
-                      {allUsers.filter(u => u.role === 'admin' && u.uid !== 'admin_initial').map(admin => (
+                      <option value="superadmin">Sistem Y�neticisi</option>
+                      {allUsers.filter(u => u.role === 'admin' && u.uid !== 'superadmin').map(admin => (
                         <option key={admin.uid} value={admin.uid}>{admin.name}</option>
                       ))}
                     </select>

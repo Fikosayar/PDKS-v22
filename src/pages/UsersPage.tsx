@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Users, Plus, Edit, Trash2 } from 'lucide-react';
 import { Truck } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -50,15 +50,15 @@ export default function UsersPage({
             <div className="space-y-2">
               <label className="text-xs font-semibold text-zinc-500 uppercase">Yetki</label>
               <select name="role" className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none">
-                <option value="employee">Personel</option>
+                <option value="personel">Personel</option>
                 <option value="admin">Yönetici</option>
               </select>
             </div>
             <div className="space-y-2">
               <label className="text-xs font-semibold text-zinc-500 uppercase">Bağlı Olduğu Yönetici</label>
               <select name="managerId" required className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none">
-                <option value="admin_initial">Sistem Yöneticisi</option>
-                {allUsers.filter(u => u.role === 'admin' && u.uid !== 'admin_initial').map(admin => (
+                <option value="superadmin">Sistem Yöneticisi</option>
+                {allUsers.filter(u => u.role === 'admin' && u.uid !== 'superadmin').map(admin => (
                   <option key={admin.uid} value={admin.uid}>{admin.name}</option>
                 ))}
               </select>

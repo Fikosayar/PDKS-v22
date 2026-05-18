@@ -739,7 +739,7 @@ export default function App() {
     const title = formData.get('title') as string;
     const personnelId = formData.get('personnelId') as string;
     const password = formData.get('password') as string;
-    const role = formData.get('role') as 'admin' | 'employee';
+    const role = formData.get('role') as 'admin' | 'personel';
     const managerId = formData.get('managerId') as string;
     const leaveBalance = parseInt(formData.get('leaveBalance') as string) || 14;
     const startDate = formData.get('startDate') as string;
@@ -1272,7 +1272,7 @@ export default function App() {
 
       const targetUser = allUsers.find(u => u.uid === userId);
       // managerId yoksa admin'e ynlendir (personele manager atanmam olabilir)
-      const effectiveManagerId = targetUser?.managerId || 'admin_initial';
+      const effectiveManagerId = targetUser?.managerId || 'superadmin';
 
       // Calculate hours from standard shift end
       const exitTime = timestamp.getTime();
@@ -1347,7 +1347,7 @@ export default function App() {
       await leaveMutation.mutateAsync({
         method: 'POST', payload: {
           userName: profile.name,
-          managerId: profile.managerId || 'admin_initial',
+          managerId: profile.managerId || 'superadmin',
           startDate, endDate, days, reason,
           type: leaveType,
           attachmentUrl,
@@ -1362,7 +1362,7 @@ export default function App() {
           userId: user.uid,
           userName: profile.name,
           requestType: 'leave',
-          managerId: profile.managerId || 'admin_initial'
+          managerId: profile.managerId || 'superadmin'
         })
       }).catch(() => { });
       setStatus({ type: 'success', message: leaveType === 'report' ? 'Raporunuz iletildi.' : 'Izin talebiniz iletildi.' });
@@ -1423,7 +1423,7 @@ export default function App() {
     }
 
     try {
-      await overtimeMutation.mutateAsync({ method: 'POST', payload: { userName: profile.name, managerId: profile.managerId || 'admin_initial', date, hours, description, status: 'pending' } });
+      await overtimeMutation.mutateAsync({ method: 'POST', payload: { userName: profile.name, managerId: profile.managerId || 'superadmin', date, hours, description, status: 'pending' } });
       // Yöneticiye push bildirimi gönder
       fetch('/api/notify/newrequest', {
         method: 'POST',
@@ -1432,7 +1432,7 @@ export default function App() {
           userId: user.uid,
           userName: profile.name,
           requestType: 'overtime',
-          managerId: profile.managerId || 'admin_initial'
+          managerId: profile.managerId || 'superadmin'
         })
       }).catch(() => { });
       setStatus({ type: 'success', message: 'Fazla mesai talebiniz iletildi.' });
@@ -1543,7 +1543,7 @@ export default function App() {
     const name = formData.get('name') as string;
     const title = formData.get('title') as string;
     const password = formData.get('password') as string;
-    const role = formData.get('role') as 'admin' | 'employee';
+    const role = formData.get('role') as 'admin' | 'personel';
     const managerId = formData.get('managerId') as string;
     const leaveBalance = parseInt(formData.get('leaveBalance') as string);
     const startDate = formData.get('startDate') as string;
@@ -2853,7 +2853,7 @@ export default function App() {
                       name="role"
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                     >
-                      <option value="employee">Personel</option>
+                      <option value="personel">Personel</option>
                       <option value="admin">Yönetici</option>
                     </select>
                   </div>
@@ -2864,8 +2864,8 @@ export default function App() {
                       required
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                     >
-                      <option value="admin_initial">Sistem Yöneticisi</option>
-                      {allUsers.filter(u => u.role === 'admin' && u.uid !== 'admin_initial').map(admin => (
+                      <option value="superadmin">Sistem Yöneticisi</option>
+                      {allUsers.filter(u => u.role === 'admin' && u.uid !== 'superadmin').map(admin => (
                         <option key={admin.uid} value={admin.uid}>{admin.name}</option>
                       ))}
                     </select>
@@ -3607,7 +3607,7 @@ export default function App() {
                       defaultValue={editingUser.role}
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                     >
-                      <option value="employee">Personel</option>
+                      <option value="personel">Personel</option>
                       <option value="admin">Yönetici</option>
                     </select>
                   </div>
@@ -3616,11 +3616,11 @@ export default function App() {
                     <select
                       name="managerId"
                       required
-                      defaultValue={editingUser.managerId || 'admin_initial'}
+                      defaultValue={editingUser.managerId || 'superadmin'}
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                     >
-                      <option value="admin_initial">Sistem Yöneticisi</option>
-                      {allUsers.filter(u => u.role === 'admin' && u.uid !== 'admin_initial').map(admin => (
+                      <option value="superadmin">Sistem Yöneticisi</option>
+                      {allUsers.filter(u => u.role === 'admin' && u.uid !== 'superadmin').map(admin => (
                         <option key={admin.uid} value={admin.uid}>{admin.name}</option>
                       ))}
                     </select>
