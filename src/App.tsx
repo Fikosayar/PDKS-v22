@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -10,13 +10,13 @@ import { subscribeToPush, requestNotificationPermission, showLocalNotification, 
 import { addToOfflineQueue, getOfflineQueue, removeFromOfflineQueue } from './lib/offlineQueue';
 import { cn } from './lib/utils';
 import { useProfile, useUsers, useLogs, useSettings, useNotifications, useLeaveRequests, useOvertimeRequests, useAttendanceMutation, useSettingsMutation, useLeaveMutation, useOvertimeMutation, useUserMutation } from './api/hooks';
-import { 
-  LogOut, 
-  LogIn, 
-  User as UserIcon, 
-  Calendar, 
-  MapPin, 
-  Shield, 
+import {
+  LogOut,
+  LogIn,
+  User as UserIcon,
+  Calendar,
+  MapPin,
+  Shield,
   Settings as SettingsIcon,
   CheckCircle2,
   XCircle,
@@ -110,17 +110,17 @@ export default function App() {
     if (qNotifs) setNotifications(qNotifs);
     if (qLeaves) setLeaveRequests(qLeaves);
     if (qOvertime) setOvertimeRequests(qOvertime);
-    
+
     if (!isProfileLoading && user) setLoading(false);
   }, [qProfile, qUsers, qLogs, qSettings, qNotifs, qLeaves, qOvertime, isProfileLoading, user]);
 
   const [showScanner, setShowScanner] = useState(false);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const activeTab = location.pathname === '/' || location.pathname === '' ? 'home' : location.pathname.substring(1);
   const setActiveTab = (tab: string) => navigate(`/${tab}`);
-  
+
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [selectedPersonnelId, setSelectedPersonnelId] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
@@ -132,7 +132,7 @@ export default function App() {
   const [manualLogType, setManualLogType] = useState<'in' | 'out'>('in');
   const [scanType, setScanType] = useState<'in' | 'out' | null>(null);
   const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
-  
+
   // Status mesajlar otomatik kaybolsun
   useEffect(() => {
     if (!status) return;
@@ -234,18 +234,18 @@ export default function App() {
   const getOrCreateDeviceId = () => {
     // 1. nce LocalStorage'a bak
     let devId = localStorage.getItem('pdks_device_id');
-    
+
     // 2. Yoksa erezlere (Cookie) bak (Safari bazen localStorage siler ama erezi tutar)
     if (!devId) {
       const match = document.cookie.match(new RegExp('(^| )pdks_device_id=([^;]+)'));
       if (match) devId = match[2];
     }
-    
+
     // 3. İkisinde de yoksa sıfırdan oluştur
     if (!devId) {
       devId = 'dev-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     }
-    
+
     // Her ihtimale kar ikisine birden tekrar glce kaydet
     try {
       localStorage.setItem('pdks_device_id', devId);
@@ -254,7 +254,7 @@ export default function App() {
     } catch (e) {
       console.warn("Tarayc veri kaydetmeyi engelliyor.");
     }
-    
+
     return devId;
   };
 
@@ -263,10 +263,10 @@ export default function App() {
     try {
       const start = new Date(startDateStr);
       const today = new Date();
-      
+
       // Basic year difference
       let years = today.getFullYear() - start.getFullYear();
-      
+
       // Month and day adjustment
       const m = today.getMonth() - start.getMonth();
       if (m < 0 || (m === 0 && today.getDate() < start.getDate())) {
@@ -318,7 +318,7 @@ export default function App() {
       format(l.timestamp.toDate(), 'yyyy-MM-dd') === todayStr
     );
 
-    // Her personel iin bugünkü en son durumu belirle (son log out mu in mi?)
+    // Her personel için bugünkü en son durumu belirle (son log out mu in mi?)
     const userLastAction = new Map<string, string>(); // userId -> 'in' | 'out'
     const userFirstIn = new Map<string, string>();     // userId -> 'HH:mm' (ilk giriş saati)
 
@@ -395,9 +395,9 @@ export default function App() {
     const shiftStart = settings?.shiftStart || '08:00';
     const [year, month] = selectedMonth.split('-');
     let lateCount = 0;
-    
+
     const userLogs = logs.filter(l => l.userId === user.uid && !l.deleted && l.type === 'in');
-    
+
     // Her günün sadece ilk girişini kontrol et
     const firstInsPerDay = new Map<string, string>(); // date -> time
     userLogs.forEach(l => {
@@ -446,11 +446,11 @@ export default function App() {
           const dateStr = current.toISOString().slice(0, 10);
           // Pazar her zaman tatil
           const isSunday = dayOfWeek === 0;
-          // 5 günlük Calisma düzeninde Cumartesi de tatil
+          // 5 günlük Çalışma düzeninde Cumartesi de tatil
           const isSaturday = dayOfWeek === 6 && workDays === 5;
           // Resmi tatil kontrol
           const isPublicHoliday = !!getHoliday(dateStr);
-          
+
           if (!isSunday && !isSaturday && !isPublicHoliday) {
             count++;
           }
@@ -467,10 +467,10 @@ export default function App() {
     if (overtimeStartTime && overtimeEndTime) {
       const [startH, startM] = overtimeStartTime.split(':').map(Number);
       const [endH, endM] = overtimeEndTime.split(':').map(Number);
-      
+
       let diffMinutes = (endH * 60 + endM) - (startH * 60 + startM);
       if (diffMinutes < 0) diffMinutes += 24 * 60; // Handle overnight overtime
-      
+
       setCalcOvertimeHours(parseFloat((diffMinutes / 60).toFixed(1)));
     }
   }, [overtimeStartTime, overtimeEndTime]);
@@ -517,10 +517,10 @@ export default function App() {
 
   // Settings listener
   // [Migrated to React Query] Firebase listener removed
-   // Logs listener  Admin: tm veriler | Personel/Manager: kendi verisi
+  // Logs listener  Admin: tm veriler | Personel/Manager: kendi verisi
   // [Migrated to React Query] Firebase listener removed
 
-  // Ekip logs listener  Sadece yoneticiler iin (altndaki personelin hareketleri)
+  // Ekip logs listener  Sadece yoneticiler için (altndaki personelin hareketleri)
   // [Migrated to React Query] Firebase listener removed
 
   // Users listener (Admin and Managers)
@@ -601,21 +601,23 @@ export default function App() {
     if (!user || !profile) return;
     const queue = await getOfflineQueue();
     if (queue.length === 0) return;
-    
+
     let syncedCount = 0;
     for (const item of queue) {
       try {
         const { clientTimestamp, ...payload } = item.payload;
-        await attendanceMutation.mutateAsync({ method: 'POST', payload: {
-          ...payload,
-          timestamp: new Date().toISOString(),
-          offlineQueued: true,
-          clientTimestamp
-        } });
+        await attendanceMutation.mutateAsync({
+          method: 'POST', payload: {
+            ...payload,
+            timestamp: new Date().toISOString(),
+            offlineQueued: true,
+            clientTimestamp
+          }
+        });
         await removeFromOfflineQueue(item.id);
         syncedCount++;
       } catch (err) {
-        console.error('evrimd Kayıt senkronize edilemedi:', err);
+        console.error('evrimd kayt senkronize edilemedi:', err);
       }
     }
     if (syncedCount > 0) {
@@ -642,8 +644,8 @@ export default function App() {
       const response = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          personnelId, 
+        body: JSON.stringify({
+          personnelId,
           password,
           deviceInfo: navigator.userAgent,
           permanentDeviceId: getOrCreateDeviceId()
@@ -680,7 +682,7 @@ export default function App() {
                 <p className="text-[10px] text-zinc-500 uppercase font-bold">Mevcut Cihazınız:</p>
                 <div className="relative">
                   <p className="text-[11px] text-zinc-300 bg-zinc-900 p-2 rounded border border-zinc-800 break-all font-mono pr-8">{data.currentDevice}</p>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => {
                       navigator.clipboard.writeText(data.currentDevice);
@@ -705,7 +707,7 @@ export default function App() {
             </div>
           );
         } else {
-          setLoginError(data.error || 'Giriş baarsz.');
+          setLoginError(data.error || 'Giriş başarısız.');
         }
       }
     } catch (error: any) {
@@ -714,8 +716,8 @@ export default function App() {
         <div className="flex flex-col items-center gap-2 justify-center text-center p-2">
           <AlertCircle size={20} className="text-red-500" />
           <div className="space-y-1">
-            <p className="font-bold">Giriş Hatas</p>
-            <p className="text-[10px] opacity-80">{error?.message || 'Sistem hatas. Lütfen internet Bağlantınz kontrol edin.'}</p>
+            <p className="font-bold">Giriş Hatası</p>
+            <p className="text-[10px] opacity-80">{error?.message || 'Sistem hatası. Lütfen internet Bağlantınz kontrol edin.'}</p>
           </div>
         </div>
       );
@@ -750,7 +752,7 @@ export default function App() {
       const response = await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           adminUid: profile.uid,
           newUser: { name, title, personnelId, password, role, managerId, leaveBalance, startDate, birthDate, allowedDevice, deviceId, canRemoteCheckIn }
         })
@@ -759,13 +761,13 @@ export default function App() {
       const data = await response.json();
 
       if (response.ok) {
-        setStatus({ type: 'success', message: 'Yeni personel başarııla eklendii.' });
+        setStatus({ type: 'success', message: 'Yeni personel başarııla eklendi.' });
         (e.target as HTMLFormElement).reset();
       } else {
         setStatus({ type: 'error', message: data.error || 'Personel eklenirken hata oluştu.' });
       }
     } catch (error) {
-      setStatus({ type: 'error', message: 'Sistem hatas.' });
+      setStatus({ type: 'error', message: 'Sistem hatası.' });
     }
   };
 
@@ -779,7 +781,7 @@ export default function App() {
     const qrSvg = qrElement.outerHTML;
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
-    
+
     printWindow.document.write(`
       <html>
         <head>
@@ -794,7 +796,7 @@ export default function App() {
         </head>
         <body>
           <div class="container">
-            <h1>PDKS Giriş/k QR Kodu</h1>
+            <h1>PDKS Giriş/Çıkış QR Kodu</h1>
             ${qrSvg}
             <p>Lütfen giriş ve klarda bu kodu okutunuz.</p>
           </div>
@@ -829,8 +831,8 @@ export default function App() {
 
   const handleScanSuccess = async (decodedText: string) => {
     if (!settings || !user || !profile || !scanType || isProcessingScan.current) return;
-    
-    // Mkerrer okutma korumas: Son 1 dakika iinde ayn ilem yapldysa engelle
+
+    // Mkerrer okutma korumas: Son 1 dakika iinde ayn işlem yapldysa engelle
     const now = Date.now();
     if (now - lastScanTimestamp.current < SCAN_COOLDOWN_MS) {
       const kalanSaniye = Math.ceil((SCAN_COOLDOWN_MS - (now - lastScanTimestamp.current)) / 1000);
@@ -838,41 +840,45 @@ export default function App() {
       setShowScanner(false);
       return;
     }
-    
+
     isProcessingScan.current = true;
     // Scanner' hemen kapat ki ift okutma olmasn
     setShowScanner(false);
-    
+
     try {
       // 1. QR Secret Check
       if (decodedText !== settings.qrSecret) {
-        await attendanceMutation.mutateAsync({ method: 'POST', payload: {
-          userId: user.uid,
-          userName: profile.name,
-          timestamp: new Date().toISOString(),
-          type: scanType,
-          ipAddress: currentIp,
-          status: 'error',
-          errorMessage: 'Geçersiz QR Kod Okutuldu'
-        } });
+        await attendanceMutation.mutateAsync({
+          method: 'POST', payload: {
+            userId: user.uid,
+            userName: profile.name,
+            timestamp: new Date().toISOString(),
+            type: scanType,
+            ipAddress: currentIp,
+            status: 'error',
+            errorMessage: 'Geçersiz QR Kod Okutuldu'
+          }
+        });
         setStatus({ type: 'error', message: 'Geçersiz QR kod. Lütfen i yerindeki güncel kodu okutun.' });
         isProcessingScan.current = false;
         return;
       }
 
-      // 2. IP Check (Nakliye yetkisi olan personel iin IP kontrol atla)
+      // 2. IP Check (Nakliye yetkisi olan personel için IP kontrol atla)
       const hasRemotePermission = profile.canRemoteCheckIn === true;
       if (settings.officeIp && currentIp !== settings.officeIp && !hasRemotePermission) {
-        await attendanceMutation.mutateAsync({ method: 'POST', payload: {
-          userId: user.uid,
-          userName: profile.name,
-          timestamp: new Date().toISOString(),
-          type: scanType,
-          ipAddress: currentIp,
-          status: 'error',
-          errorMessage: 'Hatalı IP / Ağ Erişimi Denemesi'
-        } });
-        setStatus({ type: 'error', message: `Hatal a. Sadece i yeri Wi-Fi ana balyken ilem yapabilirsiniz. (Mevcut IP: ${currentIp})` });
+        await attendanceMutation.mutateAsync({
+          method: 'POST', payload: {
+            userId: user.uid,
+            userName: profile.name,
+            timestamp: new Date().toISOString(),
+            type: scanType,
+            ipAddress: currentIp,
+            status: 'error',
+            errorMessage: 'Hatalı IP / Ağ Erişimi Denemesi'
+          }
+        });
+        setStatus({ type: 'error', message: `Hatal a. Sadece i yeri Wi-Fi ana balyken işlem yapabilirsiniz. (Mevcut IP: ${currentIp})` });
         isProcessingScan.current = false;
         return;
       }
@@ -916,14 +922,16 @@ export default function App() {
         await addToOfflineQueue(queueItem);
         const newCount = (await getOfflineQueue()).length;
         setOfflineQueueCount(newCount);
-        setStatus({ type: 'success', message: `?? nternetsiz mod: ${scanType === 'in' ? 'Giriş' : 'k'} kaydedildi, internet gelince senkronize edilecek.` });
+        setStatus({ type: 'success', message: `?? nternetsiz mod: ${scanType === 'in' ? 'Giriş' : 'Çıkış'} kaydedildi, internet gelince senkronize edilecek.` });
       } else {
         const clientNow = new Date();
         // Firestore'a yaz
-        const newDocRef = await attendanceMutation.mutateAsync({ method: 'POST', payload: {
-          ...logpayload,
-          timestamp: new Date().toISOString(),
-        } });
+        const newDocRef = await attendanceMutation.mutateAsync({
+          method: 'POST', payload: {
+            ...logpayload,
+            timestamp: new Date().toISOString(),
+          }
+        });
 
         // OPTMSTK UI: Snapshot beklemeden annda state'e ekle
         const optimisticLog: AttendanceLog = {
@@ -938,7 +946,7 @@ export default function App() {
           await checkAndCreateAutoOvertime(user.uid, profile.name, clientNow, 'out');
         }
 
-        // YöneticiyİşişİŞE GİRİŞşş bildirimi gönder
+        // Yöneticiye giriş bildirimi gönder
         fetch('/api/notify/checkin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -949,9 +957,9 @@ export default function App() {
             isRemote: !!isRemote,
             remoteNote: remoteNote || ''
           })
-        }).catch(() => {});
+        }).catch(() => { });
 
-        setStatus({ type: 'success', message: `${isRemote ? '?? Nakliye: ' : ''}${scanType === 'in' ? 'Giriş' : 'k'} ileminiz başarııla kaydedildi.` });
+        setStatus({ type: 'success', message: `${isRemote ? '?? Nakliye: ' : ''}${scanType === 'in' ? 'Giriş' : 'Çıkış'} ileminiz başarııla kaydedildi.` });
       }
 
 
@@ -971,14 +979,14 @@ export default function App() {
   const updateSettings = async (e: any) => {
     e.preventDefault();
     if (profile?.role !== 'admin') return;
-    
+
     const formData = new FormData(e.currentTarget);
     const breakRules: { thresholdHours: number, deductionMinutes: number }[] = [];
-    
+
     // Extract rules from numbered inputs
     const thresholds = formData.getAll('rule_threshold');
     const deductions = formData.getAll('rule_deduction');
-    
+
     thresholds.forEach((t, i) => {
       const thresholdVal = parseFloat(t as string);
       const deductionVal = parseInt(deductions[i] as string);
@@ -1016,39 +1024,39 @@ export default function App() {
     const [year, month] = monthStr.split('-').map(Number);
     const lastDay = new Date(year, month, 0).getDate();
     const today = new Date();
-    
+
     const dayData: any[] = [];
-    
+
     for (let d = 1; d <= lastDay; d++) {
       const date = new Date(year, month - 1, d);
       const dateStr = format(date, 'yyyy-MM-dd');
-      
+
       if (date > today) continue;
 
-      const dayLogs = logs.filter(l => 
-        l.userId === personnelUid && 
-        !l.deleted && 
+      const dayLogs = logs.filter(l =>
+        l.userId === personnelUid &&
+        !l.deleted &&
         l.status !== 'error' &&
-        l.timestamp?.toDate && 
+        l.timestamp?.toDate &&
         format(l.timestamp.toDate(), 'yyyy-MM-dd') === dateStr
-      ).sort((a,b) => a.timestamp.toDate().getTime() - b.timestamp.toDate().getTime());
+      ).sort((a, b) => a.timestamp.toDate().getTime() - b.timestamp.toDate().getTime());
 
       if (dayLogs.length === 0) {
-        const leave = leaveRequests.find(r => 
-          r.userId === personnelUid && 
-          !r.deleted && 
-          r.status === 'approved' && 
-          dateStr >= r.startDate && 
+        const leave = leaveRequests.find(r =>
+          r.userId === personnelUid &&
+          !r.deleted &&
+          r.status === 'approved' &&
+          dateStr >= r.startDate &&
           dateStr <= r.endDate
         );
-        
+
         dayData.push({
           'Tarih': format(date, 'd MMM yyyy, EEE', { locale: tr }),
           'Giriş': leave ? leave.type.toUpperCase() : 'HAREKET YOK',
           'k': '-',
           'Brt Sre (Saat)': '0',
           'Mola (Saat)': '0',
-          'Net Calisma (Saat)': '0',
+          'Net Çalışma (Saat)': '0',
           'Fazla Mesai (Saat)': '0',
           'Hafta Tatili Mesaisi (Saat)': '0'
         });
@@ -1058,7 +1066,7 @@ export default function App() {
       // First In / Last Out
       let entry = dayLogs.find(l => l.type === 'in')?.timestamp.toDate() || dayLogs[0].timestamp.toDate();
       let exit = [...dayLogs].reverse().find(l => l.type === 'out')?.timestamp.toDate() || dayLogs[dayLogs.length - 1].timestamp.toDate();
-      
+
       // SHIFT CONFIG
       const [sHour, sMin] = (settings.shiftStart || '09:00').split(':').map(Number);
       const [eHour, eMin] = (settings.shiftEnd || '18:00').split(':').map(Number);
@@ -1074,7 +1082,7 @@ export default function App() {
       if (entry > stdStart && (entry.getTime() - stdStart.getTime()) <= thresholdMs) {
         entry = new Date(stdStart);
       }
-      
+
       // Exit Adjustment:
       // 1. If they leave LATE but within threshold, round DOWN to shiftEnd (Favor Company - Overtime Prevention)
       if (exit > stdEnd && (exit.getTime() - stdEnd.getTime()) <= thresholdMs) {
@@ -1084,7 +1092,7 @@ export default function App() {
       if (exit < stdEnd && (stdEnd.getTime() - exit.getTime()) <= thresholdMs) {
         exit = new Date(stdEnd);
       }
-      
+
       const rawDuration = Math.max(0, (exit.getTime() - entry.getTime()) / (1000 * 60 * 60));
       const breakTime = getDeductedBreakTime(rawDuration);
       const netDuration = Math.max(0, rawDuration - breakTime);
@@ -1097,8 +1105,8 @@ export default function App() {
         weekendWork = netDuration;
       } else {
         if (exit.getTime() > stdEnd.getTime()) {
-           const otStart = Math.max(entry.getTime(), stdEnd.getTime());
-           overtime += (exit.getTime() - otStart) / (1000 * 60 * 60);
+          const otStart = Math.max(entry.getTime(), stdEnd.getTime());
+          overtime += (exit.getTime() - otStart) / (1000 * 60 * 60);
         }
       }
 
@@ -1110,7 +1118,7 @@ export default function App() {
         'k': format(exit, 'HH:mm') + (format(exit, 'yyyy-MM-dd') !== dateStr ? ` (+1)` : ''),
         'Brt Sre (Saat)': rawDuration.toFixed(2),
         'Mola (Saat)': breakTime.toFixed(2),
-        'Net Calisma (Saat)': normalWork.toFixed(2),
+        'Net Çalışma (Saat)': normalWork.toFixed(2),
         'Fazla Mesai (Saat)': overtime.toFixed(2),
         'Hafta Tatili Mesaisi (Saat)': weekendWork.toFixed(2)
       });
@@ -1126,19 +1134,19 @@ export default function App() {
     e.preventDefault();
     // TargetId: ak modaldan, seili personelden veya mevcut log'dan al
     const targetId = selectedDayDetails?.userId || selectedPersonnelId || editingLog?.userId || user?.uid;
-    
 
-    
+
+
     if (!targetId || !profile) {
       setStatus({ type: 'error', message: 'Hedef kullanc veya profil bilgisi eksik.' });
       return;
     }
 
     // Hedef kullancy bul: allUsers'da, kendi profilinde veya log'daki userName ile
-    const targetUser: UserProfile | null = 
-      allUsers.find(u => u.uid === targetId) || 
+    const targetUser: UserProfile | null =
+      allUsers.find(u => u.uid === targetId) ||
       (profile.uid === targetId ? profile : null);
-    
+
     if (!targetUser) {
       setStatus({ type: 'error', message: 'Kullanc bulunamad. Lütfen sayfay yenileyip tekrar deneyin.' });
       return;
@@ -1151,7 +1159,7 @@ export default function App() {
     const isSystemAdmin = profile.role === 'admin';
     const isManagerOf = targetUser.managerId === profile.uid;
     const isSelf = profile.uid === targetId;
-    
+
     const isAuthorized = isSystemAdmin || isManagerOf || isSelf;
 
     if (!isAuthorized) {
@@ -1172,38 +1180,42 @@ export default function App() {
 
       if (editingLog?.id) {
         // Mevcut kayd güncelle
-        await attendanceMutation.mutateAsync({ method: 'PUT', id: editingLog.id, payload: {
-          timestamp: timestamp,
-          type: manualLogType,
-          ipAddress: auditInfo,
-          status: newStatus,
-          ...(isAdminOrManager ? { manualEntry: true, isRemote: false, remoteNote: null } : {}),
-        } });
-        setStatus({ type: 'success', message: 'Kayıt güncellendi.' });
+        await attendanceMutation.mutateAsync({
+          method: 'PUT', id: editingLog.id, payload: {
+            timestamp: timestamp,
+            type: manualLogType,
+            ipAddress: auditInfo,
+            status: newStatus,
+            ...(isAdminOrManager ? { manualEntry: true, isRemote: false, remoteNote: null } : {}),
+          }
+        });
+        setStatus({ type: 'success', message: 'Kayt güncellendi.' });
       } else {
-        // Yeni Kayıt ekle
-        await attendanceMutation.mutateAsync({ method: 'POST', payload: {
-          userId: targetId,
-          userName: targetUser.name,
-          timestamp: timestamp,
-          type: manualLogType,
-          ipAddress: auditInfo,
-          status: newStatus,
-          manualEntry: true,
-          isRemote: !isAdminOrManager,
-          ...(isAdminOrManager ? {} : { remoteNote: 'Gemi Kayıt (Onay Bekliyor)' }),
-        } });
-        setStatus({ type: 'success', message: isAdminOrManager ? 'Kayıt eklendii.' : 'Kayıt eklendii, yonetici onay bekleniyor.' });
-        
+        // Yeni kayt ekle
+        await attendanceMutation.mutateAsync({
+          method: 'POST', payload: {
+            userId: targetId,
+            userName: targetUser.name,
+            timestamp: timestamp,
+            type: manualLogType,
+            ipAddress: auditInfo,
+            status: newStatus,
+            manualEntry: true,
+            isRemote: !isAdminOrManager,
+            ...(isAdminOrManager ? {} : { remoteNote: 'Gemi Kayt (Onay Bekliyor)' }),
+          }
+        });
+        setStatus({ type: 'success', message: isAdminOrManager ? 'Kayt eklendi.' : 'Kayt eklendi, yonetici onay bekleniyor.' });
+
         if (!isAdminOrManager) {
           fetch('/api/notify/checkin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: user.uid, userName: profile.name, type: manualLogType, isRemote: true, remoteNote: 'Gemi Manuel Kayıt Eklendi' })
-          }).catch(() => {});
+            body: JSON.stringify({ userId: user.uid, userName: profile.name, type: manualLogType, isRemote: true, remoteNote: 'Gemi Manuel Kayt Eklendi' })
+          }).catch(() => { });
         }
       }
-      
+
       // k ise otomatik mesai kontrol
       if (manualLogType === 'out') {
         await checkAndCreateAutoOvertime(targetId, targetUser.name, timestamp, 'out');
@@ -1213,7 +1225,7 @@ export default function App() {
       setEditingLog(null);
     } catch (error: any) {
       console.error('Manual log error:', error);
-      setStatus({ type: 'error', message: `Kayıt baarsz: ${error?.message || error?.code || 'Bilinmeyen hata'}` });
+      setStatus({ type: 'error', message: `Kayt başarısız: ${error?.message || error?.code || 'Bilinmeyen hata'}` });
     }
   };
 
@@ -1226,16 +1238,16 @@ export default function App() {
       });
 
       if (response.ok) {
-        setStatus({ type: 'success', message: 'Kayıt başarııla silindii.' });
+        setStatus({ type: 'success', message: 'Kayt başarııla silindi.' });
         setDeletingLog(null);
         setShowManualLogModal(false);
       } else {
         const data = await response.json();
-        setStatus({ type: 'error', message: data.error || 'Kayıt silinirken hata oluştu.' });
+        setStatus({ type: 'error', message: data.error || 'Kayt silinirken hata oluştu.' });
       }
     } catch (error) {
       console.error("Delete log error:", error);
-      setStatus({ type: 'error', message: 'Kayıt silinirken sistem hatas oluştu.' });
+      setStatus({ type: 'error', message: 'Kayt silinirken Sistem hatası oluştu.' });
     }
   };
 
@@ -1244,7 +1256,7 @@ export default function App() {
 
     const [eHour, eMin] = (settings.shiftEnd || '18:00').split(':').map(Number);
     const threshold = settings.roundingThresholdMinutes || 30;
-    
+
     const stdEndTime = new Date(timestamp);
     stdEndTime.setHours(eHour, eMin, 0, 0);
 
@@ -1253,7 +1265,7 @@ export default function App() {
 
     if (timestamp.getTime() > overtimeThresholdTime) {
       const dateStr = format(timestamp, 'yyyy-MM-dd');
-      
+
       // Check if an overtime request alıready exists for this date
       const existing = overtimeRequests.find(r => r.userId === userId && r.date === dateStr);
       if (existing) return;
@@ -1278,9 +1290,9 @@ export default function App() {
 
   const deleteUser = async (uid: string) => {
     if (profile?.role !== 'admin' || uid === user?.uid) return;
-    
+
     try {
-      await userMutation.mutateAsync({ method: 'DELETE', id: uid }); 
+      await userMutation.mutateAsync({ method: 'DELETE', id: uid });
       setStatus({ type: 'success', message: 'Personel kayd pasif hale getirildi.' });
       setDeletingUser(null);
     } catch (error) {
@@ -1300,7 +1312,7 @@ export default function App() {
     const reason = (formData.get('reason') as string).trim();
 
     if (!reason) {
-      setStatus({ type: 'error', message: 'Lütfen bir aklama giriniz.' });
+      setStatus({ type: 'error', message: 'Lütfen bir Açıklama giriniz.' });
       return;
     }
 
@@ -1319,11 +1331,11 @@ export default function App() {
       let attachmentUrl = '';
       if (reportFile) {
         if (reportFile.size > 800 * 1024) {
-          setStatus({ type: 'error', message: 'Dosya boyutu ok byk. Lütfen 800 KB altnda bir dosya sein veya resmi krpn.' });
+          setStatus({ type: 'error', message: 'Dosya boyutu ok byk. Lütfen 800 KB altnda bir dosya seçin veya resmi krpn.' });
           setUploading(false);
           return;
         }
-        
+
         attachmentUrl = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
@@ -1332,14 +1344,16 @@ export default function App() {
         });
       }
 
-      await leaveMutation.mutateAsync({ method: 'POST', payload: {
-        userName: profile.name,
-        managerId: profile.managerId || 'admin_initial',
-        startDate, endDate, days, reason,
-        type: leaveType,
-        attachmentUrl,
-        status: 'pending'
-      } });
+      await leaveMutation.mutateAsync({
+        method: 'POST', payload: {
+          userName: profile.name,
+          managerId: profile.managerId || 'admin_initial',
+          startDate, endDate, days, reason,
+          type: leaveType,
+          attachmentUrl,
+          status: 'pending'
+        }
+      });
       // Yöneticiye push bildirimi gönder
       fetch('/api/notify/newrequest', {
         method: 'POST',
@@ -1350,8 +1364,8 @@ export default function App() {
           requestType: 'leave',
           managerId: profile.managerId || 'admin_initial'
         })
-      }).catch(() => {});
-      setStatus({ type: 'success', message: leaveType === 'report' ? 'Raporunuz iletildi.' : 'İzin talebiniz iletildi.' });
+      }).catch(() => { });
+      setStatus({ type: 'success', message: leaveType === 'report' ? 'Raporunuz iletildi.' : 'Izin talebiniz iletildi.' });
       (e.target as HTMLFormElement).reset();
       setLeaveStartDate('');
       setLeaveEndDate('');
@@ -1376,18 +1390,18 @@ export default function App() {
     try {
       const blob = dataURItoBlob(viewingAttachment);
       const url = URL.createObjectURL(blob);
-      
+
       const a = document.createElement('a');
       a.href = url;
       a.download = viewingAttachment.startsWith('data:image') ? 'rapor_belgesi.png' : 'rapor_belgesi.pdf';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      
+
       if (!viewingAttachment.startsWith('data:image')) {
         window.open(url, '_blank');
       }
-      
+
       setTimeout(() => URL.revokeObjectURL(url), 100);
     } catch (e) {
       console.error(e);
@@ -1420,7 +1434,7 @@ export default function App() {
           requestType: 'overtime',
           managerId: profile.managerId || 'admin_initial'
         })
-      }).catch(() => {});
+      }).catch(() => { });
       setStatus({ type: 'success', message: 'Fazla mesai talebiniz iletildi.' });
       (e.target as HTMLFormElement).reset();
       setOvertimeEndTime('');
@@ -1432,7 +1446,7 @@ export default function App() {
 
   const handleRequestAction = async (collectionName: 'leaveRequests' | 'overtimeRequests' | 'attendance', requestId: string, action: 'approved' | 'rejected') => {
     try {
-      
+
 
       // Push bildirimi gönder (arka planda, hata olsa bile devam)
       fetch('/api/notify/approval', {
@@ -1444,9 +1458,9 @@ export default function App() {
           requestType: collectionName === 'leaveRequests' ? 'leave' : collectionName === 'attendance' ? 'manual' : 'overtime',
           actorName: profile?.name || 'Yönetici'
         })
-      }).catch(() => {});
+      }).catch(() => { });
 
-      setStatus({ type: 'success', message: `Talep ${action === 'approved' ? 'onayılandı' : 'reddedildii'}.` });
+      setStatus({ type: 'success', message: `Talep ${action === 'approved' ? 'onaylandı' : 'reddedildi'}.` });
     } catch (error) {
       setStatus({ type: 'error', message: 'lem sırasında hata oluştu.' });
     }
@@ -1480,19 +1494,19 @@ export default function App() {
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('pdks_token') },
         body: JSON.stringify({
           userId: deletingLeave.userId,
-          title: 'İzin ptali',
-          message: deletingLeave.startDate + ' tarihindeki izniniz yonetici tarafndan iptal edildi. Neden: ' + reason,
+          title: 'İzin İptali',
+          message: deletingLeave.startDate + ' tarihindeki izniniz yönetici tarafından iptal edildi. Neden: ' + reason,
           type: 'error',
           read: false
         })
-      }).catch(() => {});
+      }).catch(() => { });
 
-      setStatus({ type: 'success', message: 'İzin talebi silindii ve bakiye iade edildi.' });
+      setStatus({ type: 'success', message: 'Izin talebi silindi ve bakiye iade edildi.' });
       setDeletingLeave(null);
       setDeletionReason('');
     } catch (error) {
       console.error("Delete error:", error);
-      setStatus({ type: 'error', message: 'İzin silinirken hata oluştu.' });
+      setStatus({ type: 'error', message: 'Izin silinirken hata oluştu.' });
     }
   };
 
@@ -1510,7 +1524,7 @@ export default function App() {
 
     try {
       await leaveMutation.mutateAsync({ method: 'PUT', id: editingLeave.id!, payload: updates });
-      setStatus({ type: 'success', message: 'İzin talebi güncellendi.' });
+      setStatus({ type: 'success', message: 'Izin talebi güncellendi.' });
       setEditingLeave(null);
     } catch (error) {
       setStatus({ type: 'error', message: 'Güncelleme sırasında hata oluştu.' });
@@ -1520,7 +1534,7 @@ export default function App() {
   const handleUpdateUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editingUser) return;
-    
+
     // Check if admin or manager of this user
     const isAuthorized = profile?.role === 'admin' || editingUser.managerId === user?.uid;
     if (!isAuthorized) return;
@@ -1542,7 +1556,7 @@ export default function App() {
       const response = await fetch('/api/users/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           adminUid: profile.uid,
           targetUid: editingUser.uid,
           updates: { name, title, password, role, managerId, leaveBalance, startDate, birthDate, allowedDevice, deviceId, canRemoteCheckIn }
@@ -1558,7 +1572,7 @@ export default function App() {
       }
     } catch (error) {
       console.error("Update user error:", error);
-      setStatus({ type: 'error', message: 'Sistem hatas.' });
+      setStatus({ type: 'error', message: 'Sistem hatası.' });
     }
   };
 
@@ -1570,7 +1584,7 @@ export default function App() {
       const response = await fetch('/api/users/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           adminUid: user.uid,
           targetUid: user.uid,
           updates: { password: newPassword }
@@ -1587,7 +1601,7 @@ export default function App() {
       }
     } catch (error) {
       console.error("Password change error:", error);
-      setStatus({ type: 'error', message: 'Sistem hatas.' });
+      setStatus({ type: 'error', message: 'Sistem hatası.' });
     }
   };
 
@@ -1607,13 +1621,13 @@ export default function App() {
       });
 
     if (userLogs.length === 0) {
-      setStatus({ type: 'error', message: 'Bu ay iin hareket kayd bulunamad.' });
+      setStatus({ type: 'error', message: 'Bu ay için hareket kayd bulunamad.' });
       return;
     }
 
     const events: string[] = [];
     const dateMap = new Map<string, typeof userLogs>();
-    
+
     userLogs.forEach(log => {
       const d = log.timestamp?.toDate?.() || new Date();
       const dateKey = format(d, 'yyyy-MM-dd');
@@ -1628,18 +1642,18 @@ export default function App() {
     dateMap.forEach((dayLogs, dateKey) => {
       const inLog = dayLogs.find(l => l.type === 'in');
       const outLog = dayLogs.find(l => l.type === 'out');
-      
+
       if (inLog) {
         const inTime = inLog.timestamp?.toDate?.() || new Date();
         const outTime = outLog?.timestamp?.toDate?.() || new Date(inTime.getTime() + 8 * 60 * 60 * 1000);
         const userName = inLog.userName || 'Personel';
-        
+
         events.push(
           'BEGIN:VEVENT',
           `DTSTART:${formatICSDate(inTime)}`,
           `DTEND:${formatICSDate(outTime)}`,
           `SUMMARY:${userName} -  GÜN`,
-          `DESCRIPTION:Giriş: ${format(inTime, 'HH:mm')}${outLog ? ' / k: ' + format(outTime, 'HH:mm') : ' (k yok)'}`,
+          `DESCRIPTION:Giriş: ${format(inTime, 'HH:mm')}${outLog ? ' / Çıkış: ' + format(outTime, 'HH:mm') : ' (k yok)'}`,
           `UID:pdks-${dateKey}-${inLog.userId}@pdks`,
           'END:VEVENT'
         );
@@ -1677,7 +1691,7 @@ export default function App() {
             <div className="h-12 w-12 rounded-full border-[3px] border-zinc-800" />
             <div className="absolute inset-0 h-12 w-12 rounded-full border-[3px] border-transparent border-t-orange-500 animate-spin" />
           </div>
-          <p className="text-xs font-medium text-zinc-500 tracking-widest uppercase">yükleniyor</p>
+          <p className="text-xs font-medium text-zinc-500 tracking-widest uppercase">Ykleniyor</p>
         </div>
       </div>
     );
@@ -1690,8 +1704,8 @@ export default function App() {
         <div className="absolute inset-0 bg-zinc-950" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(249,115,22,0.15),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(249,115,22,0.08),transparent_50%)]" />
-        
-        <motion.div 
+
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -1712,7 +1726,7 @@ export default function App() {
               <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Personel ID</label>
               <div className="relative">
                 <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={18} />
-                <input 
+                <input
                   name="personnelId"
                   required
                   placeholder="ID giriniz"
@@ -1724,18 +1738,18 @@ export default function App() {
               <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Şifre</label>
               <div className="relative">
                 <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={18} />
-                <input 
+                <input
                   name="password"
                   type="password"
                   required
-                  placeholder="ŞifrİşişİŞE GİRİŞşniz"
+                  placeholder="Şifre giriniz"
                   className="w-full rounded-xl border border-zinc-800 bg-zinc-950/80 pl-12 pr-4 py-3.5 text-sm font-medium placeholder:text-zinc-700 focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 focus:outline-none transition-all"
                 />
               </div>
             </div>
 
             {loginError && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-xs font-medium text-red-500"
@@ -1751,9 +1765,9 @@ export default function App() {
               Giriş Yap
             </button>
           </form>
-          
+
           <p className="text-center text-xs text-zinc-600">
-            Giriş bilgilerinizi yöneticinizden temin edebilirsiniz.
+            giriş bilgilerinizizi yöneticinizden temin edebilirsiniz.
           </p>
           <div className="mt-4 text-center text-[10px] text-zinc-700 font-mono">
             Cihaz Kimliği: {getOrCreateDeviceId()}
@@ -1791,9 +1805,9 @@ export default function App() {
             >
               {theme === 'dark' ? <Moon size={18} /> : theme === 'light' ? <Sun size={18} /> : <Monitor size={18} />}
             </button>
-            
+
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900/10 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 transition-colors hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-orange-500"
               >
@@ -1808,11 +1822,11 @@ export default function App() {
               <AnimatePresence>
                 {showNotifications && (
                   <>
-                    <div 
-                      className="fixed inset-0 z-10" 
+                    <div
+                      className="fixed inset-0 z-10"
                       onClick={() => setShowNotifications(false)}
                     />
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -1847,7 +1861,7 @@ export default function App() {
                           </div>
                         ) : (
                           notifications.map(notif => (
-                            <div 
+                            <div
                               key={notif.id}
                               onClick={() => {
                                 markNotificationRead(notif.id!);
@@ -1878,12 +1892,12 @@ export default function App() {
                                 <div className={cn(
                                   "mt-0.5 rounded-full p-1",
                                   notif.type === 'error' ? "bg-red-500/10 text-red-500" :
-                                  notif.type === 'success' ? "bg-emerald-500/10 text-emerald-500" :
-                                  "bg-blue-500/10 text-blue-500"
+                                    notif.type === 'success' ? "bg-emerald-500/10 text-emerald-500" :
+                                      "bg-blue-500/10 text-blue-500"
                                 )}>
                                   {notif.type === 'success' ? <CheckCircle size={12} /> :
-                                   notif.type === 'error' ? <AlertCircle size={12} /> :
-                                   <Bell size={12} />}
+                                    notif.type === 'error' ? <AlertCircle size={12} /> :
+                                      <Bell size={12} />}
                                 </div>
                                 <div className="space-y-1 flex-1 min-w-0">
                                   <p className="text-xs font-bold leading-none truncate">{notif.title}</p>
@@ -1925,7 +1939,7 @@ export default function App() {
                 <span className="text-sm font-black text-orange-500">{profile?.name?.[0]?.toUpperCase()}</span>
               )}
             </button>
-            <button 
+            <button
               onClick={handleLogout}
               className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white"
             >
@@ -1984,7 +1998,7 @@ export default function App() {
               <button
                 onClick={() => {
                   if (profile?.canRemoteCheckIn) {
-                    // Uzaktan yetkili: her zaman yntem seim modal' göster
+                    // Uzaktan yetkili: her zaman yöntem seim modal' göster
                     setPendingScanType('in');
                     setShowRemoteModal(true);
                   } else {
@@ -2062,7 +2076,7 @@ export default function App() {
                 <AlertTriangle size={24} className="text-red-500 shrink-0" />
                 <div>
                   <p className="text-sm font-bold text-red-500">Ge Kalma Uyars</p>
-                  <p className="text-xs text-red-500/70">Bu ay ierisinde <strong>{userLateCountThisMonth} kez</strong> mesai balang saati ({settings?.shiftStart || '08:00'}) sonrasnda giriş yaptnz.</p>
+                  <p className="text-xs text-red-500/70">Bu ay ierisinde <strong>{userLateCountThisMonth} kez</strong> mesai Başlangıç saati ({settings?.shiftStart || '08:00'}) sonrasnda giriş yaptnz.</p>
                 </div>
               </div>
             )}
@@ -2104,13 +2118,13 @@ export default function App() {
                     <Calendar size={24} className="text-orange-500" /> Giriş Çıkış Hareketlerim
                   </h2>
                   <div className="flex items-center gap-2">
-                    <button 
+                    <button
                       onClick={() => exportToExcel(user!.uid, selectedMonth)}
                       className="flex-1 sm:flex-none rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-500 transition-colors flex items-center justify-center gap-1.5"
                     >
                       <Download size={13} /> Excel
                     </button>
-                    <button 
+                    <button
                       onClick={() => exportToCalendar(user!.uid, selectedMonth)}
                       className="flex-1 sm:flex-none rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-500 transition-colors flex items-center justify-center gap-1.5"
                     >
@@ -2124,76 +2138,76 @@ export default function App() {
                     />
                   </div>
                 </div>
-                
-              <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-[10px] font-bold text-zinc-500 uppercase tracking-tight">
-                {['Pzt', 'Sal', 'ar', 'Per', 'Cum', 'Cmt', 'Paz'].map(day => <div key={day} className="truncate">{day}</div>)}
-              </div>
-              <div className="grid grid-cols-7 gap-2" key={`cal-${selectedMonth}-${logs.filter(l => l.userId === user?.uid).length}`}>
-                {(() => {
 
-                  const results = [];
-                  const today = new Date();
-                  const [year, month] = selectedMonth.split('-').map(Number);
-                  const daysInMonth = new Date(year, month, 0).getDate();
-                  const firstDay = new Date(year, month - 1, 1).getDay();
-                  const padding = (firstDay + 6) % 7;
+                <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-[10px] font-bold text-zinc-500 uppercase tracking-tight">
+                  {['Pzt', 'Sal', 'ar', 'Per', 'Cum', 'Cmt', 'Paz'].map(day => <div key={day} className="truncate">{day}</div>)}
+                </div>
+                <div className="grid grid-cols-7 gap-2" key={`cal-${selectedMonth}-${logs.filter(l => l.userId === user?.uid).length}`}>
+                  {(() => {
 
-                  for (let i = 0; i < padding; i++) {
-                    results.push(<div key={`p-${i}`} className="aspect-square" />);
-                  }
-                  
-                  const userLogs = logs
-                    .filter(l => l.userId === user?.uid && !l.deleted && l.timestamp?.toDate)
-                    .sort((a, b) => a.timestamp.toDate().getTime() - b.timestamp.toDate().getTime());
+                    const results = [];
+                    const today = new Date();
+                    const [year, month] = selectedMonth.split('-').map(Number);
+                    const daysInMonth = new Date(year, month, 0).getDate();
+                    const firstDay = new Date(year, month - 1, 1).getDay();
+                    const padding = (firstDay + 6) % 7;
 
-                  for (let d = 1; d <= daysInMonth; d++) {
-                    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                    const dayDate = new Date(year, month - 1, d);
-                    const isSunday = dayDate.getDay() === 0;
-                    
-                    const dayInLogs = userLogs.filter(l => 
-                      format(l.timestamp.toDate(), 'yyyy-MM-dd') === dateStr
-                    );
+                    for (let i = 0; i < padding; i++) {
+                      results.push(<div key={`p-${i}`} className="aspect-square" />);
+                    }
 
-                    const leave = leaveRequests.find(r => 
-                      r.userId === user?.uid && 
-                      r.status === 'approved' && 
-                      !r.deleted &&
-                      dateStr >= r.startDate && 
-                      dateStr <= r.endDate
-                    );
+                    const userLogs = logs
+                      .filter(l => l.userId === user?.uid && !l.deleted && l.timestamp?.toDate)
+                      .sort((a, b) => a.timestamp.toDate().getTime() - b.timestamp.toDate().getTime());
 
-                    const overtime = overtimeRequests.filter(r =>
-                      r.userId === user?.uid &&
-                      r.status === 'approved' &&
-                      !r.deleted &&
-                      r.date === dateStr
-                    ).reduce((sum, r) => sum + r.hours, 0);
+                    for (let d = 1; d <= daysInMonth; d++) {
+                      const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                      const dayDate = new Date(year, month - 1, d);
+                      const isSunday = dayDate.getDay() === 0;
 
-                    const isFuture = dayDate > today;
-                    const holiday = getHoliday(dateStr);
-                    const isHolidayDay = !!holiday;
-                    const isPending = dayInLogs.some(l => l.status === 'pending' && !l.deleted);
-                    const successLogs = dayInLogs.filter(l => l.status !== 'error' && l.status !== 'pending' && !l.deleted);
-                    const hasSuccessLogs = successLogs.length > 0;
-                    const hasInLog = successLogs.some(l => l.type === 'in');
-                    const hasOutLog = successLogs.some(l => l.type === 'out');
-                    const hasErrorLogs = dayInLogs.some(l => l.status === 'error' && !l.deleted);
+                      const dayInLogs = userLogs.filter(l =>
+                        format(l.timestamp.toDate(), 'yyyy-MM-dd') === dateStr
+                      );
 
-                    results.push(
-                        <button 
-                          key={dateStr} 
+                      const leave = leaveRequests.find(r =>
+                        r.userId === user?.uid &&
+                        r.status === 'approved' &&
+                        !r.deleted &&
+                        dateStr >= r.startDate &&
+                        dateStr <= r.endDate
+                      );
+
+                      const overtime = overtimeRequests.filter(r =>
+                        r.userId === user?.uid &&
+                        r.status === 'approved' &&
+                        !r.deleted &&
+                        r.date === dateStr
+                      ).reduce((sum, r) => sum + r.hours, 0);
+
+                      const isFuture = dayDate > today;
+                      const holiday = getHoliday(dateStr);
+                      const isHolidayDay = !!holiday;
+                      const isPending = dayInLogs.some(l => l.status === 'pending' && !l.deleted);
+                      const successLogs = dayInLogs.filter(l => l.status !== 'error' && l.status !== 'pending' && !l.deleted);
+                      const hasSuccessLogs = successLogs.length > 0;
+                      const hasInLog = successLogs.some(l => l.type === 'in');
+                      const hasOutLog = successLogs.some(l => l.type === 'out');
+                      const hasErrorLogs = dayInLogs.some(l => l.status === 'error' && !l.deleted);
+
+                      results.push(
+                        <button
+                          key={dateStr}
                           onClick={() => setSelectedDayDetails({ date: dateStr, userId: user?.uid! })}
                           className={cn(
                             "aspect-square rounded-xl border p-1 flex flex-col items-center justify-between transition-all hover:scale-[1.02] hover:shadow-xl relative overflow-hidden",
                             hasErrorLogs && !hasSuccessLogs && !isPending ? "border-red-500/30 bg-red-500/5" :
-                            isPending ? "border-amber-500/30 bg-amber-500/5 shadow-[0_0_15px_rgba(245,158,11,0.05)]" :
-                            hasInLog && hasOutLog ? "border-emerald-500/30 bg-emerald-500/5 shadow-[0_0_15px_rgba(16,185,129,0.05)]" :
-                            hasInLog && !hasOutLog ? "border-cyan-500/30 bg-cyan-500/5 shadow-[0_0_15px_rgba(6,182,212,0.05)]" : 
-                            leave ? "border-orange-500/30 bg-orange-500/5 shadow-[0_0_10px_rgba(249,115,22,0.1)]" : 
-                            isHolidayDay ? "border-red-500/30 bg-red-500/5 shadow-[0_0_10px_rgba(239,68,68,0.1)]" :
-                            isSunday ? "border-zinc-900 bg-zinc-950/30" : 
-                            isFuture ? "border-zinc-900/30 bg-transparent opacity-30" : "border-zinc-900 bg-zinc-950/10"
+                              isPending ? "border-amber-500/30 bg-amber-500/5 shadow-[0_0_15px_rgba(245,158,11,0.05)]" :
+                                hasInLog && hasOutLog ? "border-emerald-500/30 bg-emerald-500/5 shadow-[0_0_15px_rgba(16,185,129,0.05)]" :
+                                  hasInLog && !hasOutLog ? "border-cyan-500/30 bg-cyan-500/5 shadow-[0_0_15px_rgba(6,182,212,0.05)]" :
+                                    leave ? "border-orange-500/30 bg-orange-500/5 shadow-[0_0_10px_rgba(249,115,22,0.1)]" :
+                                      isHolidayDay ? "border-red-500/30 bg-red-500/5 shadow-[0_0_10px_rgba(239,68,68,0.1)]" :
+                                        isSunday ? "border-zinc-900 bg-zinc-950/30" :
+                                          isFuture ? "border-zinc-900/30 bg-transparent opacity-30" : "border-zinc-900 bg-zinc-950/10"
                           )}
                         >
                           <span className={cn(
@@ -2202,14 +2216,14 @@ export default function App() {
                           )}>
                             {d}
                           </span>
-                          
+
                           {isHolidayDay && !hasSuccessLogs && !leave && (
                             <span className="hidden sm:block absolute top-1 right-1 text-[7px] font-black text-red-500 uppercase max-w-[70%] text-right truncate">
                               {holiday.name}
                             </span>
                           )}
 
-                          
+
                           <div className="flex-1 flex flex-col items-start justify-center w-full gap-1 mt-3 px-1">
                             {hasSuccessLogs && (
                               <div className="flex items-center gap-1 sm:gap-0.5 leading-none">
@@ -2236,7 +2250,7 @@ export default function App() {
                             {hasErrorLogs && (
                               <div className="h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
                             )}
-                            
+
                             {overtime > 0 && (
                               <>
                                 {/* Desktop */}
@@ -2262,7 +2276,7 @@ export default function App() {
                                   leave.type === 'report' ? "text-purple-400" : "text-orange-500"
                                 )}>
                                   <span className="text-[10px] font-black uppercase tracking-tighter">
-                                    {leave.type === 'report' ? 'Rapor' : 'İzin'}
+                                    {leave.type === 'report' ? 'Rapor' : 'Izin'}
                                   </span>
                                 </div>
                                 {/* Mobile */}
@@ -2296,7 +2310,7 @@ export default function App() {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="h-1.5 w-4 rounded-full bg-orange-500" />
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase">İzin</span>
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase">Izin</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="h-1.5 w-4 rounded-full bg-purple-500" />
@@ -2316,35 +2330,35 @@ export default function App() {
                       <tbody className="divide-y divide-zinc-900">
                         {logs.filter(l => l.userId === user?.uid && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM') === selectedMonth).length === 0 ? (
                           <tr>
-                            <td className="p-8 text-center text-zinc-500 text-xs italic">Bu ay iin Kayıt bulunmuyor.</td>
+                            <td className="p-8 text-center text-zinc-500 text-xs italic">Bu ay için kayt bulunmuyor.</td>
                           </tr>
                         ) : (
                           logs.filter(l => l.userId === user?.uid && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM') === selectedMonth)
-                            .sort((a,b) => (b.timestamp?.toDate?.()?.getTime() || 0) - (a.timestamp?.toDate?.()?.getTime() || 0))
+                            .sort((a, b) => (b.timestamp?.toDate?.()?.getTime() || 0) - (a.timestamp?.toDate?.()?.getTime() || 0))
                             .map((log) => (
-                            <tr key={log.id} className="hover:bg-zinc-900/30 transition-colors">
-                              <td className="p-4">
-                                <p className="text-xs text-zinc-400">
-                                  {log.timestamp?.toDate ? format(log.timestamp.toDate(), 'd MMM yyyy, HH:mm', { locale: tr }) : '...'}
-                                </p>
-                              </td>
-                              <td className="p-4">
-                                <div className={cn(
-                                  "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold uppercase",
-                                  log.status === 'error' ? "bg-red-500/10 text-red-500" :
-                                  log.status === 'pending' ? "bg-amber-500/10 text-amber-500" :
-                                  log.type === 'in' ? "bg-emerald-500/10 text-emerald-500" : "bg-orange-500/10 text-orange-500"
-                                )}>
-                                  {log.status === 'error' ? <ShieldAlert size={10} /> : log.status === 'pending' ? <Clock3 size={10} /> : log.type === 'in' ? <LogIn size={10} /> : <LogOut size={10} />}
-                                  {log.status === 'error' ? 'Hata' : log.status === 'pending' ? 'Bekliyor' : (log.type === 'in' ? 'Giriş' : 'k')}
-                                </div>
-                              </td>
-                              <td className="p-4 text-right">
-                                <p className="text-[10px] text-zinc-400 font-bold">{log.status === 'error' ? log.errorMessage : log.status === 'pending' ? 'Yönetici onay bekleniyor' : ''}</p>
-                                <p className="text-[10px] text-zinc-600 font-mono">{log.ipAddress}</p>
-                              </td>
-                            </tr>
-                          ))
+                              <tr key={log.id} className="hover:bg-zinc-900/30 transition-colors">
+                                <td className="p-4">
+                                  <p className="text-xs text-zinc-400">
+                                    {log.timestamp?.toDate ? format(log.timestamp.toDate(), 'd MMM yyyy, HH:mm', { locale: tr }) : '...'}
+                                  </p>
+                                </td>
+                                <td className="p-4">
+                                  <div className={cn(
+                                    "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold uppercase",
+                                    log.status === 'error' ? "bg-red-500/10 text-red-500" :
+                                      log.status === 'pending' ? "bg-amber-500/10 text-amber-500" :
+                                        log.type === 'in' ? "bg-emerald-500/10 text-emerald-500" : "bg-orange-500/10 text-orange-500"
+                                  )}>
+                                    {log.status === 'error' ? <ShieldAlert size={10} /> : log.status === 'pending' ? <Clock3 size={10} /> : log.type === 'in' ? <LogIn size={10} /> : <LogOut size={10} />}
+                                    {log.status === 'error' ? 'Hata' : log.status === 'pending' ? 'Bekliyor' : (log.type === 'in' ? 'Giriş' : 'Çıkış')}
+                                  </div>
+                                </td>
+                                <td className="p-4 text-right">
+                                  <p className="text-[10px] text-zinc-400 font-bold">{log.status === 'error' ? log.errorMessage : log.status === 'pending' ? 'Yönetici onay bekleniyor' : ''}</p>
+                                  <p className="text-[10px] text-zinc-600 font-mono">{log.ipAddress}</p>
+                                </td>
+                              </tr>
+                            ))
                         )}
                       </tbody>
                     </table>
@@ -2352,28 +2366,28 @@ export default function App() {
                     {/* Mobile Card View */}
                     <div className="md:hidden divide-y divide-zinc-900">
                       {logs.filter(l => l.userId === user?.uid && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM') === selectedMonth).length === 0 ? (
-                        <div className="p-8 text-center text-zinc-500 text-xs italic">Bu ay iin Kayıt bulunmuyor.</div>
+                        <div className="p-8 text-center text-zinc-500 text-xs italic">Bu ay için kayt bulunmuyor.</div>
                       ) : (
                         logs.filter(l => l.userId === user?.uid && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM') === selectedMonth)
-                          .sort((a,b) => (b.timestamp?.toDate?.()?.getTime() || 0) - (a.timestamp?.toDate?.()?.getTime() || 0))
+                          .sort((a, b) => (b.timestamp?.toDate?.()?.getTime() || 0) - (a.timestamp?.toDate?.()?.getTime() || 0))
                           .map((log) => (
-                          <div key={log.id} className="p-4 flex items-center justify-between hover:bg-zinc-900/30 transition-colors">
-                            <div className="space-y-1">
-                              <p className="text-[11px] font-bold text-zinc-300">
-                                {log.timestamp?.toDate ? format(log.timestamp.toDate(), 'd MMM, HH:mm', { locale: tr }) : '...'}
-                              </p>
-                              <p className="text-[9px] text-zinc-600 font-mono">{log.ipAddress}</p>
+                            <div key={log.id} className="p-4 flex items-center justify-between hover:bg-zinc-900/30 transition-colors">
+                              <div className="space-y-1">
+                                <p className="text-[11px] font-bold text-zinc-300">
+                                  {log.timestamp?.toDate ? format(log.timestamp.toDate(), 'd MMM, HH:mm', { locale: tr }) : '...'}
+                                </p>
+                                <p className="text-[9px] text-zinc-600 font-mono">{log.ipAddress}</p>
+                              </div>
+                              <div className={cn(
+                                "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[9px] font-bold uppercase",
+                                log.status === 'error' ? "bg-red-500/10 text-red-500" :
+                                  log.status === 'pending' ? "bg-amber-500/10 text-amber-500" :
+                                    log.type === 'in' ? "bg-emerald-500/10 text-emerald-500" : "bg-orange-500/10 text-orange-500"
+                              )}>
+                                {log.status === 'error' ? 'Hata' : log.status === 'pending' ? 'Bekliyor' : (log.type === 'in' ? 'Giriş' : 'Çıkış')}
+                              </div>
                             </div>
-                            <div className={cn(
-                              "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[9px] font-bold uppercase",
-                              log.status === 'error' ? "bg-red-500/10 text-red-500" :
-                              log.status === 'pending' ? "bg-amber-500/10 text-amber-500" :
-                              log.type === 'in' ? "bg-emerald-500/10 text-emerald-500" : "bg-orange-500/10 text-orange-500"
-                            )}>
-                              {log.status === 'error' ? 'Hata' : log.status === 'pending' ? 'Bekliyor' : (log.type === 'in' ? 'Giriş' : 'k')}
-                            </div>
-                          </div>
-                        ))
+                          ))
                       )}
                     </div>
                   </div>
@@ -2464,206 +2478,206 @@ export default function App() {
                         }}
                         className="w-full md:w-auto flex items-center justify-center gap-2 rounded-xl bg-orange-500 px-4 py-3 md:py-2 text-sm font-bold text-white hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/10"
                       >
-                        <Plus size={18} /> Manuel Kayıt Ekle
+                        <Plus size={18} /> Manuel Kayt Ekle
                       </button>
                     </div>
                   </div>
 
-      {/* Monthly Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        {(() => {
-          const userLogs = logs.filter(l => l.userId === selectedPersonnelId && !l.deleted && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM') === selectedMonth);
-          const userLeaves = leaveRequests.filter(r => r.userId === selectedPersonnelId && r.status === 'approved' && !r.deleted && (r.startDate.startsWith(selectedMonth) || r.endDate.startsWith(selectedMonth)));
-          const userOvertime = overtimeRequests.filter(r => r.userId === selectedPersonnelId && r.status === 'approved' && !r.deleted && r.date.startsWith(selectedMonth));
-          
-          const totalOvertimeHours = userOvertime.reduce((sum, r) => sum + r.hours, 0);
-          const totalLeaveDays = userLeaves.reduce((sum, r) => sum + r.days, 0);
-          
-          return (
-            <>
-              <div className="rounded-2xl border border-zinc-900 bg-zinc-900/30 p-4 flex flex-col items-center justify-center">
-                <p className="text-[10px] font-bold text-zinc-500 uppercase">Aylık Toplam Mesai</p>
-                <p className="text-2xl font-black text-blue-500">{totalOvertimeHours.toFixed(1)} <span className="text-xs font-normal">Saat</span></p>
-              </div>
-              <div className="rounded-2xl border border-zinc-900 bg-zinc-900/30 p-4 flex flex-col items-center justify-center">
-                <p className="text-[10px] font-bold text-zinc-500 uppercase">Aylık Toplam İzin</p>
-                <p className="text-2xl font-black text-orange-500">{totalLeaveDays} <span className="text-xs font-normal">Gün</span></p>
-              </div>
-              <div className="rounded-2xl border border-zinc-900 bg-zinc-900/30 p-4 flex flex-col items-center justify-center">
-                <p className="text-[10px] font-bold text-zinc-500 uppercase">Giriş Kaydı Sayısı</p>
-                <p className="text-2xl font-black text-emerald-500">{userLogs.filter(l => l.type === 'in').length} <span className="text-xs font-normal">Kez</span></p>
-              </div>
-            </>
-          );
-        })()}
-      </div>
+                  {/* Monthly Summary Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    {(() => {
+                      const userLogs = logs.filter(l => l.userId === selectedPersonnelId && !l.deleted && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM') === selectedMonth);
+                      const userLeaves = leaveRequests.filter(r => r.userId === selectedPersonnelId && r.status === 'approved' && !r.deleted && (r.startDate.startsWith(selectedMonth) || r.endDate.startsWith(selectedMonth)));
+                      const userOvertime = overtimeRequests.filter(r => r.userId === selectedPersonnelId && r.status === 'approved' && !r.deleted && r.date.startsWith(selectedMonth));
 
-      <div className="grid grid-cols-7 gap-2 mb-2 text-center text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-        {['Pzt', 'Sal', 'ar', 'Per', 'Cum', 'Cmt', 'Paz'].map(day => <div key={day}>{day}</div>)}
-      </div>
-                    <div className="grid grid-cols-7 gap-1 sm:gap-2">
-                      {(() => {
-                        const results = [];
-                        const [y, m] = selectedMonth.split('-').map(Number);
-                        const daysInMonth = new Date(y, m, 0).getDate();
-                        const firstDay = new Date(y, m - 1, 1).getDay();
-                        const padding = (firstDay + 6) % 7;
+                      const totalOvertimeHours = userOvertime.reduce((sum, r) => sum + r.hours, 0);
+                      const totalLeaveDays = userLeaves.reduce((sum, r) => sum + r.days, 0);
 
-                        for (let i = 0; i < padding; i++) {
-                          results.push(<div key={`p-${i}`} className="hidden lg:block aspect-square" />);
-                          results.push(<div key={`p-mob-${i}`} className="lg:hidden" />);
-                        }
-                        
-                        const userLogs = logs
-                          .filter(l => l.userId === selectedPersonnelId && !l.deleted && l.timestamp?.toDate)
-                          .sort((a, b) => a.timestamp.toDate().getTime() - b.timestamp.toDate().getTime());
+                      return (
+                        <>
+                          <div className="rounded-2xl border border-zinc-900 bg-zinc-900/30 p-4 flex flex-col items-center justify-center">
+                            <p className="text-[10px] font-bold text-zinc-500 uppercase">Ayılk Toplam Mesai</p>
+                            <p className="text-2xl font-black text-blue-500">{totalOvertimeHours.toFixed(1)} <span className="text-xs font-normal">Saat</span></p>
+                          </div>
+                          <div className="rounded-2xl border border-zinc-900 bg-zinc-900/30 p-4 flex flex-col items-center justify-center">
+                            <p className="text-[10px] font-bold text-zinc-500 uppercase">Ayılk Toplam Izin</p>
+                            <p className="text-2xl font-black text-orange-500">{totalLeaveDays} <span className="text-xs font-normal">Gün</span></p>
+                          </div>
+                          <div className="rounded-2xl border border-zinc-900 bg-zinc-900/30 p-4 flex flex-col items-center justify-center">
+                            <p className="text-[10px] font-bold text-zinc-500 uppercase">Giriş Kaydı Sayısı</p>
+                            <p className="text-2xl font-black text-emerald-500">{userLogs.filter(l => l.type === 'in').length} <span className="text-xs font-normal">Kez</span></p>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
 
-                        for (let d = 1; d <= daysInMonth; d++) {
-                          const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                          const dayDate = new Date(y, m - 1, d);
-                          const isSunday = dayDate.getDay() === 0;
-                          
-                          const dayInLogs = userLogs.filter(l => 
-                            l.type === 'in' && 
-                            format(l.timestamp.toDate(), 'yyyy-MM-dd') === dateStr
-                          );
+                  <div className="grid grid-cols-7 gap-2 mb-2 text-center text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                    {['Pzt', 'Sal', 'ar', 'Per', 'Cum', 'Cmt', 'Paz'].map(day => <div key={day}>{day}</div>)}
+                  </div>
+                  <div className="grid grid-cols-7 gap-1 sm:gap-2">
+                    {(() => {
+                      const results = [];
+                      const [y, m] = selectedMonth.split('-').map(Number);
+                      const daysInMonth = new Date(y, m, 0).getDate();
+                      const firstDay = new Date(y, m - 1, 1).getDay();
+                      const padding = (firstDay + 6) % 7;
 
-                          const leave = leaveRequests.find(r => 
-                            r.userId === selectedPersonnelId && 
-                            r.status === 'approved' && 
-                            !r.deleted &&
-                            dateStr >= r.startDate && 
-                            dateStr <= r.endDate
-                          );
+                      for (let i = 0; i < padding; i++) {
+                        results.push(<div key={`p-${i}`} className="hidden lg:block aspect-square" />);
+                        results.push(<div key={`p-mob-${i}`} className="lg:hidden" />);
+                      }
 
-                          const overtimeTotal = overtimeRequests.filter(r =>
-                            r.userId === selectedPersonnelId &&
-                            r.status === 'approved' &&
-                            !r.deleted &&
-                            r.date === dateStr
-                          ).reduce((sum, r) => sum + r.hours, 0);
+                      const userLogs = logs
+                        .filter(l => l.userId === selectedPersonnelId && !l.deleted && l.timestamp?.toDate)
+                        .sort((a, b) => a.timestamp.toDate().getTime() - b.timestamp.toDate().getTime());
 
-                          let content = null;
+                      for (let d = 1; d <= daysInMonth; d++) {
+                        const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                        const dayDate = new Date(y, m - 1, d);
+                        const isSunday = dayDate.getDay() === 0;
 
-                          if (dayInLogs.length > 0 || overtimeTotal > 0 || leave) {
-                            const dayMovements = dayInLogs.map((inLog, idx) => {
-                              const entry = inLog.timestamp.toDate();
-                              const nextOut = userLogs.find(l => 
-                                l.type === 'out' && 
-                                l.timestamp.toDate().getTime() > entry.getTime() &&
-                                format(l.timestamp.toDate(), 'yyyy-MM-dd') === dateStr
-                              );
-                              return { in: entry, out: nextOut?.timestamp.toDate() };
-                            });
+                        const dayInLogs = userLogs.filter(l =>
+                          l.type === 'in' &&
+                          format(l.timestamp.toDate(), 'yyyy-MM-dd') === dateStr
+                        );
 
-                            content = (
-                              <div className="space-y-0.5 sm:space-y-1 w-full flex flex-col items-start px-0.5 lg:px-1 mt-1 lg:mt-2 overflow-hidden">
-                                {dayMovements.length > 0 ? (
-                                  <>
-                                    {/* Desktop */}
-                                    <div className="hidden sm:flex flex-col sm:items-center gap-0 lg:gap-0.5 leading-none shrink-0 overflow-hidden">
-                                      <span className="text-[9px] lg:text-[11px] font-black text-emerald-500 truncate">{format(dayMovements[0].in, 'HH:mm')}</span>
-                                      {dayMovements[0].out && (
-                                        <>
-                                          <span className="hidden sm:inline text-[8px] lg:text-[10px] text-zinc-600">-</span>
-                                          <span className="text-[9px] lg:text-[11px] font-black text-orange-400 truncate">{format(dayMovements[0].out, 'HH:mm')}</span>
-                                        </>
-                                      )}
-                                    </div>
-                                    {/* Mobile Dots */}
-                                    <div className="sm:hidden flex items-center gap-1">
-                                      <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                                      {dayMovements[0].out && <div className="h-1.5 w-1.5 rounded-full bg-orange-400" />}
-                                    </div>
-                                  </>
-                                ) : null}
-                                
-                                {overtimeTotal > 0 && (
-                                  <>
-                                    <div className="hidden sm:block px-0.5 sm:px-1 py-0 rounded bg-blue-500/10 text-blue-400 text-[8px] lg:text-[9px] font-black uppercase truncate max-w-full">
-                                      {overtimeTotal}s
-                                    </div>
-                                    <div className="sm:hidden h-1 w-3 rounded-full bg-blue-500" />
-                                  </>
-                                )}
+                        const leave = leaveRequests.find(r =>
+                          r.userId === selectedPersonnelId &&
+                          r.status === 'approved' &&
+                          !r.deleted &&
+                          dateStr >= r.startDate &&
+                          dateStr <= r.endDate
+                        );
 
-                                {leave && (
-                                  <>
-                                    <span className="hidden sm:block text-[8px] lg:text-[9px] font-black uppercase leading-none truncate max-w-full text-orange-500">
-                                      {leave.type === 'report' ? 'RA' : 'Z'}
-                                    </span>
-                                    <div className={cn(
-                                      "sm:hidden h-1 w-full rounded-full",
-                                      leave.type === 'report' ? "bg-purple-500" : "bg-orange-500"
-                                    )} />
-                                  </>
-                                )}
-                              </div>
+                        const overtimeTotal = overtimeRequests.filter(r =>
+                          r.userId === selectedPersonnelId &&
+                          r.status === 'approved' &&
+                          !r.deleted &&
+                          r.date === dateStr
+                        ).reduce((sum, r) => sum + r.hours, 0);
+
+                        let content = null;
+
+                        if (dayInLogs.length > 0 || overtimeTotal > 0 || leave) {
+                          const dayMovements = dayInLogs.map((inLog, idx) => {
+                            const entry = inLog.timestamp.toDate();
+                            const nextOut = userLogs.find(l =>
+                              l.type === 'out' &&
+                              l.timestamp.toDate().getTime() > entry.getTime() &&
+                              format(l.timestamp.toDate(), 'yyyy-MM-dd') === dateStr
                             );
-                          } else if (isSunday) {
-                            content = (
-                              <div className="flex flex-col items-center justify-center h-full text-zinc-800/30">
-                                <span className="text-[6px] sm:text-[8px] lg:text-[10px] font-black uppercase tracking-tighter">OFF</span>
-                              </div>
-                            );
-                          }
+                            return { in: entry, out: nextOut?.timestamp.toDate() };
+                          });
 
-                          results.push(
-                            <button 
-                              key={dateStr} 
-                              onClick={() => setSelectedDayDetails({ date: dateStr, userId: selectedPersonnelId! })}
-                              className={cn(
-                                "aspect-square rounded-lg lg:rounded-xl border p-1 lg:p-2 flex flex-col items-center justify-between transition-all hover:bg-zinc-800/50 relative",
-                                dayInLogs.length > 0 ? "border-zinc-800 bg-zinc-900/30" : 
-                                leave ? "border-orange-500/20 bg-orange-500/5" : 
-                                isSunday ? "border-zinc-900 bg-zinc-950/20" : "border-zinc-900 bg-zinc-950/5"
+                          content = (
+                            <div className="space-y-0.5 sm:space-y-1 w-full flex flex-col items-start px-0.5 lg:px-1 mt-1 lg:mt-2 overflow-hidden">
+                              {dayMovements.length > 0 ? (
+                                <>
+                                  {/* Desktop */}
+                                  <div className="hidden sm:flex flex-col sm:items-center gap-0 lg:gap-0.5 leading-none shrink-0 overflow-hidden">
+                                    <span className="text-[9px] lg:text-[11px] font-black text-emerald-500 truncate">{format(dayMovements[0].in, 'HH:mm')}</span>
+                                    {dayMovements[0].out && (
+                                      <>
+                                        <span className="hidden sm:inline text-[8px] lg:text-[10px] text-zinc-600">-</span>
+                                        <span className="text-[9px] lg:text-[11px] font-black text-orange-400 truncate">{format(dayMovements[0].out, 'HH:mm')}</span>
+                                      </>
+                                    )}
+                                  </div>
+                                  {/* Mobile Dots */}
+                                  <div className="sm:hidden flex items-center gap-1">
+                                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                    {dayMovements[0].out && <div className="h-1.5 w-1.5 rounded-full bg-orange-400" />}
+                                  </div>
+                                </>
+                              ) : null}
+
+                              {overtimeTotal > 0 && (
+                                <>
+                                  <div className="hidden sm:block px-0.5 sm:px-1 py-0 rounded bg-blue-500/10 text-blue-400 text-[8px] lg:text-[9px] font-black uppercase truncate max-w-full">
+                                    {overtimeTotal}s
+                                  </div>
+                                  <div className="sm:hidden h-1 w-3 rounded-full bg-blue-500" />
+                                </>
                               )}
-                            >
-                              <div className="flex w-full items-center justify-between font-bold leading-none">
-                                <span className={cn(
-                                  "text-[8px] sm:text-[10px]",
-                                  isSunday ? "text-red-500/40" : "text-zinc-600"
-                                )}>
-                                  {d}
-                                </span>
-                              </div>
-                              <div className="flex-1 flex items-center justify-center w-full overflow-hidden">
-                                {content}
-                              </div>
-                            </button>
+
+                              {leave && (
+                                <>
+                                  <span className="hidden sm:block text-[8px] lg:text-[9px] font-black uppercase leading-none truncate max-w-full text-orange-500">
+                                    {leave.type === 'report' ? 'RA' : 'Z'}
+                                  </span>
+                                  <div className={cn(
+                                    "sm:hidden h-1 w-full rounded-full",
+                                    leave.type === 'report' ? "bg-purple-500" : "bg-orange-500"
+                                  )} />
+                                </>
+                              )}
+                            </div>
+                          );
+                        } else if (isSunday) {
+                          content = (
+                            <div className="flex flex-col items-center justify-center h-full text-zinc-800/30">
+                              <span className="text-[6px] sm:text-[8px] lg:text-[10px] font-black uppercase tracking-tighter">OFF</span>
+                            </div>
                           );
                         }
-                        return results;
-                      })()}
-                    </div>
 
-                    {/* Movements Legend */}
-                    <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-zinc-900 pt-4 px-2">
-                      <div className="flex items-center gap-1.5">
-                        <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase">Giriş</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_5px_rgba(251,146,60,0.5)]" />
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase">k</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="h-2 w-2 rounded-full bg-blue-500" />
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase">Mesai</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="h-1.5 w-4 rounded-full bg-orange-500" />
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase">İzin</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="h-1.5 w-4 rounded-full bg-purple-500" />
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase">Rapor</span>
-                      </div>
+                        results.push(
+                          <button
+                            key={dateStr}
+                            onClick={() => setSelectedDayDetails({ date: dateStr, userId: selectedPersonnelId! })}
+                            className={cn(
+                              "aspect-square rounded-lg lg:rounded-xl border p-1 lg:p-2 flex flex-col items-center justify-between transition-all hover:bg-zinc-800/50 relative",
+                              dayInLogs.length > 0 ? "border-zinc-800 bg-zinc-900/30" :
+                                leave ? "border-orange-500/20 bg-orange-500/5" :
+                                  isSunday ? "border-zinc-900 bg-zinc-950/20" : "border-zinc-900 bg-zinc-950/5"
+                            )}
+                          >
+                            <div className="flex w-full items-center justify-between font-bold leading-none">
+                              <span className={cn(
+                                "text-[8px] sm:text-[10px]",
+                                isSunday ? "text-red-500/40" : "text-zinc-600"
+                              )}>
+                                {d}
+                              </span>
+                            </div>
+                            <div className="flex-1 flex items-center justify-center w-full overflow-hidden">
+                              {content}
+                            </div>
+                          </button>
+                        );
+                      }
+                      return results;
+                    })()}
+                  </div>
+
+                  {/* Movements Legend */}
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-zinc-900 pt-4 px-2">
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
+                      <span className="text-[9px] font-bold text-zinc-500 uppercase">Giriş</span>
                     </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_5px_rgba(251,146,60,0.5)]" />
+                      <span className="text-[9px] font-bold text-zinc-500 uppercase">k</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2 w-2 rounded-full bg-blue-500" />
+                      <span className="text-[9px] font-bold text-zinc-500 uppercase">Mesai</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-1.5 w-4 rounded-full bg-orange-500" />
+                      <span className="text-[9px] font-bold text-zinc-500 uppercase">Izin</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-1.5 w-4 rounded-full bg-purple-500" />
+                      <span className="text-[9px] font-bold text-zinc-500 uppercase">Rapor</span>
+                    </div>
+                  </div>
 
                   <div className="mt-12 space-y-4">
                     <h4 className="text-lg font-bold flex items-center gap-2">
-                      <Clock size={20} className="text-orange-500" /> Tm Giriş/k Kayıtlıar
+                      <Clock size={20} className="text-orange-500" /> Tm Giriş/Çıkış Kayıtlar
                     </h4>
                     <div className="overflow-hidden rounded-2xl border border-zinc-900">
                       {/* Desktop Table */}
@@ -2690,7 +2704,7 @@ export default function App() {
                                     "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase",
                                     log.type === 'in' ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-400"
                                   )}>
-                                    {log.type === 'in' ? 'Giriş' : 'k'}
+                                    {log.type === 'in' ? 'Giriş' : 'Çıkış'}
                                   </span>
                                 </td>
                                 <td className="p-4 text-xs text-zinc-500">
@@ -2735,7 +2749,7 @@ export default function App() {
                                   "rounded-full px-2 py-0.5 text-[9px] font-bold uppercase",
                                   log.type === 'in' ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-400"
                                 )}>
-                                  {log.type === 'in' ? 'Giriş' : 'k'}
+                                  {log.type === 'in' ? 'Giriş' : 'Çıkış'}
                                 </span>
                                 <div className="flex items-center gap-3">
                                   <button
@@ -2799,7 +2813,7 @@ export default function App() {
                 <form onSubmit={addUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Ad Soyad</label>
-                    <input 
+                    <input
                       name="name"
                       required
                       placeholder="Örn: Ahmet Yılmaz"
@@ -2808,7 +2822,7 @@ export default function App() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Ünvan / Pozisyon</label>
-                    <input 
+                    <input
                       name="title"
                       placeholder="Örn: Yazılım Geliştirici, Bölüm Müdür"
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
@@ -2816,7 +2830,7 @@ export default function App() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Personel ID</label>
-                    <input 
+                    <input
                       name="personnelId"
                       required
                       placeholder="Örn: ahmet123"
@@ -2825,7 +2839,7 @@ export default function App() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Şifre</label>
-                    <input 
+                    <input
                       name="password"
                       type="password"
                       required
@@ -2835,7 +2849,7 @@ export default function App() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Yetki</label>
-                    <select 
+                    <select
                       name="role"
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                     >
@@ -2845,7 +2859,7 @@ export default function App() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Bağlı Olduğu Yönetici</label>
-                    <select 
+                    <select
                       name="managerId"
                       required
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
@@ -2857,8 +2871,8 @@ export default function App() {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">Yıllık İzin Bakiyesi (GÜN)</label>
-                    <input 
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Yıllık Izin Bakiyesi (GÜN)</label>
+                    <input
                       name="leaveBalance"
                       type="number"
                       defaultValue={14}
@@ -2867,8 +2881,8 @@ export default function App() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">İşişİŞE GİRİŞşş Tarihi</label>
-                    <input 
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">İşe Giriş Tarihi</label>
+                    <input
                       name="startDate"
                       type="date"
                       required
@@ -2877,7 +2891,7 @@ export default function App() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Doğum Tarihi</label>
-                    <input 
+                    <input
                       name="birthDate"
                       type="date"
                       required
@@ -2886,7 +2900,7 @@ export default function App() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Cihaz Kısıtlaması (UA Erişimi)</label>
-                    <input 
+                    <input
                       name="allowedDevice"
                       type="text"
                       placeholder="Örn: iPhone, Samsung, SM-G991B"
@@ -2895,16 +2909,16 @@ export default function App() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Sabit Cihaz Kimliği (Hardware ID)</label>
-                    <input 
+                    <input
                       name="deviceId"
                       type="text"
-                      placeholder="Otomatik tanımlanır veya ID girişn"
+                      placeholder="Otomatik tanımlanır veya ID giriniz"
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                     />
                   </div>
                   <div className="md:col-span-2">
                     <label className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 cursor-pointer hover:border-orange-500/50 transition-colors">
-                      <input 
+                      <input
                         name="canRemoteCheckIn"
                         type="checkbox"
                         value="true"
@@ -2928,7 +2942,7 @@ export default function App() {
                 </form>
               </div>
             )}
-            
+
             <div className="rounded-3xl border border-zinc-900 bg-zinc-900/20 overflow-hidden">
               {/* Desktop Table View */}
               <table className="hidden md:table w-full text-left">
@@ -2970,7 +2984,7 @@ export default function App() {
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           {(profile?.role === 'admin' || u.managerId === user?.uid) && (
-                            <button 
+                            <button
                               onClick={() => setEditingUser(u)}
                               className="text-zinc-600 hover:text-orange-500 transition-colors"
                             >
@@ -2978,7 +2992,7 @@ export default function App() {
                             </button>
                           )}
                           {profile?.role === 'admin' && u.uid !== user?.uid && (
-                            <button 
+                            <button
                               onClick={() => setDeletingUser(u)}
                               className="text-zinc-600 hover:text-red-500 transition-colors"
                             >
@@ -3020,7 +3034,7 @@ export default function App() {
                     </div>
                     <div className="flex items-center gap-2">
                       {(profile?.role === 'admin' || u.managerId === user?.uid) && (
-                        <button 
+                        <button
                           onClick={() => setEditingUser(u)}
                           className="p-2 text-zinc-500 active:text-orange-500 transition-colors"
                         >
@@ -3028,7 +3042,7 @@ export default function App() {
                         </button>
                       )}
                       {profile?.role === 'admin' && u.uid !== user?.uid && (
-                        <button 
+                        <button
                           onClick={() => setDeletingUser(u)}
                           className="p-2 text-zinc-500 active:text-red-500 transition-colors"
                         >
@@ -3054,26 +3068,26 @@ export default function App() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="rounded-3xl border border-zinc-900 bg-zinc-900/20 p-8 flex flex-col items-center justify-center space-y-6">
                 <div className="rounded-2xl bg-white p-4">
-                  <QRCodeSVG 
+                  <QRCodeSVG
                     id="qr-code-svg"
-                    value={settings?.qrSecret || 'PDKS-SECRET'} 
+                    value={settings?.qrSecret || 'PDKS-SECRET'}
                     size={200}
                     level="H"
                     includeMargin={false}
                   />
                 </div>
                 <div className="text-center">
-                  <p className="font-bold text-lg"> YerindİşişİŞE GİRİŞşş QR Kodu</p>
+                  <p className="font-bold text-lg"> Yerinde Giriş QR Kodu</p>
                   <p className="text-sm text-zinc-500">Bu kodu yazdırıp iş yerine asabilirsiniz.</p>
                 </div>
                 <div className="flex gap-3">
-                  <button 
+                  <button
                     onClick={handlePrintQR}
                     className="flex items-center gap-2 rounded-xl bg-orange-500 px-6 py-2 text-sm font-bold hover:bg-orange-600 transition-colors"
                   >
                     <Printer size={18} /> Yazdır
                   </button>
-                  <button 
+                  <button
                     onClick={regenerateQRSecret}
                     className="flex items-center gap-2 rounded-xl bg-zinc-800 px-6 py-2 text-sm font-bold hover:bg-zinc-700 transition-colors text-zinc-400"
                   >
@@ -3093,7 +3107,7 @@ export default function App() {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
                           <label className="text-xs font-semibold text-zinc-500 uppercase">Şirket Adı</label>
-                          <input 
+                          <input
                             name="companyName"
                             defaultValue={settings?.companyName}
                             placeholder="Örn: ABC Yazılımazlm Ltd. ti."
@@ -3102,7 +3116,7 @@ export default function App() {
                         </div>
                         <div className="space-y-2">
                           <label className="text-xs font-semibold text-zinc-500 uppercase">Haftalık Çalışma Günü</label>
-                          <select 
+                          <select
                             name="workDaysPerWeek"
                             defaultValue={settings?.workDaysPerWeek || 6}
                             className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
@@ -3113,9 +3127,9 @@ export default function App() {
                         </div>
                         <div className="space-y-2">
                           <label className="text-xs font-semibold text-zinc-500 uppercase flex items-center gap-1">
-                            Hesaplama Toleransı (Dk) <Info size={12} className="text-zinc-600" title="GİşişİŞE GİRİŞşş/erken k/fazla mesai tolerans" />
+                            Hesaplama Toleransı (Dk) <Info size={12} className="text-zinc-600" title="Ge giriş/erken k/fazla mesai tolerans" />
                           </label>
-                          <input 
+                          <input
                             name="roundingThresholdMinutes"
                             type="number"
                             defaultValue={settings?.roundingThresholdMinutes || 30}
@@ -3126,11 +3140,11 @@ export default function App() {
                     </div>
 
                     <div className="space-y-4">
-                      <h4 className="text-xs font-black text-zinc-600 uppercase tracking-widest border-b border-zinc-800 pb-1">Vardiya & Calisma Saatleri</h4>
+                      <h4 className="text-xs font-black text-zinc-600 uppercase tracking-widest border-b border-zinc-800 pb-1">Vardiya & Çalışma Saatleri</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <label className="text-xs font-semibold text-zinc-500 uppercase">Mesai Başlangıcı</label>
-                          <input 
+                          <input
                             name="shiftStart"
                             type="time"
                             defaultValue={settings?.shiftStart || '09:00'}
@@ -3139,7 +3153,7 @@ export default function App() {
                         </div>
                         <div className="space-y-2">
                           <label className="text-xs font-semibold text-zinc-500 uppercase">Mesai Bitişi</label>
-                          <input 
+                          <input
                             name="shiftEnd"
                             type="time"
                             defaultValue={settings?.shiftEnd || '18:00'}
@@ -3154,7 +3168,7 @@ export default function App() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <label className="text-xs font-semibold text-zinc-500 uppercase"> Yeri IP Adresi</label>
-                          <input 
+                          <input
                             name="officeIp"
                             defaultValue={settings?.officeIp}
                             placeholder="Örn: 176.234.12.34"
@@ -3163,7 +3177,7 @@ export default function App() {
                         </div>
                         <div className="space-y-2">
                           <label className="text-xs font-semibold text-zinc-500 uppercase">QR Gizli Anahtar</label>
-                          <input 
+                          <input
                             name="qrSecret"
                             value={settings?.qrSecret || ''}
                             onChange={(e) => setSettings(prev => prev ? { ...prev, qrSecret: e.target.value } : null)}
@@ -3176,7 +3190,7 @@ export default function App() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
                         <label className="text-xs font-semibold text-zinc-400 uppercase tracking-widest">Mola Kurallar</label>
-                        <button 
+                        <button
                           type="button"
                           onClick={() => {
                             const current = settings?.breakRules || [];
@@ -3191,8 +3205,8 @@ export default function App() {
                         {(settings?.breakRules || []).map((rule, idx) => (
                           <div key={idx} className="flex items-end gap-3 bg-zinc-950/50 p-3 rounded-xl border border-zinc-800/50 group">
                             <div className="flex-1 space-y-1">
-                              <label className="text-[10px] text-zinc-600 uppercase font-bold">Calisma Eii (Saat)</label>
-                              <input 
+                              <label className="text-[10px] text-zinc-600 uppercase font-bold">Çalışma Eii (Saat)</label>
+                              <input
                                 name="rule_threshold"
                                 type="number"
                                 step="0.5"
@@ -3202,14 +3216,14 @@ export default function App() {
                             </div>
                             <div className="flex-1 space-y-1">
                               <label className="text-[10px] text-zinc-600 uppercase font-bold">Kesinti (Dakika)</label>
-                              <input 
+                              <input
                                 name="rule_deduction"
                                 type="number"
                                 defaultValue={rule.deductionMinutes}
                                 className="w-full bg-transparent border-b border-zinc-800 focus:border-orange-500 outline-none text-sm py-1"
                               />
                             </div>
-                            <button 
+                            <button
                               type="button"
                               onClick={() => {
                                 const updated = (settings?.breakRules || []).filter((_, i) => i !== idx);
@@ -3292,7 +3306,7 @@ export default function App() {
             </div>
 
             <div className="rounded-3xl border border-zinc-900 bg-zinc-900/20 p-8 space-y-8">
-              {/* Profil Fotoğraf */}
+              {/* Profil Fotoraf */}
               <div className="flex flex-col items-center gap-3">
                 <div className="relative group">
                   {profile?.avatarUrl ? (
@@ -3323,11 +3337,11 @@ export default function App() {
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
                     className="hidden"
-                   onChange={async (e) => {
+                    onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file || !user) return;
                       if (file.size > 8 * 1024 * 1024) {
-                        setStatus({ type: 'error', message: 'Fotoğraf en fazla 8MB olabilir.' });
+                        setStatus({ type: 'error', message: 'Fotoraf en fazla 8MB olabilir.' });
                         return;
                       }
                       setAvatarUploading(true);
@@ -3347,14 +3361,14 @@ export default function App() {
                             URL.revokeObjectURL(objectUrl);
                             resolve(canvas.toDataURL('image/jpeg', 0.8));
                           };
-                          img.onerror = () => reject(new Error('Resim yüklenemedi.'));
+                          img.onerror = () => reject(new Error('Resim yklenemedi.'));
                           img.src = objectUrl;
                         });
                         await userMutation.mutateAsync({ method: 'PUT', id: user.uid, payload: { avatarUrl: avatarBase64 } });
                         setProfile(prev => prev ? { ...prev, avatarUrl: avatarBase64 } : prev);
-                        setStatus({ type: 'success', message: 'Profil Fotoğraf güncellendi.' });
+                        setStatus({ type: 'success', message: 'Profil fotoraf güncellendi.' });
                       } catch (err: any) {
-                        setStatus({ type: 'error', message: 'Fotoğraf yüklenemedi: ' + err.message });
+                        setStatus({ type: 'error', message: 'Fotoraf yklenemedi: ' + err.message });
                       } finally {
                         setAvatarUploading(false);
                         e.target.value = '';
@@ -3369,7 +3383,7 @@ export default function App() {
                   <p className="text-zinc-500 text-xs mt-1">{profile?.role === 'admin' ? 'Yönetici' : 'Personel'}</p>
                 </div>
 
-                {/* Fotoğraf aksiyonlar */}
+                {/* Fotoraf aksiyonlar */}
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => avatarInputRef.current?.click()}
@@ -3377,17 +3391,17 @@ export default function App() {
                     className="flex items-center gap-1.5 rounded-xl bg-orange-500/10 px-4 py-2 text-xs font-bold text-orange-500 hover:bg-orange-500/20 transition-colors disabled:opacity-50"
                   >
                     <Camera size={13} />
-                    {profile?.avatarUrl ? 'Değiştir' : 'Fotoğraf Ekle'}
+                    {profile?.avatarUrl ? 'Değiştir' : 'Fotoraf Ekle'}
                   </button>
                   {profile?.avatarUrl && (
                     <button
                       onClick={async () => {
                         if (!user) return;
-                        if (!window.confirm('Profil Fotoğraf silinsin mi?')) return;
+                        if (!window.confirm('Profil fotoraf silinsin mi?')) return;
                         try {
                           await userMutation.mutateAsync({ method: 'PUT', id: user.uid, payload: { avatarUrl: null } });
                           setProfile(prev => prev ? { ...prev, avatarUrl: undefined } : prev);
-                          setStatus({ type: 'success', message: 'Profil Fotoğraf silindii.' });
+                          setStatus({ type: 'success', message: 'Profil fotoraf silindi.' });
                         } catch (err: any) {
                           setStatus({ type: 'error', message: 'Silinemedi: ' + err.message });
                         }
@@ -3406,19 +3420,19 @@ export default function App() {
                   <p className="font-medium">{profile?.personnelId}</p>
                 </div>
                 <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 space-y-1">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">İşişİŞE GİRİŞşş Tarihi</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">İşe Giriş Tarihi</p>
                   <p className="font-medium">
                     {profile?.startDate ? format(new Date(profile.startDate), 'd MMMM yyyy', { locale: tr }) : '-'}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 space-y-1 md:col-span-2">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Resmi Yıllık İzin Bakiyesi</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Resmi Yıllık Izin Bakiyesi</p>
                   <div className="flex items-center justify-between">
                     <p className="text-2xl font-black text-orange-500">
                       {getEffectiveLeaveBalance(profile)} GÜN
                     </p>
                     <div className="text-right">
-                      <p className="text-[9px] text-zinc-500 uppercase">Hukuki Hak Edişi (Referans)</p>
+                      <p className="text-[9px] text-zinc-500 uppercase">Hukuki Hak Ediş (Referans)</p>
                       <p className="text-xs font-bold text-zinc-400">{calculateLegalLeave(profile?.startDate, profile?.birthDate)} GÜN</p>
                     </div>
                   </div>
@@ -3426,13 +3440,13 @@ export default function App() {
               </div>
 
               <div className="pt-4 space-y-4">
-                <button 
+                <button
                   onClick={() => setShowPasswordChangeModal(true)}
                   className="w-full flex items-center justify-center gap-2 rounded-xl bg-orange-500/10 py-4 font-bold text-orange-500 transition-colors hover:bg-orange-500/20"
                 >
                   <Key size={20} /> Şifreyi Değiştir
                 </button>
-                <button 
+                <button
                   onClick={handleLogout}
                   className="w-full flex items-center justify-center gap-2 rounded-xl bg-red-500/10 py-4 font-bold text-red-500 transition-colors hover:bg-red-500/20"
                 >
@@ -3447,7 +3461,7 @@ export default function App() {
         <AnimatePresence>
           {editingUser && (
             <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
-              <motion.div 
+              <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
@@ -3457,7 +3471,7 @@ export default function App() {
                   <h2 className="text-xl font-bold flex items-center gap-2">
                     <Edit className="text-orange-500" /> Personel Düzenle
                   </h2>
-                  <button 
+                  <button
                     onClick={() => setEditingUser(null)}
                     className="rounded-full bg-zinc-800 p-2 hover:bg-zinc-700"
                   >
@@ -3465,7 +3479,7 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* Profil Fotoğraf Yönetimi */}
+                {/* Profil Fotoraf Yönetimi */}
                 <div className="flex items-center gap-5 p-4 rounded-2xl border border-zinc-800 bg-zinc-900/30">
                   <div className="relative group shrink-0">
                     {editingUser.avatarUrl ? (
@@ -3499,24 +3513,26 @@ export default function App() {
                                 URL.revokeObjectURL(objectUrl);
                                 resolve(canvas.toDataURL('image/jpeg', 0.8));
                               };
-                              img.onerror = () => reject(new Error('Resim yüklenemedi.'));
+                              img.onerror = () => reject(new Error('Resim yklenemedi.'));
                               img.src = objectUrl;
                             });
                             await userMutation.mutateAsync({ method: 'PUT', id: editingUser.uid, payload: { avatarUrl: avatarBase64 } });
                             setEditingUser(prev => prev ? { ...prev, avatarUrl: avatarBase64 } : prev);
                             // Personele bildirim gönder
-                            await fetch('/api/notifications', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('pdks_token') }, body: JSON.stringify({
-                              userId: editingUser.uid,
-                              title: 'Profil Fotoğrafınız Güncellendi',
-                              message: `${profile?.name || 'Yöneticiniz'} Profil Fotoğrafınız güncelledi.`,
-                              type: 'info',
-                              read: false,
-                              link: '/profile',
-                              createdAt: new Date().toISOString(),
-                            }) }).catch(() => {});
-                            setStatus({ type: 'success', message: `${editingUser.name} iin profil Fotoğraf güncellendi.` });
+                            await fetch('/api/notifications', {
+                              method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('pdks_token') }, body: JSON.stringify({
+                                userId: editingUser.uid,
+                                title: 'Profil Fotorafnz Güncellendi',
+                                message: `${profile?.name || 'Yöneticiniz'} profil fotorafnz güncelledi.`,
+                                type: 'info',
+                                read: false,
+                                link: '/profile',
+                                createdAt: new Date().toISOString(),
+                              })
+                            }).catch(() => { });
+                            setStatus({ type: 'success', message: `${editingUser.name} için profil fotoraf güncellendi.` });
                           } catch (err: any) {
-                            setStatus({ type: 'error', message: 'Fotoğraf yüklenemedi: ' + err.message });
+                            setStatus({ type: 'error', message: 'Fotoraf yklenemedi: ' + err.message });
                           } finally {
                             setAvatarUploading(false);
                             e.target.value = '';
@@ -3531,33 +3547,35 @@ export default function App() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm mb-1">Profil Fotoğraf</p>
-                    <p className="text-[11px] text-zinc-500 mb-3">Resmin zerine tklayarak Fotoğraf değiştirebilirsiniz. Değişiklik personele bildirim olarak iletilir.</p>
+                    <p className="font-bold text-sm mb-1">Profil Fotoraf</p>
+                    <p className="text-[11px] text-zinc-500 mb-3">Resmin zerine tklayarak fotoraf değiştirebilirsiniz. Değişiklik personele bildirim olarak iletilir.</p>
                     {editingUser.avatarUrl && (
                       <button
                         type="button"
                         onClick={async () => {
-                          if (!window.confirm('Profil Fotoğraf silinsin mi?')) return;
+                          if (!window.confirm('Profil fotoraf silinsin mi?')) return;
                           try {
                             await userMutation.mutateAsync({ method: 'PUT', id: editingUser.uid, payload: { avatarUrl: null } });
                             setEditingUser(prev => prev ? { ...prev, avatarUrl: undefined } : prev);
-                            await fetch('/api/notifications', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('pdks_token') }, body: JSON.stringify({
-                              userId: editingUser.uid,
-                              title: 'Profil Fotoğrafınız Silindi',
-                              message: `${profile?.name || 'Yöneticiniz'} Profil Fotoğrafınız kaldrd.`,
-                              type: 'info',
-                              read: false,
-                              link: '/profile',
-                              createdAt: new Date().toISOString(),
-                            }) }).catch(() => {});
-                            setStatus({ type: 'success', message: 'Fotoğraf silindii.' });
+                            await fetch('/api/notifications', {
+                              method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('pdks_token') }, body: JSON.stringify({
+                                userId: editingUser.uid,
+                                title: 'Profil Fotorafnz Silindi',
+                                message: `${profile?.name || 'Yöneticiniz'} profil fotorafnz kaldrd.`,
+                                type: 'info',
+                                read: false,
+                                link: '/profile',
+                                createdAt: new Date().toISOString(),
+                              })
+                            }).catch(() => { });
+                            setStatus({ type: 'success', message: 'Fotoraf silindi.' });
                           } catch (err: any) {
                             setStatus({ type: 'error', message: 'Silinemedi: ' + err.message });
                           }
                         }}
                         className="flex items-center gap-1.5 rounded-lg bg-red-500/10 px-3 py-1.5 text-[11px] font-bold text-red-500 hover:bg-red-500/20 transition-colors"
                       >
-                        <Trash2 size={11} /> Fotoğraf Kaldr
+                        <Trash2 size={11} /> Fotoraf Kaldr
                       </button>
                     )}
                   </div>
@@ -3566,7 +3584,7 @@ export default function App() {
                 <form onSubmit={handleUpdateUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Ad Soyad</label>
-                    <input 
+                    <input
                       name="name"
                       required
                       defaultValue={editingUser.name}
@@ -3575,7 +3593,7 @@ export default function App() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Ünvan / Pozisyon</label>
-                    <input 
+                    <input
                       name="title"
                       defaultValue={editingUser.title || ''}
                       placeholder="Örn: Bölüm Müdür, Tekniker"
@@ -3584,7 +3602,7 @@ export default function App() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Yetki</label>
-                    <select 
+                    <select
                       name="role"
                       defaultValue={editingUser.role}
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
@@ -3595,7 +3613,7 @@ export default function App() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Bağlı Olduğu Yönetici</label>
-                    <select 
+                    <select
                       name="managerId"
                       required
                       defaultValue={editingUser.managerId || 'admin_initial'}
@@ -3609,10 +3627,10 @@ export default function App() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase flex items-center justify-between">
-                      Yıllık İzin Bakiyesi (GÜN)
+                      Yıllık Izin Bakiyesi (GÜN)
                       <span className="text-[10px] text-orange-500 lowercase font-normal italic">Mevcut: {getEffectiveLeaveBalance(editingUser)} GÜN</span>
                     </label>
-                    <input 
+                    <input
                       name="leaveBalance"
                       type="number"
                       required
@@ -3621,8 +3639,8 @@ export default function App() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">İşişİŞE GİRİŞşş Tarihi</label>
-                    <input 
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">İşe Giriş Tarihi</label>
+                    <input
                       name="startDate"
                       type="date"
                       defaultValue={editingUser.startDate}
@@ -3631,7 +3649,7 @@ export default function App() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Doğum Tarihi</label>
-                    <input 
+                    <input
                       name="birthDate"
                       type="date"
                       defaultValue={editingUser.birthDate}
@@ -3640,7 +3658,7 @@ export default function App() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Cihaz Kısıtlaması</label>
-                    <input 
+                    <input
                       name="allowedDevice"
                       type="text"
                       defaultValue={editingUser.allowedDevice || ''}
@@ -3653,7 +3671,7 @@ export default function App() {
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-semibold text-zinc-500 uppercase">Sabit Cihaz Kimliği (Fixed ID)</label>
                       {editingUser.deviceId && (
-                        <button 
+                        <button
                           type="button"
                           onClick={() => {
                             const newUpdates = { ...editingUser, deviceId: '' };
@@ -3661,7 +3679,7 @@ export default function App() {
                             fetch('/api/users/update', {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ 
+                              body: JSON.stringify({
                                 adminUid: profile.uid,
                                 targetUid: editingUser.uid,
                                 updates: { deviceId: '' }
@@ -3676,18 +3694,18 @@ export default function App() {
                         </button>
                       )}
                     </div>
-                    <input 
+                    <input
                       name="deviceId"
                       type="text"
                       defaultValue={editingUser.deviceId || ''}
-                      placeholder="Otomatik atanr, manuel girmek iin yaptrn"
+                      placeholder="Otomatik atanr, manuel girmek için yaptrn"
                       className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                     />
                   </div>
                   {/* Nakliye / Uzaktan giriş yetkisi */}
                   <div className="md:col-span-2">
                     <label className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 cursor-pointer hover:border-orange-500/50 transition-colors">
-                      <input 
+                      <input
                         name="canRemoteCheckIn"
                         type="checkbox"
                         value="true"
@@ -3706,7 +3724,7 @@ export default function App() {
 
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Şifre Sfrla (Yeni Şifre)</label>
-                    <input 
+                    <input
                       name="password"
                       type="password"
                       placeholder="Değiştirmek istemiyorsanz bo brakn"
@@ -3714,7 +3732,7 @@ export default function App() {
                     />
                   </div>
                   <div className="md:col-span-2 pt-4 flex gap-3">
-                    <button 
+                    <button
                       type="button"
                       onClick={() => {
                         setEditingUser(null);
@@ -3735,749 +3753,753 @@ export default function App() {
         </AnimatePresence>
 
         {/* Manual Log Modal */}
-      <AnimatePresence>
-        {showManualLogModal && (
-          <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowManualLogModal(false)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-md overflow-hidden rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl"
-            >
-              <div className="mb-6 flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-bold flex items-center gap-2">
-                    <Clock4 size={24} className="text-orange-500" />
-                    {editingLog ? 'Kayd Düzenle' : 'Manuel Kayıt Ekle'}
-                  </h3>
-                  {/* Hedef kişi adını göster */}
-                  {(() => {
-                    const tid = selectedDayDetails?.userId || selectedPersonnelId || editingLog?.userId;
-                    const tName = tid ? (allUsers.find(u => u.uid === tid)?.name || (profile?.uid === tid ? profile?.name : null)) : null;
-                    return tName ? <p className="text-xs text-zinc-500 mt-0.5">Personel: <span className="text-orange-400 font-bold">{tName}</span></p> : null;
-                  })()}
+        <AnimatePresence>
+          {showManualLogModal && (
+            <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowManualLogModal(false)}
+                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative w-full max-w-md overflow-hidden rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl"
+              >
+                <div className="mb-6 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold flex items-center gap-2">
+                      <Clock4 size={24} className="text-orange-500" />
+                      {editingLog ? 'Kayd Düzenle' : 'Manuel Kayt Ekle'}
+                    </h3>
+                    {/* Hedef kişi adını göster */}
+                    {(() => {
+                      const tid = selectedDayDetails?.userId || selectedPersonnelId || editingLog?.userId;
+                      const tName = tid ? (allUsers.find(u => u.uid === tid)?.name || (profile?.uid === tid ? profile?.name : null)) : null;
+                      return tName ? <p className="text-xs text-zinc-500 mt-0.5">Personel: <span className="text-orange-400 font-bold">{tName}</span></p> : null;
+                    })()}
+                  </div>
+                  <button onClick={() => setShowManualLogModal(false)} className="text-zinc-500 hover:text-white">
+                    <X size={24} />
+                  </button>
                 </div>
-                <button onClick={() => setShowManualLogModal(false)} className="text-zinc-500 hover:text-white">
-                  <X size={24} />
-                </button>
-              </div>
 
-              <form onSubmit={handleManualLog} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Tarih</label>
-                  <input
-                    type="date"
-                    required
-                    value={manualLogDate}
-                    onChange={(e) => setManualLogDate(e.target.value)}
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Saat</label>
-                  <input
-                    type="time"
-                    required
-                    value={manualLogTime}
-                    onChange={(e) => setManualLogTime(e.target.value)}
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">lem Tipi</label>
-                  <div className="grid grid-cols-2 gap-2">
+                <form onSubmit={handleManualLog} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Tarih</label>
+                    <input
+                      type="date"
+                      required
+                      value={manualLogDate}
+                      onChange={(e) => setManualLogDate(e.target.value)}
+                      className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Saat</label>
+                    <input
+                      type="time"
+                      required
+                      value={manualLogTime}
+                      onChange={(e) => setManualLogTime(e.target.value)}
+                      className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">İşlem Tipi</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setManualLogType('in')}
+                        className={cn(
+                          "rounded-xl py-3 text-sm font-bold transition-colors",
+                          manualLogType === 'in' ? "bg-emerald-600 text-white" : "bg-zinc-900 text-zinc-500"
+                        )}
+                      >
+                        Giriş
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setManualLogType('out')}
+                        className={cn(
+                          "rounded-xl py-3 text-sm font-bold transition-colors",
+                          manualLogType === 'out' ? "bg-orange-600 text-white" : "bg-zinc-900 text-zinc-500"
+                        )}
+                      >
+                        k
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 flex gap-2">
+                    {editingLog && (
+                      <button
+                        type="button"
+                        onClick={() => setDeletingLog(editingLog)}
+                        className="flex-1 rounded-xl bg-red-500/10 py-4 font-bold text-red-500 transition-colors hover:bg-red-500/20"
+                      >
+                        Sil
+                      </button>
+                    )}
                     <button
-                      type="button"
-                      onClick={() => setManualLogType('in')}
-                      className={cn(
-                        "rounded-xl py-3 text-sm font-bold transition-colors",
-                        manualLogType === 'in' ? "bg-emerald-600 text-white" : "bg-zinc-900 text-zinc-500"
-                      )}
+                      type="submit"
+                      className="flex-[2] rounded-xl bg-orange-500 py-4 font-bold text-white transition-colors hover:bg-orange-600"
                     >
-                      Giriş
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setManualLogType('out')}
-                      className={cn(
-                        "rounded-xl py-3 text-sm font-bold transition-colors",
-                        manualLogType === 'out' ? "bg-orange-600 text-white" : "bg-zinc-900 text-zinc-500"
-                      )}
-                    >
-                      k
+                      {editingLog ? 'Güncelle' : 'Kaydet'}
                     </button>
                   </div>
-                </div>
+                </form>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
-                <div className="pt-4 flex gap-2">
-                  {editingLog && (
+        {/* Edit Leave Modal */}
+        <AnimatePresence>
+          {editingLeave && (
+            <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingLeave(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative w-full max-w-lg rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl"
+              >
+                <div className="mb-6 flex items-center justify-between">
+                  <h3 className="text-xl font-bold">Izin Talebini Düzenle</h3>
+                  <button onClick={() => setEditingLeave(null)} className="rounded-full bg-zinc-900 p-2 text-zinc-500 hover:bg-zinc-800"><X size={20} /></button>
+                </div>
+                <form onSubmit={handleUpdateLeave} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-zinc-500 uppercase">Başlangıç</label>
+                      <input name="startDate" type="date" required defaultValue={editingLeave.startDate} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-zinc-500 uppercase">Bitiş</label>
+                      <input name="endDate" type="date" required defaultValue={editingLeave.endDate} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Gün Sayısı</label>
+                    <input name="days" type="number" required defaultValue={editingLeave.days} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Durum</label>
+                    <select name="status" defaultValue={editingLeave.status} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none appearance-none">
+                      <option value="pending">Bekliyor</option>
+                      <option value="approved">onaylandı</option>
+                      <option value="rejected">Reddedildi</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Açıklama</label>
+                    <textarea name="reason" required defaultValue={editingLeave.reason} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none h-24 resize-none" />
+                  </div>
+                  <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={() => setDeletingLog(editingLog)}
-                      className="flex-1 rounded-xl bg-red-500/10 py-4 font-bold text-red-500 transition-colors hover:bg-red-500/20"
+                      onClick={() => {
+                        if (!editingLeave) return;
+                        setDeletingLeave(editingLeave);
+                        setEditingLeave(null);
+                      }}
+                      className="flex-1 rounded-xl bg-red-500/10 py-3 font-bold text-red-500 transition-colors hover:bg-red-500/20"
                     >
                       Sil
                     </button>
-                  )}
-                  <button
-                    type="submit"
-                    className="flex-[2] rounded-xl bg-orange-500 py-4 font-bold text-white transition-colors hover:bg-orange-600"
-                  >
-                    {editingLog ? 'Güncelle' : 'Kaydet'}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+                    <button type="submit" className="flex-[2] rounded-xl bg-orange-500 py-3 font-bold text-white transition-colors hover:bg-orange-600">Güncelle</button>
+                  </div>
+                </form>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
-      {/* Edit Leave Modal */}
-      <AnimatePresence>
-        {editingLeave && (
-          <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingLeave(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-lg rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl"
-            >
-              <div className="mb-6 flex items-center justify-between">
-                <h3 className="text-xl font-bold">İzin Talebini Düzenle</h3>
-                <button onClick={() => setEditingLeave(null)} className="rounded-full bg-zinc-900 p-2 text-zinc-500 hover:bg-zinc-800"><X size={20} /></button>
-              </div>
-              <form onSubmit={handleUpdateLeave} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+        {/* Overtime Edit Modal */}
+        <AnimatePresence>
+          {editingOvertime && (
+            <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingOvertime(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative w-full max-w-lg rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl"
+              >
+                <div className="mb-6 flex items-center justify-between">
+                  <h3 className="text-xl font-bold">Mesai Düzenle</h3>
+                  <button onClick={() => setEditingOvertime(null)} className="rounded-full bg-zinc-900 p-2 text-zinc-500 hover:bg-zinc-800"><X size={20} /></button>
+                </div>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  await overtimeMutation.mutateAsync({
+                    method: 'PUT', id: editingOvertime.id!, payload: {
+                      date: formData.get('date'),
+                      hours: Number(formData.get('hours')),
+                      description: formData.get('description'),
+                      status: formData.get('status')
+                    }
+                  });
+                  setEditingOvertime(null);
+                  setStatus({ type: 'success', message: 'Mesai kayd güncellendi' });
+                }} className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">Balang</label>
-                    <input name="startDate" type="date" required defaultValue={editingLeave.startDate} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" />
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Tarih</label>
+                    <input name="date" type="date" required defaultValue={editingOvertime.date} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">Biti</label>
-                    <input name="endDate" type="date" required defaultValue={editingLeave.endDate} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" />
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Saat</label>
+                    <input name="hours" type="number" step="0.5" required defaultValue={editingOvertime.hours} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Gün Sayısı</label>
-                  <input name="days" type="number" required defaultValue={editingLeave.days} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Durum</label>
-                  <select name="status" defaultValue={editingLeave.status} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none appearance-none">
-                    <option value="pending">Bekliyor</option>
-                    <option value="approved">Onayılandı</option>
-                    <option value="rejected">Reddedildi</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Aklama</label>
-                  <textarea name="reason" required defaultValue={editingLeave.reason} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none h-24 resize-none" />
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!editingLeave) return;
-                      setDeletingLeave(editingLeave);
-                      setEditingLeave(null);
-                    }}
-                    className="flex-1 rounded-xl bg-red-500/10 py-3 font-bold text-red-500 transition-colors hover:bg-red-500/20"
-                  >
-                    Sil
-                  </button>
-                  <button type="submit" className="flex-[2] rounded-xl bg-orange-500 py-3 font-bold text-white transition-colors hover:bg-orange-600">Güncelle</button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Overtime Edit Modal */}
-      <AnimatePresence>
-        {editingOvertime && (
-          <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingOvertime(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-lg rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl"
-            >
-              <div className="mb-6 flex items-center justify-between">
-                <h3 className="text-xl font-bold">Mesai Düzenle</h3>
-                <button onClick={() => setEditingOvertime(null)} className="rounded-full bg-zinc-900 p-2 text-zinc-500 hover:bg-zinc-800"><X size={20} /></button>
-              </div>
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-                await overtimeMutation.mutateAsync({ method: 'PUT', id: editingOvertime.id!, payload: {
-                  date: formData.get('date'),
-                  hours: Number(formData.get('hours')),
-                  description: formData.get('description'),
-                  status: formData.get('status')
-                } });
-                setEditingOvertime(null);
-                setStatus({ type: 'success', message: 'Mesai kayd güncellendi' });
-              }} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Tarih</label>
-                  <input name="date" type="date" required defaultValue={editingOvertime.date} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Saat</label>
-                  <input name="hours" type="number" step="0.5" required defaultValue={editingOvertime.hours} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Durum</label>
-                  <select name="status" defaultValue={editingOvertime.status} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none appearance-none">
-                    <option value="pending">Bekliyor</option>
-                    <option value="approved">Onayılandı</option>
-                    <option value="rejected">Reddedildi</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Aklama</label>
-                  <textarea name="description" required defaultValue={editingOvertime.description} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none h-24 resize-none" />
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (!editingOvertime?.id) return;
-                      await overtimeMutation.mutateAsync({ method: 'PUT', id: editingOvertime.id, payload: {
-                        deleted: true,
-                      } });
-                      setEditingOvertime(null);
-                      setStatus({ type: 'success', message: 'Mesai kayd silindii.' });
-                    }}
-                    className="flex-1 rounded-xl bg-red-500/10 py-3 font-bold text-red-500 transition-colors hover:bg-red-500/20"
-                  >
-                    Sil
-                  </button>
-                  <button type="submit" className="flex-[2] rounded-xl bg-orange-500 py-3 font-bold text-white transition-colors hover:bg-orange-600">Güncelle</button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Password Change Modal */}
-      <AnimatePresence>
-        {showPasswordChangeModal && (
-          <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowPasswordChangeModal(false)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-sm rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl"
-            >
-              <div className="mb-6 flex items-center justify-between">
-                <h3 className="text-xl font-bold flex items-center gap-2">
-                  <Key size={24} className="text-orange-500" /> Şifreyi Değiştir
-                </h3>
-                <button onClick={() => setShowPasswordChangeModal(false)} className="rounded-full bg-zinc-900 p-2 text-zinc-500 hover:bg-zinc-800"><X size={20} /></button>
-              </div>
-              <form onSubmit={handleSelfPasswordChange} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Yeni Şifre</label>
-                  <input 
-                    type="password" 
-                    required 
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Şifrenizi girişn" 
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" 
-                  />
-                </div>
-                <button type="submit" className="w-full rounded-xl bg-orange-500 py-4 font-bold text-white transition-colors hover:bg-orange-600">Güncelle</button>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Dashboard Stat Detail Modal */}
-      <AnimatePresence>
-        {dashboardStatModal && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDashboardStatModal(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-sm rounded-3xl border border-zinc-800 bg-zinc-950 shadow-2xl overflow-hidden"
-            >
-              {/* Header */}
-              <div className={cn(
-                "px-6 py-5 flex items-center justify-between",
-                dashboardStatModal.color === 'emerald' ? "bg-emerald-500/10 border-b border-emerald-500/20" :
-                dashboardStatModal.color === 'orange' ? "bg-orange-500/10 border-b border-orange-500/20" :
-                dashboardStatModal.color === 'red' ? "bg-red-500/10 border-b border-red-500/20" :
-                "bg-zinc-900/40 border-b border-zinc-800"
-              )}>
-                <div className="flex items-center gap-3">
-                  <div className={cn(
-                    "p-2 rounded-xl",
-                    dashboardStatModal.color === 'emerald' ? "bg-emerald-500/20 text-emerald-400" :
-                    dashboardStatModal.color === 'orange' ? "bg-orange-500/20 text-orange-400" :
-                    dashboardStatModal.color === 'red' ? "bg-red-500/20 text-red-400" :
-                    "bg-zinc-800 text-zinc-400"
-                  )}>
-                    {dashboardStatModal.icon}
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Durum</label>
+                    <select name="status" defaultValue={editingOvertime.status} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none appearance-none">
+                      <option value="pending">Bekliyor</option>
+                      <option value="approved">onaylandı</option>
+                      <option value="rejected">Reddedildi</option>
+                    </select>
                   </div>
-                  <div>
-                    <p className="font-black text-white">{dashboardStatModal.title}</p>
-                    <p className="text-xs text-zinc-400">{dashboardStatModal.people.length} kişi • Bugün</p>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Açıklama</label>
+                    <textarea name="description" required defaultValue={editingOvertime.description} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none h-24 resize-none" />
                   </div>
-                </div>
-                <button onClick={() => setDashboardStatModal(null)} className="rounded-full bg-zinc-800/60 p-2 text-zinc-400 hover:bg-zinc-700">
-                  <X size={18} />
-                </button>
-              </div>
-              {/* List */}
-              <div className="max-h-[60vh] overflow-y-auto divide-y divide-zinc-900">
-                {dashboardStatModal.people.length === 0 ? (
-                  <div className="p-10 text-center text-zinc-500 text-sm">Bu kategoride kimse yok.</div>
-                ) : (
-                  dashboardStatModal.people.map(p => (
-                    <div key={p.uid} className="flex items-center gap-4 px-6 py-4 hover:bg-zinc-900/40 transition-colors">
-                      <div className={cn(
-                        "h-9 w-9 rounded-full flex items-center justify-center text-sm font-black shrink-0",
-                        dashboardStatModal.color === 'emerald' ? "bg-emerald-500/20 text-emerald-400" :
-                        dashboardStatModal.color === 'orange' ? "bg-orange-500/20 text-orange-400" :
-                        dashboardStatModal.color === 'red' ? "bg-red-500/20 text-red-400" :
-                        "bg-zinc-800 text-zinc-400"
-                      )}>
-                        {p.name[0]?.toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-white truncate">{p.name}</p>
-                        <p className="text-[11px] text-zinc-500 truncate">{p.detail}</p>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Day Details Modal */}
-      <AnimatePresence>
-        {selectedDayDetails && (
-          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedDayDetails(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-lg rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl max-h-[80vh] overflow-y-auto"
-            >
-              <div className="mb-6 flex items-center justify-between sticky top-0 bg-zinc-950 py-2 z-10 border-b border-zinc-900">
-                <div>
-                  <h3 className="text-xl font-bold">{format(new Date(selectedDayDetails.date), 'd MMMM yyyy', { locale: tr })}</h3>
-                  <p className="text-xs text-zinc-500">
-                    {(allUsers.find(u => u.uid === selectedDayDetails.userId)?.name 
-                      || (profile?.uid === selectedDayDetails.userId ? profile?.name : null)
-                      || 'Personel') + ' Hareketleri'}
-                  </p>
-                </div>
-                <button onClick={() => setSelectedDayDetails(null)} className="rounded-full bg-zinc-900 p-2 text-zinc-500 hover:bg-zinc-800"><X size={20} /></button>
-              </div>
-              
-              <div className="space-y-6 pt-4">
-                {/* Manuel Hareket Ekle: admin veya bu günün sahibinin yoneticisi */}
-                {(() => {
-                  const dayUserId = selectedDayDetails.userId;
-                  const dayUser = allUsers.find(u => u.uid === dayUserId);
-                  const canAddManual = profile?.role === 'admin' ||
-                    dayUser?.managerId === profile?.uid ||
-                    (dayUserId === profile?.uid && profile?.canRemoteCheckIn);
-                  if (!canAddManual) return null;
-                  return (
+                  <div className="flex gap-2">
                     <button
-                      onClick={() => {
-                        setEditingLog(null);
-                        setManualLogDate(selectedDayDetails.date);
-                        setManualLogTime(format(new Date(), 'HH:mm'));
-                        setManualLogType('in');
-                        setShowManualLogModal(true);
+                      type="button"
+                      onClick={async () => {
+                        if (!editingOvertime?.id) return;
+                        await overtimeMutation.mutateAsync({
+                          method: 'PUT', id: editingOvertime.id, payload: {
+                            deleted: true,
+                          }
+                        });
+                        setEditingOvertime(null);
+                        setStatus({ type: 'success', message: 'Mesai kayd silindi.' });
                       }}
-                      className="w-full flex items-center justify-center gap-2 rounded-2xl bg-emerald-500/10 py-4 text-emerald-500 font-bold hover:bg-emerald-500/20 transition-all border border-emerald-500/20 border-dashed"
+                      className="flex-1 rounded-xl bg-red-500/10 py-3 font-bold text-red-500 transition-colors hover:bg-red-500/20"
                     >
-                      <Plus size={20} /> Manuel Hareket Ekle
+                      Sil
                     </button>
-                  );
-                })()}
-                {/* Logs Section */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-2">
-                    <LogIn size={14} className="text-emerald-500" /> Giriş-k Kayıtlıar
-                  </h4>
-                  <div className="space-y-2">
-                    {logs.filter(l => l.userId === selectedDayDetails.userId && !l.deleted && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM-dd') === selectedDayDetails.date).length === 0 ? (
-                      <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gün için giriş/k kayd yok.</p>
-                    ) : (
-                      logs.filter(l => l.userId === selectedDayDetails.userId && !l.deleted && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM-dd') === selectedDayDetails.date)
-                        .sort((a,b) => a.timestamp.toDate() - b.timestamp.toDate())
-                        .map(log => (
-                        <div key={log.id} className={cn(
-                          "flex items-center justify-between p-3 rounded-xl border",
-                          log.status === 'pending' 
-                            ? "bg-amber-500/5 border-amber-500/20" 
-                            : "bg-zinc-900/40 border-zinc-800"
-                        )}>
-                          <div className="flex items-center gap-3">
-                            <div className={cn(
-                              "p-2 rounded-lg", 
-                              log.status === 'error' ? "bg-red-500/10 text-red-500" :
-                              log.status === 'pending' ? "bg-amber-500/10 text-amber-400" :
-                              log.type === 'in' ? "bg-emerald-500/10 text-emerald-500" : "bg-orange-500/10 text-orange-500"
-                            )}>
-                              {log.status === 'error' ? <ShieldAlert size={14} /> : 
-                               log.status === 'pending' ? <Clock3 size={14} /> :
-                               log.type === 'in' ? <LogIn size={14} /> : <LogOut size={14} />}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-bold truncate">
-                                {format(log.timestamp.toDate(), 'HH:mm')}
-                                {log.status === 'pending' && <span className="ml-2 text-[9px] text-amber-400 font-black uppercase">Onay Bekliyor</span>}
-                                {log.status === 'error' && <span className="ml-2 text-[9px] text-red-500 font-black uppercase">Hata</span>}
-                              </p>
-                              <p className="text-[10px] text-zinc-500 uppercase truncate">
-                                {log.status === 'error' ? log.errorMessage : 
-                                 log.status === 'pending' ? 'Yönetici onay bekleniyor' :
-                                 (log.type === 'in' ? 'Giriş' : 'k')}
-                              </p>
-                              <p className="text-[9px] text-zinc-600 font-mono truncate">{log.ipAddress}</p>
-                            </div>
-                          </div>
-                          {(profile?.role === 'admin' || allUsers.find(u => u.uid === log.userId)?.managerId === profile?.uid) && (
-                            <div className="flex items-center gap-1">
-                              <button onClick={() => {
-                                setEditingLog(log);
-                                setManualLogDate(format(log.timestamp.toDate(), 'yyyy-MM-dd'));
-                                setManualLogTime(format(log.timestamp.toDate(), 'HH:mm'));
-                                setManualLogType(log.type);
-                                setShowManualLogModal(true);
-                              }} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500"><Edit size={14}/></button>
-                              <button onClick={() => setDeletingLog(log)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-red-500"><Trash2 size={14}/></button>
-                            </div>
-                          )}
-                        </div>
-                      ))
-                    )}
+                    <button type="submit" className="flex-[2] rounded-xl bg-orange-500 py-3 font-bold text-white transition-colors hover:bg-orange-600">Güncelle</button>
                   </div>
-                </div>
+                </form>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
-                {/* Overtime Section */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-2">
-                    <Clock size={14} className="text-blue-500" /> Mesai Kayıtlıar
-                  </h4>
+        {/* Password Change Modal */}
+        <AnimatePresence>
+          {showPasswordChangeModal && (
+            <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowPasswordChangeModal(false)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative w-full max-w-sm rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl"
+              >
+                <div className="mb-6 flex items-center justify-between">
+                  <h3 className="text-xl font-bold flex items-center gap-2">
+                    <Key size={24} className="text-orange-500" /> Şifreyi Değiştir
+                  </h3>
+                  <button onClick={() => setShowPasswordChangeModal(false)} className="rounded-full bg-zinc-900 p-2 text-zinc-500 hover:bg-zinc-800"><X size={20} /></button>
+                </div>
+                <form onSubmit={handleSelfPasswordChange} className="space-y-4">
                   <div className="space-y-2">
-                    {overtimeRequests.filter(r => r.userId === selectedDayDetails.userId && r.date === selectedDayDetails.date).length === 0 ? (
-                      <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gün için mesai kayd yok.</p>
-                    ) : (
-                      overtimeRequests.filter(r => r.userId === selectedDayDetails.userId && r.date === selectedDayDetails.date).map(req => (
-                        <div key={req.id} className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/40 border border-zinc-800">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
-                              <Clock size={14} />
-                            </div>
-                            <div>
-                              <p className="text-sm font-bold">{req.hours} Saat</p>
-                              <p className={cn("text-[9px] font-bold uppercase", 
-                                req.status === 'approved' ? "text-emerald-500" : 
-                                req.status === 'pending' ? "text-orange-500" : "text-red-500"
-                              )}>{req.status}</p>
-                            </div>
-                          </div>
-                          {profile?.role === 'admin' && (
-                            <div className="flex items-center gap-1">
-                              <button onClick={() => setEditingOvertime(req)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500"><Edit size={14}/></button>
-                              <button 
-                                onClick={() => setDeletingOvertime(req)} 
-                                className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-red-500"
-                              >
-                                <Trash2 size={14}/>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      ))
-                    )}
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Yeni Şifre</label>
+                    <input
+                      type="password"
+                      required
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Şifrenizi giriniz"
+                      className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
+                    />
                   </div>
-                </div>
+                  <button type="submit" className="w-full rounded-xl bg-orange-500 py-4 font-bold text-white transition-colors hover:bg-orange-600">Güncelle</button>
+                </form>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
-                {/* Confirm Delete Overtime Modal */}
-                <AnimatePresence>
-                  {deletingOvertime && (
-                    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeletingOvertime(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-                      <motion.div 
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.9, opacity: 0 }}
-                        className="relative w-full max-w-sm rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl text-center"
-                      >
-                        <div className="mb-4 flex justify-center text-red-500"><Trash2 size={32} /></div>
-                        <h3 className="text-xl font-bold mb-2">Mesai Silinsin mi?</h3>
-                        <p className="text-sm text-zinc-500 mb-6">{deletingOvertime.date} tarihli {deletingOvertime.hours} saatlik mesai kayd silinecektir.</p>
-                        <div className="flex gap-3">
-                          <button onClick={() => setDeletingOvertime(null)} className="flex-1 rounded-xl bg-zinc-900 py-3 font-bold text-zinc-400">Vazge</button>
-                          <button 
-                            onClick={async () => {
-                              await overtimeMutation.mutateAsync({ method: 'DELETE', id: deletingOvertime.id! });
-                              setDeletingOvertime(null);
-                              setStatus({ type: 'success', message: 'Mesai kayd silindii.' });
-                            }} 
-                            className="flex-1 rounded-xl bg-red-500 py-3 font-bold text-white"
-                          >
-                            Sil
-                          </button>
-                        </div>
-                      </motion.div>
+        {/* Dashboard Stat Detail Modal */}
+        <AnimatePresence>
+          {dashboardStatModal && (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDashboardStatModal(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative w-full max-w-sm rounded-3xl border border-zinc-800 bg-zinc-950 shadow-2xl overflow-hidden"
+              >
+                {/* Header */}
+                <div className={cn(
+                  "px-6 py-5 flex items-center justify-between",
+                  dashboardStatModal.color === 'emerald' ? "bg-emerald-500/10 border-b border-emerald-500/20" :
+                    dashboardStatModal.color === 'orange' ? "bg-orange-500/10 border-b border-orange-500/20" :
+                      dashboardStatModal.color === 'red' ? "bg-red-500/10 border-b border-red-500/20" :
+                        "bg-zinc-900/40 border-b border-zinc-800"
+                )}>
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "p-2 rounded-xl",
+                      dashboardStatModal.color === 'emerald' ? "bg-emerald-500/20 text-emerald-400" :
+                        dashboardStatModal.color === 'orange' ? "bg-orange-500/20 text-orange-400" :
+                          dashboardStatModal.color === 'red' ? "bg-red-500/20 text-red-400" :
+                            "bg-zinc-800 text-zinc-400"
+                    )}>
+                      {dashboardStatModal.icon}
                     </div>
+                    <div>
+                      <p className="font-black text-white">{dashboardStatModal.title}</p>
+                      <p className="text-xs text-zinc-400">{dashboardStatModal.people.length} kişi • Bugün</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setDashboardStatModal(null)} className="rounded-full bg-zinc-800/60 p-2 text-zinc-400 hover:bg-zinc-700">
+                    <X size={18} />
+                  </button>
+                </div>
+                {/* List */}
+                <div className="max-h-[60vh] overflow-y-auto divide-y divide-zinc-900">
+                  {dashboardStatModal.people.length === 0 ? (
+                    <div className="p-10 text-center text-zinc-500 text-sm">Bu kategoride kimse yok.</div>
+                  ) : (
+                    dashboardStatModal.people.map(p => (
+                      <div key={p.uid} className="flex items-center gap-4 px-6 py-4 hover:bg-zinc-900/40 transition-colors">
+                        <div className={cn(
+                          "h-9 w-9 rounded-full flex items-center justify-center text-sm font-black shrink-0",
+                          dashboardStatModal.color === 'emerald' ? "bg-emerald-500/20 text-emerald-400" :
+                            dashboardStatModal.color === 'orange' ? "bg-orange-500/20 text-orange-400" :
+                              dashboardStatModal.color === 'red' ? "bg-red-500/20 text-red-400" :
+                                "bg-zinc-800 text-zinc-400"
+                        )}>
+                          {p.name[0]?.toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-white truncate">{p.name}</p>
+                          <p className="text-[11px] text-zinc-500 truncate">{p.detail}</p>
+                        </div>
+                      </div>
+                    ))
                   )}
-                </AnimatePresence>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
-                {/* Leave Section */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-2">
-                    <FileText size={14} className="text-orange-500" /> İzin Kayıtlıar
-                  </h4>
-                  <div className="space-y-2">
-                    {leaveRequests.filter(r => r.userId === selectedDayDetails.userId && selectedDayDetails.date >= r.startDate && selectedDayDetails.date <= r.endDate).length === 0 ? (
-                      <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gün için izin kayd yok.</p>
-                    ) : (
-                      leaveRequests.filter(r => r.userId === selectedDayDetails.userId && selectedDayDetails.date >= r.startDate && selectedDayDetails.date <= r.endDate).map(req => (
-                        <div key={req.id} className="flex flex-col p-3 rounded-xl bg-zinc-900/40 border border-zinc-800 space-y-2">
-                          <div className="flex items-center justify-between">
+        {/* Day Details Modal */}
+        <AnimatePresence>
+          {selectedDayDetails && (
+            <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedDayDetails(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative w-full max-w-lg rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl max-h-[80vh] overflow-y-auto"
+              >
+                <div className="mb-6 flex items-center justify-between sticky top-0 bg-zinc-950 py-2 z-10 border-b border-zinc-900">
+                  <div>
+                    <h3 className="text-xl font-bold">{format(new Date(selectedDayDetails.date), 'd MMMM yyyy', { locale: tr })}</h3>
+                    <p className="text-xs text-zinc-500">
+                      {(allUsers.find(u => u.uid === selectedDayDetails.userId)?.name
+                        || (profile?.uid === selectedDayDetails.userId ? profile?.name : null)
+                        || 'Personel') + ' Hareketleri'}
+                    </p>
+                  </div>
+                  <button onClick={() => setSelectedDayDetails(null)} className="rounded-full bg-zinc-900 p-2 text-zinc-500 hover:bg-zinc-800"><X size={20} /></button>
+                </div>
+
+                <div className="space-y-6 pt-4">
+                  {/* Manuel Hareket Ekle: admin veya bu günün sahibinin yoneticisi */}
+                  {(() => {
+                    const dayUserId = selectedDayDetails.userId;
+                    const dayUser = allUsers.find(u => u.uid === dayUserId);
+                    const canAddManual = profile?.role === 'admin' ||
+                      dayUser?.managerId === profile?.uid ||
+                      (dayUserId === profile?.uid && profile?.canRemoteCheckIn);
+                    if (!canAddManual) return null;
+                    return (
+                      <button
+                        onClick={() => {
+                          setEditingLog(null);
+                          setManualLogDate(selectedDayDetails.date);
+                          setManualLogTime(format(new Date(), 'HH:mm'));
+                          setManualLogType('in');
+                          setShowManualLogModal(true);
+                        }}
+                        className="w-full flex items-center justify-center gap-2 rounded-2xl bg-emerald-500/10 py-4 text-emerald-500 font-bold hover:bg-emerald-500/20 transition-all border border-emerald-500/20 border-dashed"
+                      >
+                        <Plus size={20} /> Manuel Hareket Ekle
+                      </button>
+                    );
+                  })()}
+                  {/* Logs Section */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-2">
+                      <LogIn size={14} className="text-emerald-500" /> Giriş-Çıkış Kayıtlar
+                    </h4>
+                    <div className="space-y-2">
+                      {logs.filter(l => l.userId === selectedDayDetails.userId && !l.deleted && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM-dd') === selectedDayDetails.date).length === 0 ? (
+                        <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gün için giriş/k kayd yok.</p>
+                      ) : (
+                        logs.filter(l => l.userId === selectedDayDetails.userId && !l.deleted && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM-dd') === selectedDayDetails.date)
+                          .sort((a, b) => a.timestamp.toDate() - b.timestamp.toDate())
+                          .map(log => (
+                            <div key={log.id} className={cn(
+                              "flex items-center justify-between p-3 rounded-xl border",
+                              log.status === 'pending'
+                                ? "bg-amber-500/5 border-amber-500/20"
+                                : "bg-zinc-900/40 border-zinc-800"
+                            )}>
+                              <div className="flex items-center gap-3">
+                                <div className={cn(
+                                  "p-2 rounded-lg",
+                                  log.status === 'error' ? "bg-red-500/10 text-red-500" :
+                                    log.status === 'pending' ? "bg-amber-500/10 text-amber-400" :
+                                      log.type === 'in' ? "bg-emerald-500/10 text-emerald-500" : "bg-orange-500/10 text-orange-500"
+                                )}>
+                                  {log.status === 'error' ? <ShieldAlert size={14} /> :
+                                    log.status === 'pending' ? <Clock3 size={14} /> :
+                                      log.type === 'in' ? <LogIn size={14} /> : <LogOut size={14} />}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-bold truncate">
+                                    {format(log.timestamp.toDate(), 'HH:mm')}
+                                    {log.status === 'pending' && <span className="ml-2 text-[9px] text-amber-400 font-black uppercase">Onay Bekliyor</span>}
+                                    {log.status === 'error' && <span className="ml-2 text-[9px] text-red-500 font-black uppercase">Hata</span>}
+                                  </p>
+                                  <p className="text-[10px] text-zinc-500 uppercase truncate">
+                                    {log.status === 'error' ? log.errorMessage :
+                                      log.status === 'pending' ? 'Yönetici onay bekleniyor' :
+                                        (log.type === 'in' ? 'Giriş' : 'Çıkış')}
+                                  </p>
+                                  <p className="text-[9px] text-zinc-600 font-mono truncate">{log.ipAddress}</p>
+                                </div>
+                              </div>
+                              {(profile?.role === 'admin' || allUsers.find(u => u.uid === log.userId)?.managerId === profile?.uid) && (
+                                <div className="flex items-center gap-1">
+                                  <button onClick={() => {
+                                    setEditingLog(log);
+                                    setManualLogDate(format(log.timestamp.toDate(), 'yyyy-MM-dd'));
+                                    setManualLogTime(format(log.timestamp.toDate(), 'HH:mm'));
+                                    setManualLogType(log.type);
+                                    setShowManualLogModal(true);
+                                  }} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500"><Edit size={14} /></button>
+                                  <button onClick={() => setDeletingLog(log)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-red-500"><Trash2 size={14} /></button>
+                                </div>
+                              )}
+                            </div>
+                          ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Overtime Section */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-2">
+                      <Clock size={14} className="text-blue-500" /> Mesai Kayıtlar
+                    </h4>
+                    <div className="space-y-2">
+                      {overtimeRequests.filter(r => r.userId === selectedDayDetails.userId && r.date === selectedDayDetails.date).length === 0 ? (
+                        <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gün için mesai kayd yok.</p>
+                      ) : (
+                        overtimeRequests.filter(r => r.userId === selectedDayDetails.userId && r.date === selectedDayDetails.date).map(req => (
+                          <div key={req.id} className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/40 border border-zinc-800">
                             <div className="flex items-center gap-3">
-                              <div className={cn("p-2 rounded-lg", req.type === 'report' ? "bg-purple-500/10 text-purple-500" : "bg-orange-500/10 text-orange-500")}>
-                                <FileText size={14} />
+                              <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+                                <Clock size={14} />
                               </div>
                               <div>
-                                <p className="text-sm font-bold capitalize">{req.type === 'report' ? 'Rapor' : (req.type === 'excuse' ? 'Mazeret' : 'Yıllık İzin')}</p>
-                                <p className={cn("text-[9px] font-bold uppercase", 
-                                  req.status === 'approved' ? "text-emerald-500" : 
-                                  req.status === 'pending' ? "text-orange-500" : "text-red-500"
+                                <p className="text-sm font-bold">{req.hours} Saat</p>
+                                <p className={cn("text-[9px] font-bold uppercase",
+                                  req.status === 'approved' ? "text-emerald-500" :
+                                    req.status === 'pending' ? "text-orange-500" : "text-red-500"
                                 )}>{req.status}</p>
                               </div>
                             </div>
                             {profile?.role === 'admin' && (
                               <div className="flex items-center gap-1">
-                                <button onClick={() => setEditingLeave(req)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500"><Edit size={14}/></button>
-                                <button onClick={() => setDeletingLeave(req)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-red-500"><Trash2 size={14}/></button>
+                                <button onClick={() => setEditingOvertime(req)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500"><Edit size={14} /></button>
+                                <button
+                                  onClick={() => setDeletingOvertime(req)}
+                                  className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-red-500"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
                               </div>
                             )}
                           </div>
-                          
-                          {req.attachmentUrl && (
-                            <button 
-                              onClick={() => handleViewAttachment(req.attachmentUrl!)}
-                              className="flex items-center gap-2 rounded-lg bg-zinc-950 p-2 text-[10px] font-bold text-emerald-400 hover:bg-zinc-900 transition-colors mt-2"
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Confirm Delete Overtime Modal */}
+                  <AnimatePresence>
+                    {deletingOvertime && (
+                      <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeletingOvertime(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+                        <motion.div
+                          initial={{ scale: 0.9, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.9, opacity: 0 }}
+                          className="relative w-full max-w-sm rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl text-center"
+                        >
+                          <div className="mb-4 flex justify-center text-red-500"><Trash2 size={32} /></div>
+                          <h3 className="text-xl font-bold mb-2">Mesai Silinsin mi?</h3>
+                          <p className="text-sm text-zinc-500 mb-6">{deletingOvertime.date} tarihli {deletingOvertime.hours} saatlik mesai kayd silinecektir.</p>
+                          <div className="flex gap-3">
+                            <button onClick={() => setDeletingOvertime(null)} className="flex-1 rounded-xl bg-zinc-900 py-3 font-bold text-zinc-400">Vazgeç</button>
+                            <button
+                              onClick={async () => {
+                                await overtimeMutation.mutateAsync({ method: 'DELETE', id: deletingOvertime.id! });
+                                setDeletingOvertime(null);
+                                setStatus({ type: 'success', message: 'Mesai kayd silindi.' });
+                              }}
+                              className="flex-1 rounded-xl bg-red-500 py-3 font-bold text-white"
                             >
-                              <Download size={14} /> Rapor Belgesini Grntle
+                              Sil
                             </button>
-                          )}
-                          <p className="text-[10px] text-zinc-500 italic">"{req.reason}"</p>
-                        </div>
-                      ))
+                          </div>
+                        </motion.div>
+                      </div>
                     )}
+                  </AnimatePresence>
+
+                  {/* Leave Section */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-2">
+                      <FileText size={14} className="text-orange-500" /> Izin Kayıtlar
+                    </h4>
+                    <div className="space-y-2">
+                      {leaveRequests.filter(r => r.userId === selectedDayDetails.userId && selectedDayDetails.date >= r.startDate && selectedDayDetails.date <= r.endDate).length === 0 ? (
+                        <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gün için izin kayd yok.</p>
+                      ) : (
+                        leaveRequests.filter(r => r.userId === selectedDayDetails.userId && selectedDayDetails.date >= r.startDate && selectedDayDetails.date <= r.endDate).map(req => (
+                          <div key={req.id} className="flex flex-col p-3 rounded-xl bg-zinc-900/40 border border-zinc-800 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className={cn("p-2 rounded-lg", req.type === 'report' ? "bg-purple-500/10 text-purple-500" : "bg-orange-500/10 text-orange-500")}>
+                                  <FileText size={14} />
+                                </div>
+                                <div>
+                                  <p className="text-sm font-bold capitalize">{req.type === 'report' ? 'Rapor' : (req.type === 'excuse' ? 'Mazeret' : 'Yıllık Izin')}</p>
+                                  <p className={cn("text-[9px] font-bold uppercase",
+                                    req.status === 'approved' ? "text-emerald-500" :
+                                      req.status === 'pending' ? "text-orange-500" : "text-red-500"
+                                  )}>{req.status}</p>
+                                </div>
+                              </div>
+                              {profile?.role === 'admin' && (
+                                <div className="flex items-center gap-1">
+                                  <button onClick={() => setEditingLeave(req)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500"><Edit size={14} /></button>
+                                  <button onClick={() => setDeletingLeave(req)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-red-500"><Trash2 size={14} /></button>
+                                </div>
+                              )}
+                            </div>
+
+                            {req.attachmentUrl && (
+                              <button
+                                onClick={() => handleViewAttachment(req.attachmentUrl!)}
+                                className="flex items-center gap-2 rounded-lg bg-zinc-950 p-2 text-[10px] font-bold text-emerald-400 hover:bg-zinc-900 transition-colors mt-2"
+                              >
+                                <Download size={14} /> Rapor Belgesini Görüntüle
+                              </button>
+                            )}
+                            <p className="text-[10px] text-zinc-500 italic">"{req.reason}"</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
-      {/* Delete Leave Modal */}
-      <AnimatePresence>
-        {deletingLeave && (
-          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeletingLeave(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-sm rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl text-center"
-            >
-              <div className="mb-4 flex justify-center text-red-500"><Trash2 size={40} /></div>
-              <h3 className="mb-2 text-xl font-bold">Talebi Sil</h3>
-              <p className="mb-4 text-sm text-zinc-500">Bu izin talebini silmek istediinize emin misiniz? Personele silme nedeni bildirilecektir.</p>
-              
-              <div className="mb-6 space-y-1 text-left">
-                <label className="text-[10px] font-bold text-zinc-500 uppercase">Silme Nedeni (Zorunlu)</label>
-                <textarea 
-                  value={deletionReason}
-                  onChange={(e) => setDeletionReason(e.target.value)}
-                  placeholder="ptal edilme sebebi..."
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2 text-sm focus:border-red-500 focus:outline-none h-20 resize-none"
-                />
-              </div>
+        {/* Delete Leave Modal */}
+        <AnimatePresence>
+          {deletingLeave && (
+            <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeletingLeave(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative w-full max-w-sm rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl text-center"
+              >
+                <div className="mb-4 flex justify-center text-red-500"><Trash2 size={40} /></div>
+                <h3 className="mb-2 text-xl font-bold">Talebi Sil</h3>
+                <p className="mb-4 text-sm text-zinc-500">Bu izin talebini silmek istediğinize emin misiniz? Personele silme nedeni bildirilecektir.</p>
 
-              <div className="flex gap-3">
-                <button onClick={() => {
-                  setDeletingLeave(null);
-                  setDeletionReason('');
-                }} className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-bold text-zinc-500">Vazge</button>
-                <button 
-                  onClick={() => handleDeleteLeave(deletingLeave.id!, deletionReason)}
-                  disabled={!deletionReason.trim()}
-                  className={cn(
-                    "flex-1 rounded-xl py-3 text-sm font-bold text-white transition-colors",
-                    deletionReason.trim() ? "bg-red-600 hover:bg-red-500" : "bg-zinc-800 cursor-not-allowed text-zinc-600"
-                  )}
-                >
-                  Sil
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Deletion Confirmation Modal */}
-      <AnimatePresence>
-        {deletingLog && (
-          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setDeletingLog(null)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl text-center"
-            >
-              <div className="mb-4 flex justify-center">
-                <div className="rounded-full bg-red-500/10 p-4 text-red-500">
-                  <Trash2 size={32} />
+                <div className="mb-6 space-y-1 text-left">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase">Silme Nedeni (Zorunlu)</label>
+                  <textarea
+                    value={deletionReason}
+                    onChange={(e) => setDeletionReason(e.target.value)}
+                    placeholder="İptal edilme sebebi..."
+                    className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2 text-sm focus:border-red-500 focus:outline-none h-20 resize-none"
+                  />
                 </div>
-              </div>
-              <h3 className="mb-2 text-xl font-bold text-white">Kayd Sil</h3>
-              <p className="mb-6 text-sm text-zinc-400">
-                Bu Kayıt silinecek, emin misiniz? Bu ilem geri alnamaz.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setDeletingLog(null)}
-                  className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-bold text-zinc-400 transition-colors hover:bg-zinc-800"
-                >
-                  Vazge
-                </button>
-                <button
-                  onClick={() => deleteLog(deletingLog)}
-                  className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white transition-colors hover:bg-red-600"
-                >
-                  Evet, Sil
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
-      {/* Delete Overtime Modal */}
-      <AnimatePresence>
-        {deletingOvertime && (
-          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeletingOvertime(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-sm rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl text-center"
-            >
-              <div className="mb-4 flex justify-center text-red-500"><Trash2 size={40} /></div>
-              <h3 className="mb-2 text-xl font-bold">Mesaiyi Sil</h3>
-              <p className="mb-6 text-sm text-zinc-500">Bu mesai kaydn silmek istediinize emin misiniz?</p>
-              <div className="flex gap-3">
-                <button onClick={() => setDeletingOvertime(null)} className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-bold text-zinc-500">Vazge</button>
-                <button onClick={async () => {
-                  try {
-                    await overtimeMutation.mutateAsync({ method: 'DELETE', id: deletingOvertime.id! });
-                    setDeletingOvertime(null);
-                    setStatus({ type: 'success', message: 'Mesai kayd silindii' });
-                  } catch (e) {
-                    setStatus({ type: 'error', message: 'Hata oluştu' });
-                  }
-                }} className="flex-1 rounded-xl bg-red-600 py-3 text-sm font-bold text-white">Sil</button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Delete User Modal */}
-      <AnimatePresence>
-        {deletingUser && (
-          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setDeletingUser(null)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl text-center"
-            >
-              <div className="mb-4 flex justify-center">
-                <div className="rounded-full bg-red-500/10 p-4 text-red-500">
-                  <Trash2 size={32} />
+                <div className="flex gap-3">
+                  <button onClick={() => {
+                    setDeletingLeave(null);
+                    setDeletionReason('');
+                  }} className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-bold text-zinc-500">Vazgeç</button>
+                  <button
+                    onClick={() => handleDeleteLeave(deletingLeave.id!, deletionReason)}
+                    disabled={!deletionReason.trim()}
+                    className={cn(
+                      "flex-1 rounded-xl py-3 text-sm font-bold text-white transition-colors",
+                      deletionReason.trim() ? "bg-red-600 hover:bg-red-500" : "bg-zinc-800 cursor-not-allowed text-zinc-600"
+                    )}
+                  >
+                    Sil
+                  </button>
                 </div>
-              </div>
-              <h3 className="mb-2 text-xl font-bold text-white">Personeli Sil</h3>
-              <p className="mb-6 text-sm text-zinc-400">
-                <strong>{deletingUser.name}</strong> isimli personeli silmek istediinize emin misiniz? Bu ilem personelin sistemİşişİŞE GİRİŞşşini engelleyecektir.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setDeletingUser(null)}
-                  className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-bold text-zinc-400 transition-colors hover:bg-zinc-800"
-                >
-                  Vazge
-                </button>
-                <button
-                  onClick={() => deleteUser(deletingUser.uid)}
-                  className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white transition-colors hover:bg-red-600"
-                >
-                  Evet, Sil
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
-      {/* QR Scanner Modal */}
+        {/* Deletion Confirmation Modal */}
+        <AnimatePresence>
+          {deletingLog && (
+            <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setDeletingLog(null)}
+                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl text-center"
+              >
+                <div className="mb-4 flex justify-center">
+                  <div className="rounded-full bg-red-500/10 p-4 text-red-500">
+                    <Trash2 size={32} />
+                  </div>
+                </div>
+                <h3 className="mb-2 text-xl font-bold text-white">Kayd Sil</h3>
+                <p className="mb-6 text-sm text-zinc-400">
+                  Bu kayt silinecek, emin misiniz? Bu işlem geri alınamaz.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setDeletingLog(null)}
+                    className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-bold text-zinc-400 transition-colors hover:bg-zinc-800"
+                  >
+                    Vazgeç
+                  </button>
+                  <button
+                    onClick={() => deleteLog(deletingLog)}
+                    className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white transition-colors hover:bg-red-600"
+                  >
+                    Evet, Sil
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Delete Overtime Modal */}
+        <AnimatePresence>
+          {deletingOvertime && (
+            <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeletingOvertime(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative w-full max-w-sm rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl text-center"
+              >
+                <div className="mb-4 flex justify-center text-red-500"><Trash2 size={40} /></div>
+                <h3 className="mb-2 text-xl font-bold">Mesaiyi Sil</h3>
+                <p className="mb-6 text-sm text-zinc-500">Bu mesai kaydn silmek istediğinize emin misiniz?</p>
+                <div className="flex gap-3">
+                  <button onClick={() => setDeletingOvertime(null)} className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-bold text-zinc-500">Vazgeç</button>
+                  <button onClick={async () => {
+                    try {
+                      await overtimeMutation.mutateAsync({ method: 'DELETE', id: deletingOvertime.id! });
+                      setDeletingOvertime(null);
+                      setStatus({ type: 'success', message: 'Mesai kayd silindi' });
+                    } catch (e) {
+                      setStatus({ type: 'error', message: 'Hata oluştu' });
+                    }
+                  }} className="flex-1 rounded-xl bg-red-600 py-3 text-sm font-bold text-white">Sil</button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Delete User Modal */}
+        <AnimatePresence>
+          {deletingUser && (
+            <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setDeletingUser(null)}
+                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl text-center"
+              >
+                <div className="mb-4 flex justify-center">
+                  <div className="rounded-full bg-red-500/10 p-4 text-red-500">
+                    <Trash2 size={32} />
+                  </div>
+                </div>
+                <h3 className="mb-2 text-xl font-bold text-white">Personeli Sil</h3>
+                <p className="mb-6 text-sm text-zinc-400">
+                  <strong>{deletingUser.name}</strong> isimli personeli silmek istediğinize emin misiniz? Bu işlem personelin sisteme girişini engelleyecektir.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setDeletingUser(null)}
+                    className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-bold text-zinc-400 transition-colors hover:bg-zinc-800"
+                  >
+                    Vazgeç
+                  </button>
+                  <button
+                    onClick={() => deleteUser(deletingUser.uid)}
+                    className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white transition-colors hover:bg-red-600"
+                  >
+                    Evet, Sil
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* QR Scanner Modal */}
         <AnimatePresence>
           {showScanner && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
-              <motion.div 
+              <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
@@ -4485,20 +4507,20 @@ export default function App() {
               >
                 <div className="flex items-center justify-between text-white">
                   <h2 className="text-xl font-bold flex items-center gap-2">
-                    <QrCode /> {scanType === 'in' ? 'Giriş' : 'k'} Taramas
+                    <QrCode /> {scanType === 'in' ? 'Giriş' : 'Çıkış'} Taramas
                   </h2>
-                  <button 
+                  <button
                     onClick={() => setShowScanner(false)}
                     className="rounded-full bg-zinc-800 p-2 hover:bg-zinc-700"
                   >
                     <XCircle size={24} />
                   </button>
                 </div>
-                <QRScanner 
-                  onScanSuccess={handleScanSuccess} 
+                <QRScanner
+                  onScanSuccess={handleScanSuccess}
                   onScanError={(err) => {
                     // Only show fatal errors like permission denied
-                    if (err.includes("izni reddedildii") || err.includes("balatlamad")) {
+                    if (err.includes("izni reddedildi") || err.includes("başlatılamadı")) {
                       setStatus({ type: 'error', message: err });
                       setShowScanner(false);
                     }
@@ -4513,236 +4535,238 @@ export default function App() {
           )}
         </AnimatePresence>
 
-      {/* Nakliye / Uzaktan Giriş Seim Modal */}
-      <AnimatePresence>
-        {showRemoteModal && (
-          <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <motion.div
-              initial={{ y: 60, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 60, opacity: 0 }}
-              transition={{ type: 'spring', damping: 20 }}
-              className="w-full max-w-md rounded-3xl border border-zinc-800 bg-zinc-950 overflow-hidden"
-            >
-              {/* Balk */}
-              <div className="flex items-center gap-3 p-5 border-b border-zinc-800">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-500 shrink-0">
-                  <Truck size={22} />
+        {/* Nakliye / Uzaktan Giriş Seçim Modal */}
+        <AnimatePresence>
+          {showRemoteModal && (
+            <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+              <motion.div
+                initial={{ y: 60, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 60, opacity: 0 }}
+                transition={{ type: 'spring', damping: 20 }}
+                className="w-full max-w-md rounded-3xl border border-zinc-800 bg-zinc-950 overflow-hidden"
+              >
+                {/* Başlık */}
+                <div className="flex items-center gap-3 p-5 border-b border-zinc-800">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-500 shrink-0">
+                    <Truck size={22} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-white">Giriş Yöntemi</h3>
+                    <p className="text-xs text-zinc-500">
+                      {pendingScanType === 'in' ? '🚛 Giriş' : '🚛 Çıkış'} ilemi  Bir yöntem seçin
+                    </p>
+                  </div>
+                  <button onClick={() => { setShowRemoteModal(false); setRemoteManualMode(false); setRemoteNote(''); setRemoteManualTime(''); }} className="text-zinc-500 hover:text-white p-1">
+                    <X size={20} />
+                  </button>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-white">Giriş Yntemi</h3>
-                  <p className="text-xs text-zinc-500">
-                    {pendingScanType === 'in' ? '?? Giriş' : '?? k'} ilemi  Bir yntem sein
-                  </p>
-                </div>
-                <button onClick={() => { setShowRemoteModal(false); setRemoteManualMode(false); setRemoteNote(''); setRemoteManualTime(''); }} className="text-zinc-500 hover:text-white p-1">
+
+                {!remoteManualMode ? (
+                  /* === EKRAN 1: yöntem Seimi === */
+                  <div className="p-5 space-y-3">
+                    {/* QR seçeneği */}
+                    <button
+                      onClick={() => {
+                        if (pendingScanType) {
+                          setScanType(pendingScanType);
+                          setShowRemoteModal(false);
+                          setRemoteManualMode(false);
+                          setShowScanner(true);
+                        }
+                      }}
+                      className="w-full flex items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 hover:border-orange-500/50 hover:bg-zinc-900 transition-all text-left"
+                    >
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 shrink-0">
+                        <QrCode size={22} />
+                      </div>
+                      <div>
+                        <p className="font-bold text-white text-sm">QR Kod ile Giriş</p>
+                        <p className="text-xs text-zinc-500 mt-0.5"> İş yerindeki QR kodu kameraya okutun</p>
+                      </div>
+                      <ChevronRight size={18} className="ml-auto text-zinc-600" />
+                    </button>
+
+                    {/* Manuel seçeneği */}
+                    <button
+                      onClick={() => {
+                        setRemoteManualMode(true);
+                        setRemoteManualTime(format(new Date(), 'HH:mm'));
+                      }}
+                      className="w-full flex items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 hover:border-orange-500/50 hover:bg-zinc-900 transition-all text-left"
+                    >
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 shrink-0">
+                        <Clock size={22} />
+                      </div>
+                      <div>
+                        <p className="font-bold text-white text-sm">Manuel Giriş</p>
+                        <p className="text-xs text-zinc-500 mt-0.5">Saati kendiniz giriniz (nakliye, saha Çalışması)</p>
+                      </div>
+                      <ChevronRight size={18} className="ml-auto text-zinc-600" />
+                    </button>
+
+                    <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 flex items-start gap-2">
+                      <MapPin size={14} className="text-amber-400 shrink-0 mt-0.5" />
+                      <p className="text-xs text-amber-400">Her iki yntemde de konumunuz ve notunuz yoneticinize iletilir.</p>
+                    </div>
+                  </div>
+                ) : (
+                  /* === EKRAN 2: Manuel Giriş Formu === */
+                  <div className="p-5 space-y-4">
+                    <button onClick={() => setRemoteManualMode(false)} className="flex items-center gap-1 text-xs text-zinc-500 hover:text-white transition">
+                      <ChevronLeft size={14} /> Geri dn
+                    </button>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-zinc-400 uppercase">{pendingScanType === 'in' ? 'Giriş Saati' : 'Çıkış Saati'}</label>
+                      <input
+                        type="time"
+                        value={remoteManualTime}
+                        onChange={(e) => setRemoteManualTime(e.target.value)}
+                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-2xl font-bold text-center focus:border-orange-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-zinc-400 uppercase">Açıklama / Konum Notu</label>
+                      <textarea
+                        value={remoteNote}
+                        onChange={(e) => setRemoteNote(e.target.value)}
+                        placeholder="Örn: Ankara mal teslimi, Şantiye Çalışması..."
+                        rows={3}
+                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none resize-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => { setShowRemoteModal(false); setRemoteManualMode(false); setRemoteNote(''); }}
+                        className="rounded-xl border border-zinc-700 py-3 text-sm font-bold text-zinc-400 hover:bg-zinc-800 transition"
+                      >
+                        İptal
+                      </button>
+                      <button
+                        disabled={remoteSubmitting || !remoteManualTime}
+                        onClick={async () => {
+                          if (!user || !profile || !pendingScanType || !remoteManualTime) return;
+                          setRemoteSubmitting(true);
+                          try {
+                            // Saat bilgisini Bugüne uygula
+                            const [h, m] = remoteManualTime.split(':').map(Number);
+                            const clientNow = new Date();
+                            clientNow.setHours(h, m, 0, 0);
+
+                            // GPS konum al
+                            let location = undefined;
+                            try {
+                              const pos = await new Promise<GeolocationPosition>((res, rej) => {
+                                navigator.geolocation.getCurrentPosition(res, rej, { timeout: 4000 });
+                              });
+                              location = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+                            } catch { }
+
+                            const logpayload = {
+                              userId: user.uid,
+                              userName: profile.name,
+                              type: pendingScanType,
+                              ipAddress: currentIp || 'Manuel',
+                              location: location || null,
+                              status: 'pending' as const,
+                              isRemote: true,
+                              remoteNote: remoteNote || '',
+                              manualEntry: true,
+                            };
+
+                            const newDocRef = await attendanceMutation.mutateAsync({
+                              method: 'POST', payload: {
+                                ...logpayload,
+                                timestamp: clientNow, // Kullancnn girdii saat
+                              }
+                            });
+
+                            // Optimistik UI
+                            const optimisticLog: AttendanceLog = {
+                              id: newDocRef.id,
+                              ...logpayload,
+                              timestamp: { toDate: () => clientNow } as any,
+                            };
+                            setLogs(prev => [optimisticLog, ...prev.filter(l => l.id !== newDocRef.id)]);
+
+                            // Bildirim gönder
+                            fetch('/api/notify/checkin', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ userId: user.uid, userName: profile.name, type: pendingScanType, isRemote: true, remoteNote: remoteNote || '' })
+                            }).catch(() => { });
+
+                            setStatus({ type: 'success', message: `?? Manuel ${pendingScanType === 'in' ? 'giriş' : 'Çıkış'} talebi alındı. Yönetici onayndan sonra kesinleşecek.` });
+                            setShowRemoteModal(false);
+                            setRemoteManualMode(false);
+                            setRemoteNote('');
+                            setRemoteManualTime('');
+                          } catch (err) {
+                            setStatus({ type: 'error', message: 'Manuel kayt sırasında hata oluştu.' });
+                          } finally {
+                            setRemoteSubmitting(false);
+                          }
+                        }}
+                        className="rounded-xl bg-orange-500 py-3 text-sm font-bold text-white hover:bg-orange-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        {remoteSubmitting ? <Clock size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                        {remoteSubmitting ? 'Kaydediliyor...' : 'Kaydet'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Belge Görüntüleyici Modal */}
+        {/* Belge Görüntüleyici Modal */}
+        {viewingAttachment && (
+          <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-black/90 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="w-full max-w-4xl bg-zinc-900 rounded-2xl overflow-hidden flex flex-col border border-zinc-800 h-[80vh] shadow-2xl">
+              <div className="flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-950">
+                <h3 className="font-bold text-white flex items-center gap-2">
+                  <FileText size={18} className="text-emerald-500" /> Belge Görüntüleyici
+                </h3>
+                <button onClick={() => setViewingAttachment(null)} className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition-colors">
                   <X size={20} />
                 </button>
               </div>
-
-              {!remoteManualMode ? (
-                /* === EKRAN 1: Yntem Seimi === */
-                <div className="p-5 space-y-3">
-                  {/* QR Seenei */}
-                  <button
-                    onClick={() => {
-                      if (pendingScanType) {
-                        setScanType(pendingScanType);
-                        setShowRemoteModal(false);
-                        setRemoteManualMode(false);
-                        setShowScanner(true);
-                      }
-                    }}
-                    className="w-full flex items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 hover:border-orange-500/50 hover:bg-zinc-900 transition-all text-left"
-                  >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 shrink-0">
-                      <QrCode size={22} />
+              <div className="flex-1 bg-black/80 p-2 sm:p-4 flex items-center justify-center overflow-auto relative">
+                {viewingAttachment.startsWith('data:image') ? (
+                  <img src={viewingAttachment} alt="Rapor Belgesi" className="max-w-full max-h-full object-contain rounded-lg" />
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-4 text-center max-w-md mx-auto p-4">
+                    <div className="w-24 h-24 rounded-full bg-red-500/10 flex items-center justify-center mb-2">
+                      <FileText size={48} className="text-red-500" />
                     </div>
-                    <div>
-                      <p className="font-bold text-white text-sm">QR Kod ilİşişİŞE GİRİŞşş</p>
-                      <p className="text-xs text-zinc-500 mt-0.5"> yerindeki QR kodu kameraya okutun</p>
-                    </div>
-                    <ChevronRight size={18} className="ml-auto text-zinc-600" />
-                  </button>
-
-                  {/* Manuel Seenei */}
-                  <button
-                    onClick={() => {
-                      setRemoteManualMode(true);
-                      setRemoteManualTime(format(new Date(), 'HH:mm'));
-                    }}
-                    className="w-full flex items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 hover:border-orange-500/50 hover:bg-zinc-900 transition-all text-left"
-                  >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 shrink-0">
-                      <Clock size={22} />
-                    </div>
-                    <div>
-                      <p className="font-bold text-white text-sm">Manuel Giriş</p>
-                      <p className="text-xs text-zinc-500 mt-0.5">Saati kendiniz girişn (nakliye, saha Calismas)</p>
-                    </div>
-                    <ChevronRight size={18} className="ml-auto text-zinc-600" />
-                  </button>
-
-                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 flex items-start gap-2">
-                    <MapPin size={14} className="text-amber-400 shrink-0 mt-0.5" />
-                    <p className="text-xs text-amber-400">Her iki yntemde de konumunuz ve notunuz yoneticinize iletilir.</p>
-                  </div>
-                </div>
-              ) : (
-                /* === EKRAN 2: Manuel Giriş Formu === */
-                <div className="p-5 space-y-4">
-                  <button onClick={() => setRemoteManualMode(false)} className="flex items-center gap-1 text-xs text-zinc-500 hover:text-white transition">
-                    <ChevronLeft size={14} /> Geri dn
-                  </button>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-400 uppercase">{pendingScanType === 'in' ? 'Giriş Saati' : 'k Saati'}</label>
-                    <input
-                      type="time"
-                      value={remoteManualTime}
-                      onChange={(e) => setRemoteManualTime(e.target.value)}
-                      className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-2xl font-bold text-center focus:border-orange-500 focus:outline-none"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-400 uppercase">Aklama / Konum Notu</label>
-                    <textarea
-                      value={remoteNote}
-                      onChange={(e) => setRemoteNote(e.target.value)}
-                      placeholder="Örn: Ankara mal teslimi, antiye Calismas..."
-                      rows={3}
-                      className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none resize-none"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
+                    <h4 className="text-xl font-bold text-white">PDF Belgesi</h4>
+                    <p className="text-sm text-zinc-400">
+                      Mobil cihazlarda (zellikle iOS) yerleik PDF Görüntüleyiciler tam uyumlu çalışmayabilir. Belgeyi eksiksiz Görüntülemek için lütfen cihazınıza indirin veya an.
+                    </p>
                     <button
-                      onClick={() => { setShowRemoteModal(false); setRemoteManualMode(false); setRemoteNote(''); }}
-                      className="rounded-xl border border-zinc-700 py-3 text-sm font-bold text-zinc-400 hover:bg-zinc-800 transition"
+                      onClick={handleDownloadAndOpen}
+                      className="mt-4 flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(239,68,68,0.3)]"
                     >
-                      ptal
-                    </button>
-                    <button
-                      disabled={remoteSubmitting || !remoteManualTime}
-                      onClick={async () => {
-                        if (!user || !profile || !pendingScanType || !remoteManualTime) return;
-                        setRemoteSubmitting(true);
-                        try {
-                          // Saat bilgisini Bugüne uygula
-                          const [h, m] = remoteManualTime.split(':').map(Number);
-                          const clientNow = new Date();
-                          clientNow.setHours(h, m, 0, 0);
-
-                          // GPS konum al
-                          let location = undefined;
-                          try {
-                            const pos = await new Promise<GeolocationPosition>((res, rej) => {
-                              navigator.geolocation.getCurrentPosition(res, rej, { timeout: 4000 });
-                            });
-                            location = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
-                          } catch {}
-
-                          const logpayload = {
-                            userId: user.uid,
-                            userName: profile.name,
-                            type: pendingScanType,
-                            ipAddress: currentIp || 'Manuel',
-                            location: location || null,
-                            status: 'pending' as const,
-                            isRemote: true,
-                            remoteNote: remoteNote || '',
-                            manualEntry: true,
-                          };
-
-                          const newDocRef = await attendanceMutation.mutateAsync({ method: 'POST', payload: {
-                            ...logpayload,
-                            timestamp: clientNow, // Kullancnn girdii saat
-                          } });
-
-                          // Optimistik UI
-                          const optimisticLog: AttendanceLog = {
-                            id: newDocRef.id,
-                            ...logpayload,
-                            timestamp: { toDate: () => clientNow } as any,
-                          };
-                          setLogs(prev => [optimisticLog, ...prev.filter(l => l.id !== newDocRef.id)]);
-
-                          // Bildirim gönder
-                          fetch('/api/notify/checkin', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ userId: user.uid, userName: profile.name, type: pendingScanType, isRemote: true, remoteNote: remoteNote || '' })
-                          }).catch(() => {});
-
-                          setStatus({ type: 'success', message: `?? Manuel ${pendingScanType === 'in' ? 'giriş' : 'k'} talebi alnd. Yönetici onayndan sonra kesinleecek.` });
-                          setShowRemoteModal(false);
-                          setRemoteManualMode(false);
-                          setRemoteNote('');
-                          setRemoteManualTime('');
-                        } catch (err) {
-                          setStatus({ type: 'error', message: 'Manuel Kayıt sırasında hata oluştu.' });
-                        } finally {
-                          setRemoteSubmitting(false);
-                        }
-                      }}
-                      className="rounded-xl bg-orange-500 py-3 text-sm font-bold text-white hover:bg-orange-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                      {remoteSubmitting ? <Clock size={16} className="animate-spin" /> : <CheckCircle size={16} />}
-                      {remoteSubmitting ? 'Kaydediliyor...' : 'Kaydet'}
+                      <Download size={18} /> Belgeyi A / İndir
                     </button>
                   </div>
+                )}
+              </div>
+              {viewingAttachment.startsWith('data:image') && (
+                <div className="p-4 bg-zinc-950 border-t border-zinc-800 flex justify-end gap-3">
+                  <button onClick={handleDownloadAndOpen} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                    <Download size={16} /> Cihaza İndir
+                  </button>
                 </div>
               )}
-            </motion.div>
+            </div>
           </div>
         )}
-      </AnimatePresence>
-
-      {/* Belge Grntleyici Modal */}
-      {/* Belge Grntleyici Modal */}
-      {viewingAttachment && (
-        <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-black/90 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-4xl bg-zinc-900 rounded-2xl overflow-hidden flex flex-col border border-zinc-800 h-[80vh] shadow-2xl">
-            <div className="flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-950">
-              <h3 className="font-bold text-white flex items-center gap-2">
-                <FileText size={18} className="text-emerald-500"/> Belge Grntleyici
-              </h3>
-              <button onClick={() => setViewingAttachment(null)} className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition-colors">
-                <X size={20} />
-              </button>
-            </div>
-            <div className="flex-1 bg-black/80 p-2 sm:p-4 flex items-center justify-center overflow-auto relative">
-              {viewingAttachment.startsWith('data:image') ? (
-                <img src={viewingAttachment} alt="Rapor Belgesi" className="max-w-full max-h-full object-contain rounded-lg" />
-              ) : (
-                <div className="flex flex-col items-center justify-center gap-4 text-center max-w-md mx-auto p-4">
-                  <div className="w-24 h-24 rounded-full bg-red-500/10 flex items-center justify-center mb-2">
-                    <FileText size={48} className="text-red-500" />
-                  </div>
-                  <h4 className="text-xl font-bold text-white">PDF Belgesi</h4>
-                  <p className="text-sm text-zinc-400">
-                    Mobil cihazlarda (zellikle iOS) yerleik PDF grntleyiciler tam uyumlu Calismayabilir. Belgeyi eksiksiz grntlemek iin lütfen cihazınıza indirin veya an.
-                  </p>
-                  <button 
-                    onClick={handleDownloadAndOpen}
-                    className="mt-4 flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(239,68,68,0.3)]"
-                  >
-                    <Download size={18} /> Belgeyi A / ndir
-                  </button>
-                </div>
-              )}
-            </div>
-            {viewingAttachment.startsWith('data:image') && (
-              <div className="p-4 bg-zinc-950 border-t border-zinc-800 flex justify-end gap-3">
-                <button onClick={handleDownloadAndOpen} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-                  <Download size={16} /> Cihaza ndir
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       </main>
 
