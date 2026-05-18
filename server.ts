@@ -275,7 +275,9 @@ async function startServer() {
         name: newUser.name,
         title: newUser.title,
         role: newUser.role,
-        managerId: (newUser.managerId === 'superadmin' || newUser.managerId === 'admin_initial') ? null : (newUser.managerId || null),
+        managerId: (newUser.managerId === 'superadmin' || newUser.managerId === 'admin_initial' || newUser.managerId === '') ? null : (newUser.managerId || null),
+        leaveBalance: newUser.leaveBalance === '' ? 0 : newUser.leaveBalance,
+        startDate: newUser.startDate === '' ? null : newUser.startDate,
         passwordHash: hashedPassword,
         leaveBalance: newUser.leaveBalance,
         canRemoteCheckIn: newUser.canRemoteCheckIn,
@@ -291,7 +293,10 @@ async function startServer() {
   app.post('/api/users/update', authenticateToken, async (req: any, res: any) => {
     try {
       const { targetUid, updates } = req.body;
-      if (updates.managerId === 'superadmin' || updates.managerId === 'admin_initial') updates.managerId = null;
+      if (updates.managerId === 'superadmin' || updates.managerId === 'admin_initial' || updates.managerId === '') updates.managerId = null;
+      if (updates.leaveBalance === '') updates.leaveBalance = 0;
+      if (updates.startDate === '') updates.startDate = null;
+      
       const isSelf = req.user.uid === targetUid;
       const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin';
       if (!isSelf && !isAdmin) return res.status(403).json({ error: 'Yetkisiz' });
