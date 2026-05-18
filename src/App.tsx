@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -241,7 +241,7 @@ export default function App() {
       if (match) devId = match[2];
     }
     
-    // 3. kisinde de yoksa sfrdan olutur
+    // 3. İkisinde de yoksa sıfırdan oluştur
     if (!devId) {
       devId = 'dev-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     }
@@ -249,7 +249,7 @@ export default function App() {
     // Her ihtimale kar ikisine birden tekrar glce kaydet
     try {
       localStorage.setItem('pdks_device_id', devId);
-      // erezi 10 yıl geerli olacak ekilde ayarla
+      // erezi 10 yıl geçerli olacak ekilde ayarla
       document.cookie = `pdks_device_id=${devId}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
     } catch (e) {
       console.warn("Tarayc veri kaydetmeyi engelliyor.");
@@ -309,7 +309,7 @@ export default function App() {
     // Sadece aktif personel (silinmemi)
     const activeUsers = allUsers.filter(u => u.role !== 'deleted');
 
-    // Bugnn onayıl loglar (pending dahil deil)
+    // Bugünün onayıl loglar (pending dahil değil)
     const todayLogs = logs.filter(l =>
       !l.deleted &&
       l.status !== 'pending' &&
@@ -318,7 +318,7 @@ export default function App() {
       format(l.timestamp.toDate(), 'yyyy-MM-dd') === todayStr
     );
 
-    // Her personel iin bugnk en son durumu belirle (son log out mu in mi?)
+    // Her personel iin bugünkü en son durumu belirle (son log out mu in mi?)
     const userLastAction = new Map<string, string>(); // userId -> 'in' | 'out'
     const userFirstIn = new Map<string, string>();     // userId -> 'HH:mm' (ilk giriş saati)
 
@@ -337,7 +337,7 @@ export default function App() {
       if (type === 'in') presentIds.add(uid);
     });
 
-    // İzinli bugn
+    // İzinli Bugün
     const onLeaveIds = new Set<string>(
       leaveRequests.filter(r =>
         r.status === 'approved' && !r.deleted &&
@@ -345,13 +345,13 @@ export default function App() {
       ).map(r => r.userId)
     );
 
-    // Geç kalanlar: ilk giriş saati mesai bandan sonra olan kiiler (kii ba 1 kez)
+    // Geç kalanlar: ilk giriş saati mesai bandan sonra olan kişiler (kişi başı 1 kez)
     let lateCount = 0;
     userFirstIn.forEach((time) => {
       if (time > shiftStart) lateCount++;
     });
 
-    // Gelmeyen listesi: aktif, izinli deil, bugn hi giriş yapmam
+    // Gelmeyen listesi: aktif, izinli değil, bugün hi giriş yapmamış
     const lateIds = new Set<string>();
     userFirstIn.forEach((time, uid) => { if (time > shiftStart) lateIds.add(uid); });
     const absentUserIds = new Set<string>();
@@ -363,7 +363,7 @@ export default function App() {
     const userMap = new Map<string, UserProfile>(activeUsers.map(u => [u.uid, u]));
     const presentList = [...presentIds].map(uid => {
       const u = userMap.get(uid);
-      return { uid, name: u?.name || uid, detail: `Giris: ${userFirstIn.get(uid) || '-'}` };
+      return { uid, name: u?.name || uid, detail: `Giriş: ${userFirstIn.get(uid) || '-'}` };
     });
     const onLeaveList = [...onLeaveIds].map(uid => {
       const u = userMap.get(uid);
@@ -371,7 +371,7 @@ export default function App() {
     });
     const lateList = [...lateIds].map(uid => {
       const u = userMap.get(uid);
-      return { uid, name: u?.name || uid, detail: `Giris: ${userFirstIn.get(uid) || '-'}` };
+      return { uid, name: u?.name || uid, detail: `Giriş: ${userFirstIn.get(uid) || '-'}` };
     });
     const absentList = [...absentUserIds].map(uid => {
       const u = userMap.get(uid);
@@ -398,7 +398,7 @@ export default function App() {
     
     const userLogs = logs.filter(l => l.userId === user.uid && !l.deleted && l.type === 'in');
     
-    // Her gnn sadece ilk girişini kontrol et
+    // Her günün sadece ilk girişini kontrol et
     const firstInsPerDay = new Map<string, string>(); // date -> time
     userLogs.forEach(l => {
       const dateStr = format(l.timestamp?.toDate() || new Date(), 'yyyy-MM-dd');
@@ -446,7 +446,7 @@ export default function App() {
           const dateStr = current.toISOString().slice(0, 10);
           // Pazar her zaman tatil
           const isSunday = dayOfWeek === 0;
-          // 5 gnlk Calisma dzeninde Cumartesi de tatil
+          // 5 günlük Calisma düzeninde Cumartesi de tatil
           const isSaturday = dayOfWeek === 6 && workDays === 5;
           // Resmi tatil kontrol
           const isPublicHoliday = !!getHoliday(dateStr);
@@ -530,11 +530,11 @@ export default function App() {
   // Notifications listener
   // [Migrated to React Query] Firebase listener removed
 
-  // nternet balant takibi
+  // İnternet bağlantı takibi
   useEffect(() => {
     const handleOnline = async () => {
       setIsOnline(true);
-      // nternet gelince evrimd kuyruu senkronize et
+      // İnternet gelince evrimd kuyruu senkronize et
       await syncOfflineQueueToFirebase();
     };
     const handleOffline = () => setIsOnline(false);
@@ -605,9 +605,9 @@ export default function App() {
     let syncedCount = 0;
     for (const item of queue) {
       try {
-        const { clientTimestamp, ...payıload } = item.payıload;
-        await attendanceMutation.mutateAsync({ method: 'POST', payıload: {
-          ...payıload,
+        const { clientTimestamp, ...payload } = item.payload;
+        await attendanceMutation.mutateAsync({ method: 'POST', payload: {
+          ...payload,
           timestamp: new Date().toISOString(),
           offlineQueued: true,
           clientTimestamp
@@ -615,7 +615,7 @@ export default function App() {
         await removeFromOfflineQueue(item.id);
         syncedCount++;
       } catch (err) {
-        console.error('evrimd kayt senkronize edilemedi:', err);
+        console.error('evrimd Kayıt senkronize edilemedi:', err);
       }
     }
     if (syncedCount > 0) {
@@ -705,7 +705,7 @@ export default function App() {
             </div>
           );
         } else {
-          setLoginError(data.error || 'Giris baarsz.');
+          setLoginError(data.error || 'Giriş baarsz.');
         }
       }
     } catch (error: any) {
@@ -714,8 +714,8 @@ export default function App() {
         <div className="flex flex-col items-center gap-2 justify-center text-center p-2">
           <AlertCircle size={20} className="text-red-500" />
           <div className="space-y-1">
-            <p className="font-bold">Giris Hatas</p>
-            <p className="text-[10px] opacity-80">{error?.message || 'Sistem hatas. Lütfen internet balantnz kontrol edin.'}</p>
+            <p className="font-bold">Giriş Hatas</p>
+            <p className="text-[10px] opacity-80">{error?.message || 'Sistem hatas. Lütfen internet Bağlantınz kontrol edin.'}</p>
           </div>
         </div>
       );
@@ -762,7 +762,7 @@ export default function App() {
         setStatus({ type: 'success', message: 'Yeni personel başarııla eklendii.' });
         (e.target as HTMLFormElement).reset();
       } else {
-        setStatus({ type: 'error', message: data.error || 'Personel eklenirken hata olutu.' });
+        setStatus({ type: 'error', message: data.error || 'Personel eklenirken hata oluştu.' });
       }
     } catch (error) {
       setStatus({ type: 'error', message: 'Sistem hatas.' });
@@ -794,7 +794,7 @@ export default function App() {
         </head>
         <body>
           <div class="container">
-            <h1>PDKS Giris/k QR Kodu</h1>
+            <h1>PDKS Giriş/k QR Kodu</h1>
             ${qrSvg}
             <p>Lütfen giriş ve klarda bu kodu okutunuz.</p>
           </div>
@@ -819,7 +819,7 @@ export default function App() {
       await settingsMutation.mutateAsync({ ...settings, qrSecret: newSecret });
       setStatus({ type: 'success', message: 'QR kod başarııla güncellendi.' });
     } catch (error) {
-      setStatus({ type: 'error', message: 'QR kod güncellenirken hata olutu.' });
+      setStatus({ type: 'error', message: 'QR kod güncellenirken hata oluştu.' });
     }
   };
 
@@ -846,7 +846,7 @@ export default function App() {
     try {
       // 1. QR Secret Check
       if (decodedText !== settings.qrSecret) {
-        await attendanceMutation.mutateAsync({ method: 'POST', payıload: {
+        await attendanceMutation.mutateAsync({ method: 'POST', payload: {
           userId: user.uid,
           userName: profile.name,
           timestamp: new Date().toISOString(),
@@ -863,7 +863,7 @@ export default function App() {
       // 2. IP Check (Nakliye yetkisi olan personel iin IP kontrol atla)
       const hasRemotePermission = profile.canRemoteCheckIn === true;
       if (settings.officeIp && currentIp !== settings.officeIp && !hasRemotePermission) {
-        await attendanceMutation.mutateAsync({ method: 'POST', payıload: {
+        await attendanceMutation.mutateAsync({ method: 'POST', payload: {
           userId: user.uid,
           userName: profile.name,
           timestamp: new Date().toISOString(),
@@ -894,7 +894,7 @@ export default function App() {
         console.warn("Geolocation denied or failed");
       }
 
-      const logPayıload: any = {
+      const logpayload: any = {
         userId: user.uid,
         userName: profile.name,
         type: scanType,
@@ -910,25 +910,25 @@ export default function App() {
         const queueItem: OfflineQueueItem = {
           id: `offline-${Date.now()}-${Math.random().toString(36).substring(2)}`,
           type: 'attendance',
-          payıload: { ...logPayıload, clientTimestamp: new Date().toISOString() },
+          payload: { ...logpayload, clientTimestamp: new Date().toISOString() },
           createdAt: new Date().toISOString()
         };
         await addToOfflineQueue(queueItem);
         const newCount = (await getOfflineQueue()).length;
         setOfflineQueueCount(newCount);
-        setStatus({ type: 'success', message: `?? nternetsiz mod: ${scanType === 'in' ? 'Giris' : 'k'} kaydedildi, internet gelince senkronize edilecek.` });
+        setStatus({ type: 'success', message: `?? nternetsiz mod: ${scanType === 'in' ? 'Giriş' : 'k'} kaydedildi, internet gelince senkronize edilecek.` });
       } else {
         const clientNow = new Date();
         // Firestore'a yaz
-        const newDocRef = await attendanceMutation.mutateAsync({ method: 'POST', payıload: {
-          ...logPayıload,
+        const newDocRef = await attendanceMutation.mutateAsync({ method: 'POST', payload: {
+          ...logpayload,
           timestamp: new Date().toISOString(),
         } });
 
         // OPTMSTK UI: Snapshot beklemeden annda state'e ekle
         const optimisticLog: AttendanceLog = {
           id: newDocRef.id,
-          ...logPayıload,
+          ...logpayload,
           timestamp: { toDate: () => clientNow } as any,
         };
         setLogs(prev => [optimisticLog, ...prev.filter(l => l.id !== newDocRef.id)]);
@@ -938,7 +938,7 @@ export default function App() {
           await checkAndCreateAutoOvertime(user.uid, profile.name, clientNow, 'out');
         }
 
-        // Yöneticiye giriş bildirimi gnder
+        // YöneticiyİşişİŞE GİRİŞşş bildirimi gönder
         fetch('/api/notify/checkin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -951,7 +951,7 @@ export default function App() {
           })
         }).catch(() => {});
 
-        setStatus({ type: 'success', message: `${isRemote ? '?? Nakliye: ' : ''}${scanType === 'in' ? 'Giris' : 'k'} ileminiz başarııla kaydedildi.` });
+        setStatus({ type: 'success', message: `${isRemote ? '?? Nakliye: ' : ''}${scanType === 'in' ? 'Giriş' : 'k'} ileminiz başarııla kaydedildi.` });
       }
 
 
@@ -961,7 +961,7 @@ export default function App() {
       setScanType(null);
     } catch (error) {
       console.error("Save log error:", error);
-      setStatus({ type: 'error', message: 'lem kaydedilirken bir hata olutu.' });
+      setStatus({ type: 'error', message: 'lem kaydedilirken bir hata oluştu.' });
     } finally {
       isProcessingScan.current = false;
     }
@@ -1002,7 +1002,7 @@ export default function App() {
       await settingsMutation.mutateAsync(newSettings);
       setStatus({ type: 'success', message: 'Ayarlar güncellendi.' });
     } catch (error) {
-      setStatus({ type: 'error', message: 'Ayarlar güncellenirken hata olutu.' });
+      setStatus({ type: 'error', message: 'Ayarlar güncellenirken hata oluştu.' });
     }
   };
 
@@ -1044,7 +1044,7 @@ export default function App() {
         
         dayData.push({
           'Tarih': format(date, 'd MMM yyyy, EEE', { locale: tr }),
-          'Giris': leave ? leave.type.toUpperCase() : 'HAREKET YOK',
+          'Giriş': leave ? leave.type.toUpperCase() : 'HAREKET YOK',
           'k': '-',
           'Brt Sre (Saat)': '0',
           'Mola (Saat)': '0',
@@ -1106,7 +1106,7 @@ export default function App() {
 
       dayData.push({
         'Tarih': format(date, 'd MMM yyyy, EEE', { locale: tr }),
-        'Giris': format(entry, 'HH:mm'),
+        'Giriş': format(entry, 'HH:mm'),
         'k': format(exit, 'HH:mm') + (format(exit, 'yyyy-MM-dd') !== dateStr ? ` (+1)` : ''),
         'Brt Sre (Saat)': rawDuration.toFixed(2),
         'Mola (Saat)': breakTime.toFixed(2),
@@ -1172,17 +1172,17 @@ export default function App() {
 
       if (editingLog?.id) {
         // Mevcut kayd güncelle
-        await attendanceMutation.mutateAsync({ method: 'PUT', id: editingLog.id, payıload: {
+        await attendanceMutation.mutateAsync({ method: 'PUT', id: editingLog.id, payload: {
           timestamp: timestamp,
           type: manualLogType,
           ipAddress: auditInfo,
           status: newStatus,
           ...(isAdminOrManager ? { manualEntry: true, isRemote: false, remoteNote: null } : {}),
         } });
-        setStatus({ type: 'success', message: 'Kayt güncellendi.' });
+        setStatus({ type: 'success', message: 'Kayıt güncellendi.' });
       } else {
-        // Yeni kayt ekle
-        await attendanceMutation.mutateAsync({ method: 'POST', payıload: {
+        // Yeni Kayıt ekle
+        await attendanceMutation.mutateAsync({ method: 'POST', payload: {
           userId: targetId,
           userName: targetUser.name,
           timestamp: timestamp,
@@ -1191,15 +1191,15 @@ export default function App() {
           status: newStatus,
           manualEntry: true,
           isRemote: !isAdminOrManager,
-          ...(isAdminOrManager ? {} : { remoteNote: 'Gemi Kayt (Onay Bekliyor)' }),
+          ...(isAdminOrManager ? {} : { remoteNote: 'Gemi Kayıt (Onay Bekliyor)' }),
         } });
-        setStatus({ type: 'success', message: isAdminOrManager ? 'Kayt eklendii.' : 'Kayt eklendii, yonetici onay bekleniyor.' });
+        setStatus({ type: 'success', message: isAdminOrManager ? 'Kayıt eklendii.' : 'Kayıt eklendii, yonetici onay bekleniyor.' });
         
         if (!isAdminOrManager) {
           fetch('/api/notify/checkin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: user.uid, userName: profile.name, type: manualLogType, isRemote: true, remoteNote: 'Gemi Manuel Kayt Eklendi' })
+            body: JSON.stringify({ userId: user.uid, userName: profile.name, type: manualLogType, isRemote: true, remoteNote: 'Gemi Manuel Kayıt Eklendi' })
           }).catch(() => {});
         }
       }
@@ -1213,7 +1213,7 @@ export default function App() {
       setEditingLog(null);
     } catch (error: any) {
       console.error('Manual log error:', error);
-      setStatus({ type: 'error', message: `Kayt baarsz: ${error?.message || error?.code || 'Bilinmeyen hata'}` });
+      setStatus({ type: 'error', message: `Kayıt baarsz: ${error?.message || error?.code || 'Bilinmeyen hata'}` });
     }
   };
 
@@ -1226,16 +1226,16 @@ export default function App() {
       });
 
       if (response.ok) {
-        setStatus({ type: 'success', message: 'Kayt başarııla silindii.' });
+        setStatus({ type: 'success', message: 'Kayıt başarııla silindii.' });
         setDeletingLog(null);
         setShowManualLogModal(false);
       } else {
         const data = await response.json();
-        setStatus({ type: 'error', message: data.error || 'Kayt silinirken hata olutu.' });
+        setStatus({ type: 'error', message: data.error || 'Kayıt silinirken hata oluştu.' });
       }
     } catch (error) {
       console.error("Delete log error:", error);
-      setStatus({ type: 'error', message: 'Kayt silinirken sistem hatas olutu.' });
+      setStatus({ type: 'error', message: 'Kayıt silinirken sistem hatas oluştu.' });
     }
   };
 
@@ -1269,7 +1269,7 @@ export default function App() {
       if (overtimeHours <= 0) return;
 
       try {
-        await overtimeMutation.mutateAsync({ method: 'POST', payıload: { userName, managerId: effectiveManagerId, date: dateStr, hours: overtimeHours, description: 'Otomatik Sistem Kayd (' + format(timestamp, 'HH:mm') + ' k)', status: 'pending' } });
+        await overtimeMutation.mutateAsync({ method: 'POST', payload: { userName, managerId: effectiveManagerId, date: dateStr, hours: overtimeHours, description: 'Otomatik Sistem Kayd (' + format(timestamp, 'HH:mm') + ' k)', status: 'pending' } });
       } catch (error) {
         console.error("Auto overtime error:", error);
       }
@@ -1285,7 +1285,7 @@ export default function App() {
       setDeletingUser(null);
     } catch (error) {
       console.error("Delete user error:", error);
-      setStatus({ type: 'error', message: 'Personel silinirken hata olutu.' });
+      setStatus({ type: 'error', message: 'Personel silinirken hata oluştu.' });
     }
   };
 
@@ -1300,12 +1300,12 @@ export default function App() {
     const reason = (formData.get('reason') as string).trim();
 
     if (!reason) {
-      setStatus({ type: 'error', message: 'Lütfen bir aklama girişniz.' });
+      setStatus({ type: 'error', message: 'Lütfen bir aklama giriniz.' });
       return;
     }
 
     if (isNaN(days) || days <= 0) {
-      setStatus({ type: 'error', message: 'Lütfen geerli bir gn says girişniz.' });
+      setStatus({ type: 'error', message: 'Lütfen geçerli bir Gün Sayısı giriniz.' });
       return;
     }
 
@@ -1332,7 +1332,7 @@ export default function App() {
         });
       }
 
-      await leaveMutation.mutateAsync({ method: 'POST', payıload: {
+      await leaveMutation.mutateAsync({ method: 'POST', payload: {
         userName: profile.name,
         managerId: profile.managerId || 'admin_initial',
         startDate, endDate, days, reason,
@@ -1340,7 +1340,7 @@ export default function App() {
         attachmentUrl,
         status: 'pending'
       } });
-      // Yöneticiye push bildirimi gnder
+      // Yöneticiye push bildirimi gönder
       fetch('/api/notify/newrequest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1351,7 +1351,7 @@ export default function App() {
           managerId: profile.managerId || 'admin_initial'
         })
       }).catch(() => {});
-      setStatus({ type: 'success', message: leaveType === 'report' ? 'Raporunuz iletildi.' : 'Izin talebiniz iletildi.' });
+      setStatus({ type: 'success', message: leaveType === 'report' ? 'Raporunuz iletildi.' : 'İzin talebiniz iletildi.' });
       (e.target as HTMLFormElement).reset();
       setLeaveStartDate('');
       setLeaveEndDate('');
@@ -1360,8 +1360,8 @@ export default function App() {
       setLeaveType('annual');
     } catch (error: any) {
       console.error("Leave request error:", error);
-      const msg = error?.message || 'Bilinmeyen bir hata olutu.';
-      setStatus({ type: 'error', message: `Talep iletilirken hata olutu: ${msg}` });
+      const msg = error?.message || 'Bilinmeyen bir hata oluştu.';
+      setStatus({ type: 'error', message: `Talep iletilirken hata oluştu: ${msg}` });
     } finally {
       setUploading(false);
     }
@@ -1391,7 +1391,7 @@ export default function App() {
       setTimeout(() => URL.revokeObjectURL(url), 100);
     } catch (e) {
       console.error(e);
-      setStatus({ type: 'error', message: 'Dosya indirilirken hata olutu.' });
+      setStatus({ type: 'error', message: 'Dosya indirilirken hata oluştu.' });
     }
   };
   const submitOvertimeRequest = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -1404,13 +1404,13 @@ export default function App() {
     const description = formData.get('description') as string;
 
     if (isNaN(hours) || hours <= 0) {
-      setStatus({ type: 'error', message: 'Lütfen geerli bir saat girişniz.' });
+      setStatus({ type: 'error', message: 'Lütfen geçerli bir saat giriniz.' });
       return;
     }
 
     try {
-      await overtimeMutation.mutateAsync({ method: 'POST', payıload: { userName: profile.name, managerId: profile.managerId || 'admin_initial', date, hours, description, status: 'pending' } });
-      // Yöneticiye push bildirimi gnder
+      await overtimeMutation.mutateAsync({ method: 'POST', payload: { userName: profile.name, managerId: profile.managerId || 'admin_initial', date, hours, description, status: 'pending' } });
+      // Yöneticiye push bildirimi gönder
       fetch('/api/notify/newrequest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1426,7 +1426,7 @@ export default function App() {
       setOvertimeEndTime('');
       setCalcOvertimeHours(0);
     } catch (error) {
-      setStatus({ type: 'error', message: 'Talep iletilirken hata olutu.' });
+      setStatus({ type: 'error', message: 'Talep iletilirken hata oluştu.' });
     }
   };
 
@@ -1434,7 +1434,7 @@ export default function App() {
     try {
       
 
-      // Push bildirimi gnder (arka planda, hata olsa bile devam)
+      // Push bildirimi gönder (arka planda, hata olsa bile devam)
       fetch('/api/notify/approval', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1448,7 +1448,7 @@ export default function App() {
 
       setStatus({ type: 'success', message: `Talep ${action === 'approved' ? 'onayılandı' : 'reddedildii'}.` });
     } catch (error) {
-      setStatus({ type: 'error', message: 'lem srasnda hata olutu.' });
+      setStatus({ type: 'error', message: 'lem sırasında hata oluştu.' });
     }
   };
 
@@ -1480,19 +1480,19 @@ export default function App() {
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('pdks_token') },
         body: JSON.stringify({
           userId: deletingLeave.userId,
-          title: 'Izin ptali',
+          title: 'İzin ptali',
           message: deletingLeave.startDate + ' tarihindeki izniniz yonetici tarafndan iptal edildi. Neden: ' + reason,
           type: 'error',
           read: false
         })
       }).catch(() => {});
 
-      setStatus({ type: 'success', message: 'Izin talebi silindii ve bakiye iade edildi.' });
+      setStatus({ type: 'success', message: 'İzin talebi silindii ve bakiye iade edildi.' });
       setDeletingLeave(null);
       setDeletionReason('');
     } catch (error) {
       console.error("Delete error:", error);
-      setStatus({ type: 'error', message: 'Izin silinirken hata olutu.' });
+      setStatus({ type: 'error', message: 'İzin silinirken hata oluştu.' });
     }
   };
 
@@ -1509,11 +1509,11 @@ export default function App() {
     };
 
     try {
-      await leaveMutation.mutateAsync({ method: 'PUT', id: editingLeave.id!, payıload: updates });
-      setStatus({ type: 'success', message: 'Izin talebi güncellendi.' });
+      await leaveMutation.mutateAsync({ method: 'PUT', id: editingLeave.id!, payload: updates });
+      setStatus({ type: 'success', message: 'İzin talebi güncellendi.' });
       setEditingLeave(null);
     } catch (error) {
-      setStatus({ type: 'error', message: 'Gncelleme srasnda hata olutu.' });
+      setStatus({ type: 'error', message: 'Güncelleme sırasında hata oluştu.' });
     }
   };
 
@@ -1554,7 +1554,7 @@ export default function App() {
         setEditingUser(null);
       } else {
         const data = await response.json();
-        setStatus({ type: 'error', message: data.error || 'Gncelleme srasnda hata olutu.' });
+        setStatus({ type: 'error', message: data.error || 'Güncelleme sırasında hata oluştu.' });
       }
     } catch (error) {
       console.error("Update user error:", error);
@@ -1583,7 +1583,7 @@ export default function App() {
         setNewPassword('');
       } else {
         const data = await response.json();
-        setStatus({ type: 'error', message: data.error || 'Şifre güncellenirken bir hata olutu.' });
+        setStatus({ type: 'error', message: data.error || 'Şifre güncellenirken bir hata oluştu.' });
       }
     } catch (error) {
       console.error("Password change error:", error);
@@ -1638,8 +1638,8 @@ export default function App() {
           'BEGIN:VEVENT',
           `DTSTART:${formatICSDate(inTime)}`,
           `DTEND:${formatICSDate(outTime)}`,
-          `SUMMARY:${userName} -  Gn`,
-          `DESCRIPTION:Giris: ${format(inTime, 'HH:mm')}${outLog ? ' / k: ' + format(outTime, 'HH:mm') : ' (k yok)'}`,
+          `SUMMARY:${userName} -  GÜN`,
+          `DESCRIPTION:Giriş: ${format(inTime, 'HH:mm')}${outLog ? ' / k: ' + format(outTime, 'HH:mm') : ' (k yok)'}`,
           `UID:pdks-${dateKey}-${inLog.userId}@pdks`,
           'END:VEVENT'
         );
@@ -1677,7 +1677,7 @@ export default function App() {
             <div className="h-12 w-12 rounded-full border-[3px] border-zinc-800" />
             <div className="absolute inset-0 h-12 w-12 rounded-full border-[3px] border-transparent border-t-orange-500 animate-spin" />
           </div>
-          <p className="text-xs font-medium text-zinc-500 tracking-widest uppercase">Ykleniyor</p>
+          <p className="text-xs font-medium text-zinc-500 tracking-widest uppercase">yükleniyor</p>
         </div>
       </div>
     );
@@ -1715,7 +1715,7 @@ export default function App() {
                 <input 
                   name="personnelId"
                   required
-                  placeholder="ID girişniz"
+                  placeholder="ID giriniz"
                   className="w-full rounded-xl border border-zinc-800 bg-zinc-950/80 pl-12 pr-4 py-3.5 text-sm font-medium placeholder:text-zinc-700 focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 focus:outline-none transition-all"
                 />
               </div>
@@ -1728,7 +1728,7 @@ export default function App() {
                   name="password"
                   type="password"
                   required
-                  placeholder="Şifre girişniz"
+                  placeholder="ŞifrİşişİŞE GİRİŞşniz"
                   className="w-full rounded-xl border border-zinc-800 bg-zinc-950/80 pl-12 pr-4 py-3.5 text-sm font-medium placeholder:text-zinc-700 focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 focus:outline-none transition-all"
                 />
               </div>
@@ -1753,7 +1753,7 @@ export default function App() {
           </form>
           
           <p className="text-center text-xs text-zinc-600">
-            Giris bilgilerinizi yöneticinizden temin edebilirsiniz.
+            Giriş bilgilerinizi yöneticinizden temin edebilirsiniz.
           </p>
           <div className="mt-4 text-center text-[10px] text-zinc-700 font-mono">
             Cihaz Kimliği: {getOrCreateDeviceId()}
@@ -1965,7 +1965,7 @@ export default function App() {
                 <WifiOff size={18} className="text-amber-400 shrink-0" />
                 <div>
                   <p className="text-sm font-bold text-amber-400">evrimd Mod</p>
-                  <p className="text-xs text-amber-400/70">nternet yok. Hareketler cihaznza kaydedilecek, balant gelince otomatik gnderilecek.</p>
+                  <p className="text-xs text-amber-400/70">İnternet yok. Hareketler cihazınıza kaydedilecek, bağlantı gelince otomatik gönderilecek.</p>
                 </div>
               </div>
             )}
@@ -1974,7 +1974,7 @@ export default function App() {
                 <Clock size={18} className="text-blue-400 shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-bold text-blue-400">{offlineQueueCount} Bekleyen Hareket</p>
-                  <p className="text-xs text-blue-400/70">nternet geldi. Senkronize ediliyor...</p>
+                  <p className="text-xs text-blue-400/70">İnternet geldi. Senkronize ediliyor...</p>
                 </div>
               </div>
             )}
@@ -2262,7 +2262,7 @@ export default function App() {
                                   leave.type === 'report' ? "text-purple-400" : "text-orange-500"
                                 )}>
                                   <span className="text-[10px] font-black uppercase tracking-tighter">
-                                    {leave.type === 'report' ? 'Rapor' : 'Izin'}
+                                    {leave.type === 'report' ? 'Rapor' : 'İzin'}
                                   </span>
                                 </div>
                                 {/* Mobile */}
@@ -2284,7 +2284,7 @@ export default function App() {
                 <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-zinc-900 pt-4 px-2">
                   <div className="flex items-center gap-1.5">
                     <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase">Giris</span>
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase">Giriş</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_5px_rgba(251,146,60,0.5)]" />
@@ -2296,7 +2296,7 @@ export default function App() {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="h-1.5 w-4 rounded-full bg-orange-500" />
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase">Izin</span>
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase">İzin</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="h-1.5 w-4 rounded-full bg-purple-500" />
@@ -2316,7 +2316,7 @@ export default function App() {
                       <tbody className="divide-y divide-zinc-900">
                         {logs.filter(l => l.userId === user?.uid && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM') === selectedMonth).length === 0 ? (
                           <tr>
-                            <td className="p-8 text-center text-zinc-500 text-xs italic">Bu ay iin kayt bulunmuyor.</td>
+                            <td className="p-8 text-center text-zinc-500 text-xs italic">Bu ay iin Kayıt bulunmuyor.</td>
                           </tr>
                         ) : (
                           logs.filter(l => l.userId === user?.uid && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM') === selectedMonth)
@@ -2336,7 +2336,7 @@ export default function App() {
                                   log.type === 'in' ? "bg-emerald-500/10 text-emerald-500" : "bg-orange-500/10 text-orange-500"
                                 )}>
                                   {log.status === 'error' ? <ShieldAlert size={10} /> : log.status === 'pending' ? <Clock3 size={10} /> : log.type === 'in' ? <LogIn size={10} /> : <LogOut size={10} />}
-                                  {log.status === 'error' ? 'Hata' : log.status === 'pending' ? 'Bekliyor' : (log.type === 'in' ? 'Giris' : 'k')}
+                                  {log.status === 'error' ? 'Hata' : log.status === 'pending' ? 'Bekliyor' : (log.type === 'in' ? 'Giriş' : 'k')}
                                 </div>
                               </td>
                               <td className="p-4 text-right">
@@ -2352,7 +2352,7 @@ export default function App() {
                     {/* Mobile Card View */}
                     <div className="md:hidden divide-y divide-zinc-900">
                       {logs.filter(l => l.userId === user?.uid && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM') === selectedMonth).length === 0 ? (
-                        <div className="p-8 text-center text-zinc-500 text-xs italic">Bu ay iin kayt bulunmuyor.</div>
+                        <div className="p-8 text-center text-zinc-500 text-xs italic">Bu ay iin Kayıt bulunmuyor.</div>
                       ) : (
                         logs.filter(l => l.userId === user?.uid && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM') === selectedMonth)
                           .sort((a,b) => (b.timestamp?.toDate?.()?.getTime() || 0) - (a.timestamp?.toDate?.()?.getTime() || 0))
@@ -2370,7 +2370,7 @@ export default function App() {
                               log.status === 'pending' ? "bg-amber-500/10 text-amber-500" :
                               log.type === 'in' ? "bg-emerald-500/10 text-emerald-500" : "bg-orange-500/10 text-orange-500"
                             )}>
-                              {log.status === 'error' ? 'Hata' : log.status === 'pending' ? 'Bekliyor' : (log.type === 'in' ? 'Giris' : 'k')}
+                              {log.status === 'error' ? 'Hata' : log.status === 'pending' ? 'Bekliyor' : (log.type === 'in' ? 'Giriş' : 'k')}
                             </div>
                           </div>
                         ))
@@ -2464,7 +2464,7 @@ export default function App() {
                         }}
                         className="w-full md:w-auto flex items-center justify-center gap-2 rounded-xl bg-orange-500 px-4 py-3 md:py-2 text-sm font-bold text-white hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/10"
                       >
-                        <Plus size={18} /> Manuel Kayt Ekle
+                        <Plus size={18} /> Manuel Kayıt Ekle
                       </button>
                     </div>
                   </div>
@@ -2482,15 +2482,15 @@ export default function App() {
           return (
             <>
               <div className="rounded-2xl border border-zinc-900 bg-zinc-900/30 p-4 flex flex-col items-center justify-center">
-                <p className="text-[10px] font-bold text-zinc-500 uppercase">Ayılk Toplam Mesai</p>
+                <p className="text-[10px] font-bold text-zinc-500 uppercase">Aylık Toplam Mesai</p>
                 <p className="text-2xl font-black text-blue-500">{totalOvertimeHours.toFixed(1)} <span className="text-xs font-normal">Saat</span></p>
               </div>
               <div className="rounded-2xl border border-zinc-900 bg-zinc-900/30 p-4 flex flex-col items-center justify-center">
-                <p className="text-[10px] font-bold text-zinc-500 uppercase">Ayılk Toplam Izin</p>
-                <p className="text-2xl font-black text-orange-500">{totalLeaveDays} <span className="text-xs font-normal">Gn</span></p>
+                <p className="text-[10px] font-bold text-zinc-500 uppercase">Aylık Toplam İzin</p>
+                <p className="text-2xl font-black text-orange-500">{totalLeaveDays} <span className="text-xs font-normal">Gün</span></p>
               </div>
               <div className="rounded-2xl border border-zinc-900 bg-zinc-900/30 p-4 flex flex-col items-center justify-center">
-                <p className="text-[10px] font-bold text-zinc-500 uppercase">Giris Kayd Says</p>
+                <p className="text-[10px] font-bold text-zinc-500 uppercase">Giriş Kaydı Sayısı</p>
                 <p className="text-2xl font-black text-emerald-500">{userLogs.filter(l => l.type === 'in').length} <span className="text-xs font-normal">Kez</span></p>
               </div>
             </>
@@ -2641,7 +2641,7 @@ export default function App() {
                     <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-zinc-900 pt-4 px-2">
                       <div className="flex items-center gap-1.5">
                         <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase">Giris</span>
+                        <span className="text-[9px] font-bold text-zinc-500 uppercase">Giriş</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <div className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_5px_rgba(251,146,60,0.5)]" />
@@ -2653,7 +2653,7 @@ export default function App() {
                       </div>
                       <div className="flex items-center gap-1.5">
                         <div className="h-1.5 w-4 rounded-full bg-orange-500" />
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase">Izin</span>
+                        <span className="text-[9px] font-bold text-zinc-500 uppercase">İzin</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <div className="h-1.5 w-4 rounded-full bg-purple-500" />
@@ -2663,7 +2663,7 @@ export default function App() {
 
                   <div className="mt-12 space-y-4">
                     <h4 className="text-lg font-bold flex items-center gap-2">
-                      <Clock size={20} className="text-orange-500" /> Tm Giris/k Kayıtlıar
+                      <Clock size={20} className="text-orange-500" /> Tm Giriş/k Kayıtlıar
                     </h4>
                     <div className="overflow-hidden rounded-2xl border border-zinc-900">
                       {/* Desktop Table */}
@@ -2690,7 +2690,7 @@ export default function App() {
                                     "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase",
                                     log.type === 'in' ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-400"
                                   )}>
-                                    {log.type === 'in' ? 'Giris' : 'k'}
+                                    {log.type === 'in' ? 'Giriş' : 'k'}
                                   </span>
                                 </td>
                                 <td className="p-4 text-xs text-zinc-500">
@@ -2735,7 +2735,7 @@ export default function App() {
                                   "rounded-full px-2 py-0.5 text-[9px] font-bold uppercase",
                                   log.type === 'in' ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-400"
                                 )}>
-                                  {log.type === 'in' ? 'Giris' : 'k'}
+                                  {log.type === 'in' ? 'Giriş' : 'k'}
                                 </span>
                                 <div className="flex items-center gap-3">
                                   <button
@@ -2857,7 +2857,7 @@ export default function App() {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">Yıllk Izin Bakiyesi (Gn)</label>
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Yıllık İzin Bakiyesi (GÜN)</label>
                     <input 
                       name="leaveBalance"
                       type="number"
@@ -2867,7 +2867,7 @@ export default function App() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">e Giris Tarihi</label>
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">İşişİŞE GİRİŞşş Tarihi</label>
                     <input 
                       name="startDate"
                       type="date"
@@ -2885,7 +2885,7 @@ export default function App() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">Cihaz Kstlamas (UA erii)</label>
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Cihaz Kısıtlaması (UA Erişimi)</label>
                     <input 
                       name="allowedDevice"
                       type="text"
@@ -3047,7 +3047,7 @@ export default function App() {
           <section className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold flex items-center gap-2">
-                <QrCode size={28} className="text-orange-500" /> QR Kod Oluturucu
+                <QrCode size={28} className="text-orange-500" /> QR Kod Oluşturucu
               </h2>
             </div>
 
@@ -3063,7 +3063,7 @@ export default function App() {
                   />
                 </div>
                 <div className="text-center">
-                  <p className="font-bold text-lg"> Yerinde Giriş QR Kodu</p>
+                  <p className="font-bold text-lg"> YerindİşişİŞE GİRİŞşş QR Kodu</p>
                   <p className="text-sm text-zinc-500">Bu kodu yazdırıp iş yerine asabilirsiniz.</p>
                 </div>
                 <div className="flex gap-3">
@@ -3108,12 +3108,12 @@ export default function App() {
                             className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
                           >
                             <option value="5">5 Gün</option>
-                            <option value="6">6 Gn</option>
+                            <option value="6">6 GÜN</option>
                           </select>
                         </div>
                         <div className="space-y-2">
                           <label className="text-xs font-semibold text-zinc-500 uppercase flex items-center gap-1">
-                            Hesaplama Toleransı (Dk) <Info size={12} className="text-zinc-600" title="Ge giriş/erken k/fazla mesai tolerans" />
+                            Hesaplama Toleransı (Dk) <Info size={12} className="text-zinc-600" title="GİşişİŞE GİRİŞşş/erken k/fazla mesai tolerans" />
                           </label>
                           <input 
                             name="roundingThresholdMinutes"
@@ -3292,7 +3292,7 @@ export default function App() {
             </div>
 
             <div className="rounded-3xl border border-zinc-900 bg-zinc-900/20 p-8 space-y-8">
-              {/* Profil Fotoraf */}
+              {/* Profil Fotoğraf */}
               <div className="flex flex-col items-center gap-3">
                 <div className="relative group">
                   {profile?.avatarUrl ? (
@@ -3327,7 +3327,7 @@ export default function App() {
                       const file = e.target.files?.[0];
                       if (!file || !user) return;
                       if (file.size > 8 * 1024 * 1024) {
-                        setStatus({ type: 'error', message: 'Fotoraf en fazla 8MB olabilir.' });
+                        setStatus({ type: 'error', message: 'Fotoğraf en fazla 8MB olabilir.' });
                         return;
                       }
                       setAvatarUploading(true);
@@ -3347,14 +3347,14 @@ export default function App() {
                             URL.revokeObjectURL(objectUrl);
                             resolve(canvas.toDataURL('image/jpeg', 0.8));
                           };
-                          img.onerror = () => reject(new Error('Resim yklenemedi.'));
+                          img.onerror = () => reject(new Error('Resim yüklenemedi.'));
                           img.src = objectUrl;
                         });
-                        await userMutation.mutateAsync({ method: 'PUT', id: user.uid, payıload: { avatarUrl: avatarBase64 } });
+                        await userMutation.mutateAsync({ method: 'PUT', id: user.uid, payload: { avatarUrl: avatarBase64 } });
                         setProfile(prev => prev ? { ...prev, avatarUrl: avatarBase64 } : prev);
-                        setStatus({ type: 'success', message: 'Profil fotoraf güncellendi.' });
+                        setStatus({ type: 'success', message: 'Profil Fotoğraf güncellendi.' });
                       } catch (err: any) {
-                        setStatus({ type: 'error', message: 'Fotoraf yklenemedi: ' + err.message });
+                        setStatus({ type: 'error', message: 'Fotoğraf yüklenemedi: ' + err.message });
                       } finally {
                         setAvatarUploading(false);
                         e.target.value = '';
@@ -3369,7 +3369,7 @@ export default function App() {
                   <p className="text-zinc-500 text-xs mt-1">{profile?.role === 'admin' ? 'Yönetici' : 'Personel'}</p>
                 </div>
 
-                {/* Fotoraf aksiyonlar */}
+                {/* Fotoğraf aksiyonlar */}
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => avatarInputRef.current?.click()}
@@ -3377,17 +3377,17 @@ export default function App() {
                     className="flex items-center gap-1.5 rounded-xl bg-orange-500/10 px-4 py-2 text-xs font-bold text-orange-500 hover:bg-orange-500/20 transition-colors disabled:opacity-50"
                   >
                     <Camera size={13} />
-                    {profile?.avatarUrl ? 'Değiştir' : 'Fotoraf Ekle'}
+                    {profile?.avatarUrl ? 'Değiştir' : 'Fotoğraf Ekle'}
                   </button>
                   {profile?.avatarUrl && (
                     <button
                       onClick={async () => {
                         if (!user) return;
-                        if (!window.confirm('Profil fotoraf silinsin mi?')) return;
+                        if (!window.confirm('Profil Fotoğraf silinsin mi?')) return;
                         try {
-                          await userMutation.mutateAsync({ method: 'PUT', id: user.uid, payıload: { avatarUrl: null } });
+                          await userMutation.mutateAsync({ method: 'PUT', id: user.uid, payload: { avatarUrl: null } });
                           setProfile(prev => prev ? { ...prev, avatarUrl: undefined } : prev);
-                          setStatus({ type: 'success', message: 'Profil fotoraf silindii.' });
+                          setStatus({ type: 'success', message: 'Profil Fotoğraf silindii.' });
                         } catch (err: any) {
                           setStatus({ type: 'error', message: 'Silinemedi: ' + err.message });
                         }
@@ -3406,20 +3406,20 @@ export default function App() {
                   <p className="font-medium">{profile?.personnelId}</p>
                 </div>
                 <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 space-y-1">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">e Giris Tarihi</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">İşişİŞE GİRİŞşş Tarihi</p>
                   <p className="font-medium">
                     {profile?.startDate ? format(new Date(profile.startDate), 'd MMMM yyyy', { locale: tr }) : '-'}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 space-y-1 md:col-span-2">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Resmi Yıllk Izin Bakiyesi</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Resmi Yıllık İzin Bakiyesi</p>
                   <div className="flex items-center justify-between">
                     <p className="text-2xl font-black text-orange-500">
-                      {getEffectiveLeaveBalance(profile)} GN
+                      {getEffectiveLeaveBalance(profile)} GÜN
                     </p>
                     <div className="text-right">
-                      <p className="text-[9px] text-zinc-500 uppercase">Hukuki Hak Edi (Referans)</p>
-                      <p className="text-xs font-bold text-zinc-400">{calculateLegalLeave(profile?.startDate, profile?.birthDate)} Gn</p>
+                      <p className="text-[9px] text-zinc-500 uppercase">Hukuki Hak Edişi (Referans)</p>
+                      <p className="text-xs font-bold text-zinc-400">{calculateLegalLeave(profile?.startDate, profile?.birthDate)} GÜN</p>
                     </div>
                   </div>
                 </div>
@@ -3465,7 +3465,7 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* Profil Fotoraf Yönetimi */}
+                {/* Profil Fotoğraf Yönetimi */}
                 <div className="flex items-center gap-5 p-4 rounded-2xl border border-zinc-800 bg-zinc-900/30">
                   <div className="relative group shrink-0">
                     {editingUser.avatarUrl ? (
@@ -3499,24 +3499,24 @@ export default function App() {
                                 URL.revokeObjectURL(objectUrl);
                                 resolve(canvas.toDataURL('image/jpeg', 0.8));
                               };
-                              img.onerror = () => reject(new Error('Resim yklenemedi.'));
+                              img.onerror = () => reject(new Error('Resim yüklenemedi.'));
                               img.src = objectUrl;
                             });
-                            await userMutation.mutateAsync({ method: 'PUT', id: editingUser.uid, payıload: { avatarUrl: avatarBase64 } });
+                            await userMutation.mutateAsync({ method: 'PUT', id: editingUser.uid, payload: { avatarUrl: avatarBase64 } });
                             setEditingUser(prev => prev ? { ...prev, avatarUrl: avatarBase64 } : prev);
-                            // Personele bildirim gnder
+                            // Personele bildirim gönder
                             await fetch('/api/notifications', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('pdks_token') }, body: JSON.stringify({
                               userId: editingUser.uid,
-                              title: 'Profil Fotorafnz Güncellendi',
-                              message: `${profile?.name || 'Yöneticiniz'} profil fotorafnz güncelledi.`,
+                              title: 'Profil Fotoğrafınız Güncellendi',
+                              message: `${profile?.name || 'Yöneticiniz'} Profil Fotoğrafınız güncelledi.`,
                               type: 'info',
                               read: false,
                               link: '/profile',
                               createdAt: new Date().toISOString(),
                             }) }).catch(() => {});
-                            setStatus({ type: 'success', message: `${editingUser.name} iin profil fotoraf güncellendi.` });
+                            setStatus({ type: 'success', message: `${editingUser.name} iin profil Fotoğraf güncellendi.` });
                           } catch (err: any) {
-                            setStatus({ type: 'error', message: 'Fotoraf yklenemedi: ' + err.message });
+                            setStatus({ type: 'error', message: 'Fotoğraf yüklenemedi: ' + err.message });
                           } finally {
                             setAvatarUploading(false);
                             e.target.value = '';
@@ -3531,33 +3531,33 @@ export default function App() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm mb-1">Profil Fotoraf</p>
-                    <p className="text-[11px] text-zinc-500 mb-3">Resmin zerine tklayarak fotoraf değiştirebilirsiniz. Değişiklik personele bildirim olarak iletilir.</p>
+                    <p className="font-bold text-sm mb-1">Profil Fotoğraf</p>
+                    <p className="text-[11px] text-zinc-500 mb-3">Resmin zerine tklayarak Fotoğraf değiştirebilirsiniz. Değişiklik personele bildirim olarak iletilir.</p>
                     {editingUser.avatarUrl && (
                       <button
                         type="button"
                         onClick={async () => {
-                          if (!window.confirm('Profil fotoraf silinsin mi?')) return;
+                          if (!window.confirm('Profil Fotoğraf silinsin mi?')) return;
                           try {
-                            await userMutation.mutateAsync({ method: 'PUT', id: editingUser.uid, payıload: { avatarUrl: null } });
+                            await userMutation.mutateAsync({ method: 'PUT', id: editingUser.uid, payload: { avatarUrl: null } });
                             setEditingUser(prev => prev ? { ...prev, avatarUrl: undefined } : prev);
                             await fetch('/api/notifications', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('pdks_token') }, body: JSON.stringify({
                               userId: editingUser.uid,
-                              title: 'Profil Fotorafnz Silindi',
-                              message: `${profile?.name || 'Yöneticiniz'} profil fotorafnz kaldrd.`,
+                              title: 'Profil Fotoğrafınız Silindi',
+                              message: `${profile?.name || 'Yöneticiniz'} Profil Fotoğrafınız kaldrd.`,
                               type: 'info',
                               read: false,
                               link: '/profile',
                               createdAt: new Date().toISOString(),
                             }) }).catch(() => {});
-                            setStatus({ type: 'success', message: 'Fotoraf silindii.' });
+                            setStatus({ type: 'success', message: 'Fotoğraf silindii.' });
                           } catch (err: any) {
                             setStatus({ type: 'error', message: 'Silinemedi: ' + err.message });
                           }
                         }}
                         className="flex items-center gap-1.5 rounded-lg bg-red-500/10 px-3 py-1.5 text-[11px] font-bold text-red-500 hover:bg-red-500/20 transition-colors"
                       >
-                        <Trash2 size={11} /> Fotoraf Kaldr
+                        <Trash2 size={11} /> Fotoğraf Kaldr
                       </button>
                     )}
                   </div>
@@ -3609,8 +3609,8 @@ export default function App() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-500 uppercase flex items-center justify-between">
-                      Yıllk Izin Bakiyesi (Gn)
-                      <span className="text-[10px] text-orange-500 lowercase font-normal italic">Mevcut: {getEffectiveLeaveBalance(editingUser)} Gn</span>
+                      Yıllık İzin Bakiyesi (GÜN)
+                      <span className="text-[10px] text-orange-500 lowercase font-normal italic">Mevcut: {getEffectiveLeaveBalance(editingUser)} GÜN</span>
                     </label>
                     <input 
                       name="leaveBalance"
@@ -3621,7 +3621,7 @@ export default function App() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">e Giris Tarihi</label>
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">İşişİŞE GİRİŞşş Tarihi</label>
                     <input 
                       name="startDate"
                       type="date"
@@ -3639,7 +3639,7 @@ export default function App() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase">Cihaz Kstlamas</label>
+                    <label className="text-xs font-semibold text-zinc-500 uppercase">Cihaz Kısıtlaması</label>
                     <input 
                       name="allowedDevice"
                       type="text"
@@ -3755,9 +3755,9 @@ export default function App() {
                 <div>
                   <h3 className="text-xl font-bold flex items-center gap-2">
                     <Clock4 size={24} className="text-orange-500" />
-                    {editingLog ? 'Kayd Düzenle' : 'Manuel Kayt Ekle'}
+                    {editingLog ? 'Kayd Düzenle' : 'Manuel Kayıt Ekle'}
                   </h3>
-                  {/* Hedef kii adn göster */}
+                  {/* Hedef kişi adını göster */}
                   {(() => {
                     const tid = selectedDayDetails?.userId || selectedPersonnelId || editingLog?.userId;
                     const tName = tid ? (allUsers.find(u => u.uid === tid)?.name || (profile?.uid === tid ? profile?.name : null)) : null;
@@ -3801,7 +3801,7 @@ export default function App() {
                         manualLogType === 'in' ? "bg-emerald-600 text-white" : "bg-zinc-900 text-zinc-500"
                       )}
                     >
-                      Giris
+                      Giriş
                     </button>
                     <button
                       type="button"
@@ -3830,7 +3830,7 @@ export default function App() {
                     type="submit"
                     className="flex-[2] rounded-xl bg-orange-500 py-4 font-bold text-white transition-colors hover:bg-orange-600"
                   >
-                    {editingLog ? 'Gncelle' : 'Kaydet'}
+                    {editingLog ? 'Güncelle' : 'Kaydet'}
                   </button>
                 </div>
               </form>
@@ -3851,7 +3851,7 @@ export default function App() {
               className="relative w-full max-w-lg rounded-3xl border border-zinc-900 bg-zinc-950 p-6 shadow-2xl"
             >
               <div className="mb-6 flex items-center justify-between">
-                <h3 className="text-xl font-bold">Izin Talebini Düzenle</h3>
+                <h3 className="text-xl font-bold">İzin Talebini Düzenle</h3>
                 <button onClick={() => setEditingLeave(null)} className="rounded-full bg-zinc-900 p-2 text-zinc-500 hover:bg-zinc-800"><X size={20} /></button>
               </div>
               <form onSubmit={handleUpdateLeave} className="space-y-4">
@@ -3866,7 +3866,7 @@ export default function App() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase">Gn Says</label>
+                  <label className="text-xs font-semibold text-zinc-500 uppercase">Gün Sayısı</label>
                   <input name="days" type="number" required defaultValue={editingLeave.days} className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" />
                 </div>
                 <div className="space-y-2">
@@ -3893,7 +3893,7 @@ export default function App() {
                   >
                     Sil
                   </button>
-                  <button type="submit" className="flex-[2] rounded-xl bg-orange-500 py-3 font-bold text-white transition-colors hover:bg-orange-600">Gncelle</button>
+                  <button type="submit" className="flex-[2] rounded-xl bg-orange-500 py-3 font-bold text-white transition-colors hover:bg-orange-600">Güncelle</button>
                 </div>
               </form>
             </motion.div>
@@ -3919,7 +3919,7 @@ export default function App() {
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 const formData = new FormData(e.currentTarget);
-                await overtimeMutation.mutateAsync({ method: 'PUT', id: editingOvertime.id!, payıload: {
+                await overtimeMutation.mutateAsync({ method: 'PUT', id: editingOvertime.id!, payload: {
                   date: formData.get('date'),
                   hours: Number(formData.get('hours')),
                   description: formData.get('description'),
@@ -3953,7 +3953,7 @@ export default function App() {
                     type="button"
                     onClick={async () => {
                       if (!editingOvertime?.id) return;
-                      await overtimeMutation.mutateAsync({ method: 'PUT', id: editingOvertime.id, payıload: {
+                      await overtimeMutation.mutateAsync({ method: 'PUT', id: editingOvertime.id, payload: {
                         deleted: true,
                       } });
                       setEditingOvertime(null);
@@ -3963,7 +3963,7 @@ export default function App() {
                   >
                     Sil
                   </button>
-                  <button type="submit" className="flex-[2] rounded-xl bg-orange-500 py-3 font-bold text-white transition-colors hover:bg-orange-600">Gncelle</button>
+                  <button type="submit" className="flex-[2] rounded-xl bg-orange-500 py-3 font-bold text-white transition-colors hover:bg-orange-600">Güncelle</button>
                 </div>
               </form>
             </motion.div>
@@ -4000,7 +4000,7 @@ export default function App() {
                     className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none" 
                   />
                 </div>
-                <button type="submit" className="w-full rounded-xl bg-orange-500 py-4 font-bold text-white transition-colors hover:bg-orange-600">Gncelle</button>
+                <button type="submit" className="w-full rounded-xl bg-orange-500 py-4 font-bold text-white transition-colors hover:bg-orange-600">Güncelle</button>
               </form>
             </motion.div>
           </div>
@@ -4038,7 +4038,7 @@ export default function App() {
                   </div>
                   <div>
                     <p className="font-black text-white">{dashboardStatModal.title}</p>
-                    <p className="text-xs text-zinc-400">{dashboardStatModal.people.length} kii  Bugn</p>
+                    <p className="text-xs text-zinc-400">{dashboardStatModal.people.length} kişi • Bugün</p>
                   </div>
                 </div>
                 <button onClick={() => setDashboardStatModal(null)} className="rounded-full bg-zinc-800/60 p-2 text-zinc-400 hover:bg-zinc-700">
@@ -4098,7 +4098,7 @@ export default function App() {
               </div>
               
               <div className="space-y-6 pt-4">
-                {/* Manuel Hareket Ekle: admin veya bu gnn sahibinin yoneticisi */}
+                {/* Manuel Hareket Ekle: admin veya bu günün sahibinin yoneticisi */}
                 {(() => {
                   const dayUserId = selectedDayDetails.userId;
                   const dayUser = allUsers.find(u => u.uid === dayUserId);
@@ -4124,11 +4124,11 @@ export default function App() {
                 {/* Logs Section */}
                 <div className="space-y-3">
                   <h4 className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-2">
-                    <LogIn size={14} className="text-emerald-500" /> Giris-k Kayıtlıar
+                    <LogIn size={14} className="text-emerald-500" /> Giriş-k Kayıtlıar
                   </h4>
                   <div className="space-y-2">
                     {logs.filter(l => l.userId === selectedDayDetails.userId && !l.deleted && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM-dd') === selectedDayDetails.date).length === 0 ? (
-                      <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gn iin giriş/k kayd yok.</p>
+                      <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gün için giriş/k kayd yok.</p>
                     ) : (
                       logs.filter(l => l.userId === selectedDayDetails.userId && !l.deleted && l.timestamp?.toDate && format(l.timestamp.toDate(), 'yyyy-MM-dd') === selectedDayDetails.date)
                         .sort((a,b) => a.timestamp.toDate() - b.timestamp.toDate())
@@ -4159,7 +4159,7 @@ export default function App() {
                               <p className="text-[10px] text-zinc-500 uppercase truncate">
                                 {log.status === 'error' ? log.errorMessage : 
                                  log.status === 'pending' ? 'Yönetici onay bekleniyor' :
-                                 (log.type === 'in' ? 'Giris' : 'k')}
+                                 (log.type === 'in' ? 'Giriş' : 'k')}
                               </p>
                               <p className="text-[9px] text-zinc-600 font-mono truncate">{log.ipAddress}</p>
                             </div>
@@ -4189,7 +4189,7 @@ export default function App() {
                   </h4>
                   <div className="space-y-2">
                     {overtimeRequests.filter(r => r.userId === selectedDayDetails.userId && r.date === selectedDayDetails.date).length === 0 ? (
-                      <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gn iin mesai kayd yok.</p>
+                      <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gün için mesai kayd yok.</p>
                     ) : (
                       overtimeRequests.filter(r => r.userId === selectedDayDetails.userId && r.date === selectedDayDetails.date).map(req => (
                         <div key={req.id} className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/40 border border-zinc-800">
@@ -4257,11 +4257,11 @@ export default function App() {
                 {/* Leave Section */}
                 <div className="space-y-3">
                   <h4 className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-2">
-                    <FileText size={14} className="text-orange-500" /> Izin Kayıtlıar
+                    <FileText size={14} className="text-orange-500" /> İzin Kayıtlıar
                   </h4>
                   <div className="space-y-2">
                     {leaveRequests.filter(r => r.userId === selectedDayDetails.userId && selectedDayDetails.date >= r.startDate && selectedDayDetails.date <= r.endDate).length === 0 ? (
-                      <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gn iin izin kayd yok.</p>
+                      <p className="text-xs italic text-zinc-600 py-2 text-center">Bu gün için izin kayd yok.</p>
                     ) : (
                       leaveRequests.filter(r => r.userId === selectedDayDetails.userId && selectedDayDetails.date >= r.startDate && selectedDayDetails.date <= r.endDate).map(req => (
                         <div key={req.id} className="flex flex-col p-3 rounded-xl bg-zinc-900/40 border border-zinc-800 space-y-2">
@@ -4271,7 +4271,7 @@ export default function App() {
                                 <FileText size={14} />
                               </div>
                               <div>
-                                <p className="text-sm font-bold capitalize">{req.type === 'report' ? 'Rapor' : (req.type === 'excuse' ? 'Mazeret' : 'Yıllk Izin')}</p>
+                                <p className="text-sm font-bold capitalize">{req.type === 'report' ? 'Rapor' : (req.type === 'excuse' ? 'Mazeret' : 'Yıllık İzin')}</p>
                                 <p className={cn("text-[9px] font-bold uppercase", 
                                   req.status === 'approved' ? "text-emerald-500" : 
                                   req.status === 'pending' ? "text-orange-500" : "text-red-500"
@@ -4376,7 +4376,7 @@ export default function App() {
               </div>
               <h3 className="mb-2 text-xl font-bold text-white">Kayd Sil</h3>
               <p className="mb-6 text-sm text-zinc-400">
-                Bu kayt silinecek, emin misiniz? Bu ilem geri alnamaz.
+                Bu Kayıt silinecek, emin misiniz? Bu ilem geri alnamaz.
               </p>
               <div className="flex gap-3">
                 <button
@@ -4419,7 +4419,7 @@ export default function App() {
                     setDeletingOvertime(null);
                     setStatus({ type: 'success', message: 'Mesai kayd silindii' });
                   } catch (e) {
-                    setStatus({ type: 'error', message: 'Hata olutu' });
+                    setStatus({ type: 'error', message: 'Hata oluştu' });
                   }
                 }} className="flex-1 rounded-xl bg-red-600 py-3 text-sm font-bold text-white">Sil</button>
               </div>
@@ -4452,7 +4452,7 @@ export default function App() {
               </div>
               <h3 className="mb-2 text-xl font-bold text-white">Personeli Sil</h3>
               <p className="mb-6 text-sm text-zinc-400">
-                <strong>{deletingUser.name}</strong> isimli personeli silmek istediinize emin misiniz? Bu ilem personelin sisteme girişini engelleyecektir.
+                <strong>{deletingUser.name}</strong> isimli personeli silmek istediinize emin misiniz? Bu ilem personelin sistemİşişİŞE GİRİŞşşini engelleyecektir.
               </p>
               <div className="flex gap-3">
                 <button
@@ -4485,7 +4485,7 @@ export default function App() {
               >
                 <div className="flex items-center justify-between text-white">
                   <h2 className="text-xl font-bold flex items-center gap-2">
-                    <QrCode /> {scanType === 'in' ? 'Giris' : 'k'} Taramas
+                    <QrCode /> {scanType === 'in' ? 'Giriş' : 'k'} Taramas
                   </h2>
                   <button 
                     onClick={() => setShowScanner(false)}
@@ -4513,7 +4513,7 @@ export default function App() {
           )}
         </AnimatePresence>
 
-      {/* Nakliye / Uzaktan Giris Seim Modal */}
+      {/* Nakliye / Uzaktan Giriş Seim Modal */}
       <AnimatePresence>
         {showRemoteModal && (
           <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4">
@@ -4530,9 +4530,9 @@ export default function App() {
                   <Truck size={22} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-white">Giris Yntemi</h3>
+                  <h3 className="font-bold text-white">Giriş Yntemi</h3>
                   <p className="text-xs text-zinc-500">
-                    {pendingScanType === 'in' ? '?? Giris' : '?? k'} ilemi  Bir yntem sein
+                    {pendingScanType === 'in' ? '?? Giriş' : '?? k'} ilemi  Bir yntem sein
                   </p>
                 </div>
                 <button onClick={() => { setShowRemoteModal(false); setRemoteManualMode(false); setRemoteNote(''); setRemoteManualTime(''); }} className="text-zinc-500 hover:text-white p-1">
@@ -4559,7 +4559,7 @@ export default function App() {
                       <QrCode size={22} />
                     </div>
                     <div>
-                      <p className="font-bold text-white text-sm">QR Kod ile Giris</p>
+                      <p className="font-bold text-white text-sm">QR Kod ilİşişİŞE GİRİŞşş</p>
                       <p className="text-xs text-zinc-500 mt-0.5"> yerindeki QR kodu kameraya okutun</p>
                     </div>
                     <ChevronRight size={18} className="ml-auto text-zinc-600" />
@@ -4577,7 +4577,7 @@ export default function App() {
                       <Clock size={22} />
                     </div>
                     <div>
-                      <p className="font-bold text-white text-sm">Manuel Giris</p>
+                      <p className="font-bold text-white text-sm">Manuel Giriş</p>
                       <p className="text-xs text-zinc-500 mt-0.5">Saati kendiniz girişn (nakliye, saha Calismas)</p>
                     </div>
                     <ChevronRight size={18} className="ml-auto text-zinc-600" />
@@ -4589,14 +4589,14 @@ export default function App() {
                   </div>
                 </div>
               ) : (
-                /* === EKRAN 2: Manuel Giris Formu === */
+                /* === EKRAN 2: Manuel Giriş Formu === */
                 <div className="p-5 space-y-4">
                   <button onClick={() => setRemoteManualMode(false)} className="flex items-center gap-1 text-xs text-zinc-500 hover:text-white transition">
                     <ChevronLeft size={14} /> Geri dn
                   </button>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-400 uppercase">{pendingScanType === 'in' ? 'Giris Saati' : 'k Saati'}</label>
+                    <label className="text-xs font-semibold text-zinc-400 uppercase">{pendingScanType === 'in' ? 'Giriş Saati' : 'k Saati'}</label>
                     <input
                       type="time"
                       value={remoteManualTime}
@@ -4629,7 +4629,7 @@ export default function App() {
                         if (!user || !profile || !pendingScanType || !remoteManualTime) return;
                         setRemoteSubmitting(true);
                         try {
-                          // Saat bilgisini bugne uygula
+                          // Saat bilgisini Bugüne uygula
                           const [h, m] = remoteManualTime.split(':').map(Number);
                           const clientNow = new Date();
                           clientNow.setHours(h, m, 0, 0);
@@ -4643,7 +4643,7 @@ export default function App() {
                             location = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
                           } catch {}
 
-                          const logPayıload = {
+                          const logpayload = {
                             userId: user.uid,
                             userName: profile.name,
                             type: pendingScanType,
@@ -4655,20 +4655,20 @@ export default function App() {
                             manualEntry: true,
                           };
 
-                          const newDocRef = await attendanceMutation.mutateAsync({ method: 'POST', payıload: {
-                            ...logPayıload,
+                          const newDocRef = await attendanceMutation.mutateAsync({ method: 'POST', payload: {
+                            ...logpayload,
                             timestamp: clientNow, // Kullancnn girdii saat
                           } });
 
                           // Optimistik UI
                           const optimisticLog: AttendanceLog = {
                             id: newDocRef.id,
-                            ...logPayıload,
+                            ...logpayload,
                             timestamp: { toDate: () => clientNow } as any,
                           };
                           setLogs(prev => [optimisticLog, ...prev.filter(l => l.id !== newDocRef.id)]);
 
-                          // Bildirim gnder
+                          // Bildirim gönder
                           fetch('/api/notify/checkin', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -4681,7 +4681,7 @@ export default function App() {
                           setRemoteNote('');
                           setRemoteManualTime('');
                         } catch (err) {
-                          setStatus({ type: 'error', message: 'Manuel kayt srasnda hata olutu.' });
+                          setStatus({ type: 'error', message: 'Manuel Kayıt sırasında hata oluştu.' });
                         } finally {
                           setRemoteSubmitting(false);
                         }
@@ -4722,7 +4722,7 @@ export default function App() {
                   </div>
                   <h4 className="text-xl font-bold text-white">PDF Belgesi</h4>
                   <p className="text-sm text-zinc-400">
-                    Mobil cihazlarda (zellikle iOS) yerleik PDF grntleyiciler tam uyumlu Calismayabilir. Belgeyi eksiksiz grntlemek iin lütfen cihaznza indirin veya an.
+                    Mobil cihazlarda (zellikle iOS) yerleik PDF grntleyiciler tam uyumlu Calismayabilir. Belgeyi eksiksiz grntlemek iin lütfen cihazınıza indirin veya an.
                   </p>
                   <button 
                     onClick={handleDownloadAndOpen}
