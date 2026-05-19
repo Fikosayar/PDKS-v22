@@ -115,3 +115,44 @@ export const notifications = pgTable('notifications', {
   link: text('link'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
+
+// --- Relations ---
+import { relations } from 'drizzle-orm';
+
+export const companiesRelations = relations(companies, ({ many }) => ({
+  users: many(users),
+  attendanceLogs: many(attendanceLogs),
+  leaveRequests: many(leaveRequests),
+  overtimeRequests: many(overtimeRequests),
+  companySettings: many(companySettings),
+}));
+
+export const usersRelations = relations(users, ({ one, many }) => ({
+  company: one(companies, {
+    fields: [users.companyId],
+    references: [companies.id],
+  }),
+  manager: one(users, {
+    fields: [users.managerId],
+    references: [users.id],
+    relationName: 'manager',
+  }),
+  subordinates: many(users, {
+    relationName: 'manager',
+  }),
+  attendanceLogs: many(attendanceLogs),
+  leaveRequests: many(leaveRequests),
+  overtimeRequests: many(overtimeRequests),
+  notifications: many(notifications),
+}));
+
+export const attendanceLogsRelations = relations(attendanceLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [attendanceLogs.userId],
+    references: [users.id],
+  }),
+  company: one(companies, {
+    fields: [attendanceLogs.companyId],
+    references: [companies.id],
+  }),
+}));
