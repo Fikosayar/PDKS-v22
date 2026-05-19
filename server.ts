@@ -1,4 +1,11 @@
-﻿import express from 'express';
+﻿// Güvenlik Middlewares
+import { apiLimiter, loginLimiter } from './src/middlewares/rateLimit.js';
+
+// Route'lar
+import authRoutes from './src/routes/authRoutes.js';
+import userRoutes from './src/routes/userRoutes.js';
+import attendanceRoutes from './src/routes/attendanceRoutes.js';
+import express from 'express';
 import dotenv from 'dotenv';
 dotenv.config();
 import path from 'path';
@@ -212,33 +219,17 @@ async function startServer() {
 
   app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 
-  // --- Auth ---
-  app.post('/api/login', async (req, res) => {
-    const { personnelId, password } = req.body;
-    if (!personnelId || !password) return res.status(400).json({ error: 'Geçersiz giriş' });
-    const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
-    if (!checkRateLimit(clientIp)) return res.status(429).json({ error: 'Çok fazla deneme. Lütfen bekleyin.' });
+  
 
-    try {
-      const userList = await db.select().from(users).where(eq(users.personnelId, personnelId)).limit(1);
-      if (userList.length === 0) return res.status(401).json({ error: 'Hatalı ID veya şifre' });
-      const user = userList[0];
+app.use('/api/', apiLimiter);
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-      const passwordMatch = await bcrypt.compare(password, user.passwordHash);
-      if (!passwordMatch) return res.status(401).json({ error: 'Hatalı ID veya şifre' });
-      if (!user.isActive) return res.status(403).json({ error: 'Hesap devre dışı' });
+app.use('/api', loginLimiter, authRoutes); // loginLimiter applied specifically
+app.use('/api/users', userRoutes);
+app.use('/api/attendance', attendanceRoutes);
 
-      const token = jwt.sign({ uid: user.id, role: user.role, companyId: user.companyId }, JWT_SECRET, { expiresIn: '30d' });
-      const { passwordHash, ...safeUser } = user;
-      res.json({ success: true, uid: user.id, customToken: token, ...safeUser });
-    } catch (error: any) {
-      console.error('[Login Error]', error);
-      res.status(500).json({ error: 'Sistem hatası' });
-    }
-  });
-
-  // --- Me ---
-  app.get('/api/me', authenticateToken, async (req: any, res) => {
+// --- Me API ---
+app.get('/api/me', authenticateToken, async (req: any, res) => {
     try {
       const userList = await db.select().from(users).where(eq(users.id, req.user.uid)).limit(1);
       if (userList.length === 0) return res.status(404).json({ error: 'Kullanıcı bulunamadı' });
@@ -247,134 +238,9 @@ async function startServer() {
     } catch (error: any) {
       res.status(500).json({ error: 'Sistem hatası' });
     }
-  });
+});
 
-  // --- Users ---
-  app.get('/api/users', authenticateToken, async (req: any, res) => {
-    try {
-      if (!req.user.companyId && req.user.role !== 'superadmin') return res.status(400).json({ error: 'Şirket bulunamadı' });
-      const query = req.user.role === 'superadmin'
-        ? db.select().from(users)
-        : db.select().from(users).where(eq(users.companyId, req.user.companyId));
-      const allUsers = await query;
-      const safeUsers = allUsers.map(u => { const { passwordHash, ...safe } = u; return safe; });
-      res.json(safeUsers);
-    } catch (error) {
-      res.status(500).json({ error: 'Sistem hatası' });
-    }
-  });
-
-  app.post('/api/users', authenticateToken, async (req: any, res: any) => {
-    try {
-      if (req.user.role !== 'admin' && req.user.role !== 'superadmin') return res.status(403).json({ error: 'Yetkisiz' });
-      const { newUser } = req.body;
-      const hashedPassword = await bcrypt.hash(newUser.password, 10);
-      const userList = await db.insert(users).values({
-        companyId: req.user.companyId,
-        personnelId: newUser.personnelId,
-        name: newUser.name,
-        title: newUser.title,
-        role: newUser.role,
-        managerId: (newUser.managerId === 'superadmin' || newUser.managerId === 'admin_initial' || newUser.managerId === '') ? null : (newUser.managerId || null),
-        leaveBalance: newUser.leaveBalance === '' ? 0 : newUser.leaveBalance,
-        startDate: newUser.startDate === '' ? null : newUser.startDate,
-        passwordHash: hashedPassword,
-        leaveBalance: newUser.leaveBalance,
-        canRemoteCheckIn: newUser.canRemoteCheckIn,
-        allowedDevice: newUser.allowedDevice,
-      }).returning();
-      res.json({ success: true, user: userList[0] });
-    } catch (e: any) {
-      console.error(e);
-      res.status(500).json({ error: 'Sistem hatası' });
-    }
-  });
-
-  app.post('/api/users/update', authenticateToken, async (req: any, res: any) => {
-    try {
-      const { targetUid, updates } = req.body;
-      if (updates.managerId === 'superadmin' || updates.managerId === 'admin_initial' || updates.managerId === '') updates.managerId = null;
-      if (updates.leaveBalance === '') updates.leaveBalance = 0;
-      if (updates.startDate === '') updates.startDate = null;
-      
-      const isSelf = req.user.uid === targetUid;
-      const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin';
-      if (!isSelf && !isAdmin) return res.status(403).json({ error: 'Yetkisiz' });
-      if (updates.password) {
-        updates.passwordHash = await bcrypt.hash(updates.password, 10);
-        delete updates.password;
-      }
-      await db.update(users).set(updates).where(eq(users.id, targetUid));
-      res.json({ success: true });
-    } catch (e) {
-      res.status(500).json({ error: 'Sistem hatası' });
-    }
-  });
-
-  app.delete('/api/users/:id', authenticateToken, async (req: any, res: any) => {
-    try {
-      if (req.user.role !== 'admin' && req.user.role !== 'superadmin') return res.status(403).json({ error: 'Yetkisiz' });
-      await db.update(users).set({ isActive: false }).where(eq(users.id, req.params.id));
-      res.json({ success: true });
-    } catch (e) {
-      res.status(500).json({ error: 'Sistem hatası' });
-    }
-  });
-
-  // --- Attendance Logs ---
-  app.get('/api/logs', authenticateToken, async (req: any, res) => {
-    try {
-      const companyId = req.user.companyId;
-      if (!companyId) return res.status(400).json({ error: 'Şirket bulunamadı' });
-      const logs = await db.select().from(attendanceLogs).where(eq(attendanceLogs.companyId, companyId)).orderBy(desc(attendanceLogs.timestamp));
-      res.json(logs);
-    } catch (error) {
-      res.status(500).json({ error: 'Sistem hatası' });
-    }
-  });
-
-  app.post('/api/attendance', authenticateToken, async (req: any, res) => {
-    try {
-      const { type, isRemote, remoteNote, latitude, longitude } = req.body;
-      const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
-      await db.insert(attendanceLogs).values({
-        companyId: req.user.companyId,
-        userId: req.user.uid,
-        type,
-        ipAddress: clientIp,
-        status: 'success',
-        isRemote: !!isRemote,
-        remoteNote,
-        latitude,
-        longitude
-      });
-      res.json({ success: true });
-    } catch (error) {
-      res.status(500).json({ error: 'Sistem hatası' });
-    }
-  });
-
-  app.delete('/api/attendance/:id', authenticateToken, async (req: any, res: any) => {
-    try {
-      if (req.user.role !== 'admin' && req.user.role !== 'superadmin') return res.status(403).json({ error: 'Yetkisiz' });
-      await db.delete(attendanceLogs).where(eq(attendanceLogs.id, req.params.id));
-      res.json({ success: true });
-    } catch (e) {
-      res.status(500).json({ error: 'Sistem hatası' });
-    }
-  });
-
-  app.put('/api/attendance/:id', authenticateToken, async (req: any, res: any) => {
-    try {
-      if (req.user.role !== 'admin' && req.user.role !== 'superadmin') return res.status(403).json({ error: 'Yetkisiz' });
-      await db.update(attendanceLogs).set(req.body).where(eq(attendanceLogs.id, req.params.id));
-      res.json({ success: true });
-    } catch (e) {
-      res.status(500).json({ error: 'Sistem hatası' });
-    }
-  });
-
-  // --- Settings ---
+// --- Settings ---
   app.get('/api/settings', authenticateToken, async (req: any, res: any) => {
     try {
       const s = await db.select().from(companySettings).where(eq(companySettings.companyId, req.user.companyId)).limit(1);
