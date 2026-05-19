@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -10,6 +10,7 @@ import { subscribeToPush, requestNotificationPermission, showLocalNotification, 
 import { addToOfflineQueue, getOfflineQueue, removeFromOfflineQueue } from './lib/offlineQueue';
 import { cn } from './lib/utils';
 import { useProfile, useUsers, useLogs, useSettings, useNotifications, useLeaveRequests, useOvertimeRequests, useAttendanceMutation, useSettingsMutation, useLeaveMutation, useOvertimeMutation, useUserMutation } from './api/hooks';
+import { useAuth } from './features/auth/AuthContext';
 import {
   LogOut,
   LogIn,
@@ -78,7 +79,8 @@ function dataURItoBlob(dataURI: string) {
   return new Blob([ab], { type: mimeString });
 }
 export default function App() {
-  const [user, setUser] = useState<{ uid: string } | null>(null);
+  // --- Auth (via AuthContext) ---
+  const { user, profile: authProfile, logout: handleLogout } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [logs, setLogs] = useState<AttendanceLog[]>([]);
@@ -95,12 +97,6 @@ export default function App() {
   const { data: qNotifs } = useNotifications();
   const { data: qLeaves } = useLeaveRequests();
   const { data: qOvertime } = useOvertimeRequests();
-
-  useEffect(() => {
-    // Read session on mount
-    const savedUser = localStorage.getItem('pdks_user');
-    if (savedUser) setUser(JSON.parse(savedUser));
-  }, []);
 
   useEffect(() => {
     if (qProfile) setProfile(qProfile);
@@ -142,7 +138,6 @@ export default function App() {
   }, [status]);
 
   const [currentIp, setCurrentIp] = useState<string>('');
-  const [loginError, setLoginError] = useState<React.ReactNode | null>(null);
   const [calcLeaveDays, setCalcLeaveDays] = useState<number>(0);
   const [editingLeave, setEditingLeave] = useState<LeaveRequest | null>(null);
   const [deletingLeave, setDeletingLeave] = useState<LeaveRequest | null>(null);
@@ -633,7 +628,8 @@ export default function App() {
   // Overtime Requests listener  or() yerine ayr query'ler (index gerektirmez)
   // [Migrated to React Query] Firebase listener removed
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  // handleLogin moved to LoginPage.tsx + AuthContext
+  const _handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoginError(null);
     const formData = new FormData(e.currentTarget);
@@ -724,11 +720,7 @@ export default function App() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('pdks_session');
-    setUser(null);
-    setProfile(null);
-  };
+  // handleLogout is now provided by useAuth() above
 
   const addUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
