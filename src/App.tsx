@@ -1697,85 +1697,11 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center p-6 text-white overflow-hidden">
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-zinc-950" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(249,115,22,0.15),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(249,115,22,0.08),transparent_50%)]" />
+  // Login is now handled by AppRouter + LoginPage + AuthContext
+  // App.tsx only renders when the user is already authenticated
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="relative z-10 w-full max-w-md space-y-8"
-        >
-          <div className="text-center space-y-4">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-orange-500/20 to-orange-600/10 text-orange-500 shadow-[0_0_60px_rgba(249,115,22,0.15)] border border-orange-500/20">
-              <Clock size={48} strokeWidth={1.5} />
-            </div>
-            <div className="space-y-2">
-              <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">PDKS</h1>
-              <p className="text-zinc-500 text-sm font-medium">Personel Devam Kontrol Sistemi</p>
-            </div>
-          </div>
 
-          <form onSubmit={handleLogin} className="space-y-5 rounded-3xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-xl p-8 shadow-2xl">
-            <div className="space-y-2">
-              <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Personel ID</label>
-              <div className="relative">
-                <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={18} />
-                <input
-                  name="personnelId"
-                  required
-                  placeholder="ID giriniz"
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950/80 pl-12 pr-4 py-3.5 text-sm font-medium placeholder:text-zinc-700 focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 focus:outline-none transition-all"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Şifre</label>
-              <div className="relative">
-                <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={18} />
-                <input
-                  name="password"
-                  type="password"
-                  required
-                  placeholder="Şifre giriniz"
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950/80 pl-12 pr-4 py-3.5 text-sm font-medium placeholder:text-zinc-700 focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 focus:outline-none transition-all"
-                />
-              </div>
-            </div>
 
-            {loginError && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-xs font-medium text-red-500"
-              >
-                {loginError}
-              </motion.div>
-            )}
-
-            <button
-              type="submit"
-              className="w-full rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 py-4 font-bold text-white shadow-lg shadow-orange-500/25 transition-all hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-[0.98]"
-            >
-              Giriş Yap
-            </button>
-          </form>
-
-          <p className="text-center text-xs text-zinc-600">
-            giriş bilgilerinizizi yöneticinizden temin edebilirsiniz.
-          </p>
-          <div className="mt-4 text-center text-[10px] text-zinc-700 font-mono">
-            Cihaz Kimliği: {getOrCreateDeviceId()}
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen theme-bg-base pb-24 theme-text transition-colors duration-200">
